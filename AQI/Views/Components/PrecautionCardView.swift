@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PrecautionCardView: View {
     let range: AQIRange
+    var onStartGuide: (() -> Void)? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
@@ -43,7 +44,9 @@ struct PrecautionCardView: View {
 
             Spacer(minLength: 12)
 
-            Button(range.buttonTitle) {}
+            Button(range.buttonTitle) {
+                onStartGuide?()
+            }
                 .buttonStyle(.borderedProminent)
                 .tint(range.accentColor)
                 .controlSize(.regular)
