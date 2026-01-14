@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 final class ArticlesViewModel: ObservableObject {
     let articles: [Article] = [

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct PrecautionView: View {
     @StateObject private var viewModel = PrecautionViewModel()

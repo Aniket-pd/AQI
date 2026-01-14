@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct SignalsView: View {
     @StateObject private var viewModel = SignalsViewModel()

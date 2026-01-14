@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct ArticlesView: View {
     @StateObject private var viewModel = ArticlesViewModel()

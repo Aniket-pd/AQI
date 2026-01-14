@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 final class PrecautionViewModel: ObservableObject {
     let ranges: [AQIRange] = [
