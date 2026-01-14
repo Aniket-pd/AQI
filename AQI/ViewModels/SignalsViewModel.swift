@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Combine
 
 final class SignalsViewModel: ObservableObject {
     let sections: [SignalSection] = [
