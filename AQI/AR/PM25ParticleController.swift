@@ -261,7 +261,7 @@ final class PM25ParticleController: NSObject {
 
         let node = SCNNode()
         let sphere = SCNSphere(radius: 0.12)
-        node.geometry = sphere
+        // Use sphere only as emitter shape; do not render geometry
         s.emitterShape = sphere
         node.addParticleSystem(s)
 

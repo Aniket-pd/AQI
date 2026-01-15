@@ -3,7 +3,8 @@ import SwiftUI
 import Combine
 
 final class PM25OverlayViewModel: ObservableObject {
-    @Published var pm25: Double = 12 { didSet { pm25 = max(0, pm25) } }
+    // Do NOT write to this in didSet to avoid recursion.
+    @Published var pm25: Double = 12
     @Published var isLive: Bool = false
     @Published var breathActive: Bool = false
 
@@ -22,4 +23,3 @@ final class PM25OverlayViewModel: ObservableObject {
         }
     }
 }
-
