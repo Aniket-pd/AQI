@@ -24,6 +24,11 @@ struct ContentView: View {
                 .tabItem {
                     Label("Articles", systemImage: "book.closed")
                 }
+
+            PM25OverlayView()
+                .tabItem {
+                    Label("AR", systemImage: "camera.viewfinder")
+                }
         }
         .tint(.white)
     }
