@@ -20,7 +20,9 @@ struct SignalsView: View {
                             SectionHeaderView(title: section.title.uppercased())
                             VStack(spacing: 8) {
                                 ForEach(section.items) { item in
-                                    SignalRowView(item: item)
+                                    NavigationLink(destination: destinationView(for: item.kind)) {
+                                        SignalRowView(item: item)
+                                    }
                                 }
                             }
                             .padding(12)
@@ -41,4 +43,29 @@ struct SignalsView: View {
 #Preview {
     SignalsView()
         .preferredColorScheme(.dark)
+}
+
+// MARK: - Private helpers
+extension SignalsView {
+    @ViewBuilder
+    func destinationView(for kind: BodySignalKind) -> some View {
+        switch kind {
+        case .breathingDiscomfort:
+            BreathingDiscomfortView()
+        case .eyeThroatIrritation:
+            EyeThroatIrritationView()
+        case .unusualFatigue:
+            UnusualFatigueView()
+        case .headacheHeavyHead:
+            HeadacheHeavyHeadView()
+        case .poorFocusBrainFog:
+            PoorFocusBrainFogView()
+        case .lowEnergy:
+            LowEnergyView()
+        case .noseIrritation:
+            NoseIrritationView()
+        case .poorSleep:
+            PoorSleepView()
+        }
+    }
 }

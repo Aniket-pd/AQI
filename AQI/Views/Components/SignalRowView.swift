@@ -36,7 +36,8 @@ struct SignalRowView: View {
         item: SignalItem(
             title: "High PM2.5 Exposure",
             iconName: "drop.fill",
-            tintColor: .blue
+            tintColor: .blue,
+            kind: .breathingDiscomfort
         )
     )
     .padding()

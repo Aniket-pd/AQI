@@ -7,6 +7,17 @@
 
 import SwiftUI
 
+enum BodySignalKind: Hashable {
+    case breathingDiscomfort
+    case eyeThroatIrritation
+    case unusualFatigue
+    case headacheHeavyHead
+    case poorFocusBrainFog
+    case lowEnergy
+    case noseIrritation
+    case poorSleep
+}
+
 struct SignalSection: Identifiable {
     let id = UUID()
     let title: String
@@ -18,4 +29,5 @@ struct SignalItem: Identifiable {
     let title: String
     let iconName: String
     let tintColor: Color
+    let kind: BodySignalKind
 }

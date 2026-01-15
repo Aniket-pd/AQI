@@ -11,28 +11,16 @@ import Combine
 final class SignalsViewModel: ObservableObject {
     let sections: [SignalSection] = [
         SignalSection(
-            title: "Daily Air Preparedness",
-            items: [
-                SignalItem(title: "Bad Air Day", iconName: "cloud.fill", tintColor: Color(red: 0.56, green: 0.6, blue: 0.67)),
-                SignalItem(title: "High PM2.5 Exposure", iconName: "drop.fill", tintColor: Color(red: 0.36, green: 0.74, blue: 0.9)),
-                SignalItem(title: "Outdoor Activity on Polluted Days", iconName: "figure.walk", tintColor: Color(red: 0.38, green: 0.83, blue: 0.59)),
-                SignalItem(title: "Indoor Air Protection", iconName: "house.fill", tintColor: Color(red: 0.46, green: 0.64, blue: 0.92))
-            ]
-        ),
-        SignalSection(
             title: "Body Signals",
             items: [
-                SignalItem(title: "Breathing Discomfort", iconName: "lungs.fill", tintColor: Color(red: 0.86, green: 0.62, blue: 0.62)),
-                SignalItem(title: "Eye & Throat Irritation", iconName: "eye.fill", tintColor: Color(red: 0.84, green: 0.66, blue: 0.34)),
-                SignalItem(title: "Unusual Fatigue", iconName: "face.dashed", tintColor: Color(red: 0.68, green: 0.62, blue: 0.86))
-            ]
-        ),
-        SignalSection(
-            title: "Environmental Exposure",
-            items: [
-                SignalItem(title: "Traffic & Road Exposure", iconName: "car.fill", tintColor: Color(red: 0.64, green: 0.7, blue: 0.82)),
-                SignalItem(title: "Smoke & Burning Nearby", iconName: "flame.fill", tintColor: Color(red: 0.96, green: 0.55, blue: 0.29)),
-                SignalItem(title: "Dense Urban Areas", iconName: "building.2.fill", tintColor: Color(red: 0.6, green: 0.68, blue: 0.85))
+                SignalItem(title: "Breathing discomfort", iconName: "lungs.fill", tintColor: Color(red: 0.86, green: 0.62, blue: 0.62), kind: .breathingDiscomfort),
+                SignalItem(title: "Eye and throat irritation", iconName: "eye.fill", tintColor: Color(red: 0.84, green: 0.66, blue: 0.34), kind: .eyeThroatIrritation),
+                SignalItem(title: "Unusual fatigue", iconName: "bolt.slash.fill", tintColor: Color(red: 0.68, green: 0.62, blue: 0.86), kind: .unusualFatigue),
+                SignalItem(title: "Headache / heavy head", iconName: "waveform.path.ecg", tintColor: Color(red: 0.58, green: 0.72, blue: 0.86), kind: .headacheHeavyHead),
+                SignalItem(title: "Poor focus / brain fog", iconName: "brain", tintColor: Color(red: 0.38, green: 0.83, blue: 0.59), kind: .poorFocusBrainFog),
+                SignalItem(title: "Feeling low on energy", iconName: "battery.25", tintColor: Color(red: 0.96, green: 0.73, blue: 0.20), kind: .lowEnergy),
+                SignalItem(title: "Nose irritation", iconName: "aqi.low", tintColor: Color(red: 0.72, green: 0.64, blue: 0.78), kind: .noseIrritation),
+                SignalItem(title: "Poor sleep", iconName: "bed.double.fill", tintColor: Color(red: 0.56, green: 0.60, blue: 0.80), kind: .poorSleep)
             ]
         )
     ]
