@@ -3,7 +3,9 @@ import SwiftUI
 struct InversionOverlayView: View {
     @StateObject private var vm = InversionViewModel()
     @State private var showInfo = false
-    
+    @State private var caption: String = ""
+    @State private var captionOpacity: Double = 0
+    @State private var lastStage: Int = -1
 
     var body: some View {
         ZStack {
@@ -14,10 +16,55 @@ struct InversionOverlayView: View {
                 header
                 Spacer()
                 stabilityControl
+                captionView
             }
             .padding()
         }
         .sheet(isPresented: $showInfo) { infoSheet }
+        .onChange(of: vm.stability) { _, s in
+            updateCaption(for: s)
+        }
+        .onAppear { updateCaption(for: vm.stability) }
+    }
+
+    private var captionView: some View {
+        Text(caption)
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+            .multilineTextAlignment(.center)
+            .opacity(captionOpacity)
+            .animation(.easeInOut(duration: 0.5), value: captionOpacity)
+    }
+
+    private func updateCaption(for s: Double) {
+        let stage: Int
+        let t = s
+        switch t {
+        case ..<0.15: stage = 0
+        case 0.15..<0.3: stage = 1
+        case 0.3..<0.45: stage = 2
+        case 0.45..<0.65: stage = 3
+        default: stage = 4
+        }
+        guard stage != lastStage else { return }
+        lastStage = stage
+        let text: String
+        switch stage {
+        case 0: text = "Warm air usually rises and carries pollution away."
+        case 1: text = "Ground cools; near‑surface air gets denser."
+        case 2: text = "Cool air settles; rising slows."
+        case 3: text = "A warm layer forms above and lowers mixing height."
+        default: text = "Pollution spreads sideways instead of escaping upward."
+        }
+        captionOpacity = 0
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            caption = text
+            captionOpacity = 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                captionOpacity = 0.85 // keep lightly visible
+            }
+        }
     }
 
     private var header: some View {

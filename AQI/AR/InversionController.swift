@@ -14,6 +14,7 @@ final class InversionController: NSObject {
     private let cityNode = SCNNode()
     private let atmosphereNode = SCNNode()
     private let sourcesNode = SCNNode()
+    private let mixingArrowsNode = SCNNode()
 
     // Particle systems
     private var backgroundHaze: SCNParticleSystem = SCNParticleSystem() // pollution aloft
@@ -24,6 +25,8 @@ final class InversionController: NSObject {
     private var warmCoreTracers: SCNParticleSystem = SCNParticleSystem() // warm layer core
     private var sourceEmitters: [SCNNode] = []
     private let planarTurbulenceNode = SCNNode()
+    private let boundaryTangentTurbulenceNode = SCNNode()
+    private let groundTurbulenceNode = SCNNode()
 
     // Physics fields controlling motion
     private let baseTurbulenceNode = SCNNode()
@@ -33,11 +36,13 @@ final class InversionController: NSObject {
     private let boundaryDragNode = SCNNode()
     private let coolLayerNode = SCNNode()
     private let warmLayerNode = SCNNode()
-    private let boundaryTangentTurbulenceNode = SCNNode()
-    private let groundTurbulenceNode = SCNNode()
+    // Removed duplicate declarations:
+    // private let boundaryTangentTurbulenceNode = SCNNode()
+    // private let groundTurbulenceNode = SCNNode()
     private let coolLayerGeomNode = SCNNode()
     private let warmLayerGeomNode = SCNNode()
     private let buoyancyNode = SCNNode()
+    // private let groundTurbulenceNode = SCNNode()
 
     // State
     private var placed = false
@@ -46,6 +51,11 @@ final class InversionController: NSObject {
     private var boundaryThickness: CGFloat = 0.06
     private var lastUpdateTime: TimeInterval = 0
     private var timeAccum: Double = 0
+    private var trappedLoad: Double = 0 // 0..1 gradual fresh->haze mix
+    private var mixPulseActive: Bool = false
+    private var mixPulseElapsed: Double = 0
+    private var mixPulseDuration: Double = 0
+    private var nextPulseTimer: Double = 2.0
 
     // Failure moments timer
     private var failureTimer: Timer?
@@ -76,6 +86,7 @@ final class InversionController: NSObject {
         // Build atmosphere and city (order not critical, we apply colliders after)
         buildAtmosphere()
         buildCity()
+        buildMixingArrows()
 
         // Position root at plane center (node is already positioned at plane)
         root.position = SCNVector3(plane.center.x, 0, plane.center.z)
@@ -103,6 +114,7 @@ final class InversionController: NSObject {
 
         buildCity()
         buildAtmosphere()
+        buildMixingArrows()
         // Compute a position in front of camera if requested
         var t = transform
         var position = SIMD3<Float>(t.columns.3.x, t.columns.3.y, t.columns.3.z)
@@ -147,6 +159,17 @@ final class InversionController: NSObject {
         coolCoreTracers.birthRate = CGFloat(140 + 900 * layerScale) * compScale
         warmCoreTracers.birthRate = CGFloat(120 + 800 * layerScale) * compScale
 
+        // Cushion zone thickness near cap and proximity-scaled behavior (field half-extents)
+        let t = CGFloat(lerp(0.01, 0.03, pow(s, 0.8)))
+        if let dragField = boundaryDragNode.physicsField {
+            dragField.halfExtent = SCNVector3(0.18, Float(max(0.006, t * 0.5)), 0.18)
+            dragField.strength = CGFloat(lerp(0.0, 0.5, pow(s, 1.2)))
+        }
+        if let tanField = boundaryTangentTurbulenceNode.physicsField {
+            tanField.halfExtent = SCNVector3(0.22, Float(max(0.004, t * 0.33)), 0.22)
+            tanField.strength = CGFloat(lerp(0.0, 0.25, pow(s, 1.3)))
+        }
+
         // Pollution mixing: split total emission per source into free vs trapped
         let totalPerSource: CGFloat = 80 * compScale
         let trappedFrac = CGFloat(smoothstep(edge0: 0.25, edge1: 0.85, x: s))
@@ -186,17 +209,75 @@ final class InversionController: NSObject {
             warmCoreShape.height = height
         }
 
-        // Update boundary collider & drag band and planar diffusion
+        // Update boundary collider & bands and planar diffusion
         boundaryColliderNode.position.y = Float(hbEff)
         boundaryDragNode.position.y = Float(hbEff)
-        boundaryDragNode.physicsField?.strength = CGFloat(lerp(0.0, 0.5, pow(s, 1.2)))
         boundaryTangentTurbulenceNode.position.y = Float(hbEff)
-        boundaryTangentTurbulenceNode.physicsField?.strength = CGFloat(lerp(0.0, 0.25, pow(s, 1.3)))
         planarTurbulenceNode.position.y = Float(max(0.03, hbEff * 0.45))
-        planarTurbulenceNode.physicsField?.strength = CGFloat(lerp(0.02, 0.22, pow(s, 1.2)))
 
-        // Always enable barrier; leakage handled by free fraction and drag band
+        // Intermittent micro-mixing pulses under weak inversion
+        var pulseEnv: Double = 0
+        if s < 0.45 {
+            nextPulseTimer -= dt
+            if nextPulseTimer <= 0 && !mixPulseActive {
+                mixPulseActive = true
+                mixPulseElapsed = 0
+                mixPulseDuration = Double.random(in: 0.5...1.2)
+                nextPulseTimer = Double.random(in: 2.0...4.0)
+            }
+            if mixPulseActive {
+                mixPulseElapsed += dt
+                let u = min(max(mixPulseElapsed / max(0.2, mixPulseDuration), 0), 1)
+                // Smooth envelope 0..1..0
+                pulseEnv = 0.5 * (1 - cos(.pi * u))
+                if mixPulseElapsed >= mixPulseDuration { mixPulseActive = false }
+            }
+        } else {
+            mixPulseActive = false
+            nextPulseTimer = min(nextPulseTimer, 2.0)
+        }
+
+        // Pollution mixing: per-source free vs trapped with pulse modulation
+        let totalPerSource2: CGFloat = 80 * compScale
+        let trappedFracBase = smoothstep(edge0: 0.25, edge1: 0.85, x: s)
+        let trappedFracEff = max(0.0, min(1.0, trappedFracBase - 0.12 * pulseEnv))
+
+        // Update trappedLoad (fresh->haze) slowly over time
+        let gain = 0.16 * s
+        let loss = 0.12 * (1 - s) + 0.06 * pulseEnv
+        trappedLoad = min(max(trappedLoad + dt * (gain - loss), 0.0), 1.0)
+
+        for node in sourceEmitters {
+            guard let systems = node.particleSystems, systems.count >= 3 else { continue }
+            let trappedTotal = totalPerSource2 * CGFloat(trappedFracEff)
+            let freshRate = trappedTotal * CGFloat(1 - trappedLoad)
+            let hazeRate = trappedTotal * CGFloat(trappedLoad)
+            let freeRate = totalPerSource2 - trappedTotal
+            systems[0].birthRate = freshRate
+            systems[1].birthRate = hazeRate
+            systems[2].birthRate = freeRate
+            // Haze longer lifetime and wider spread as inversion strengthens
+            systems[1].particleLifeSpan = CGFloat(lerp(9, 16, s))
+            systems[1].spreadingAngle = CGFloat(lerp(18, 35, s))
+            // Slightly reduce drag during pulse to hint near-escape
+            // (implemented by boundaryDrag strength above)
+            // Free gets a tiny upward boost during pulse
+            systems[2].particleVelocity = CGFloat(0.02 + 0.004 * pulseEnv)
+        }
+
+        // Always enable barrier; leakage handled by free fraction and cushion band
         applyPollutionCollider(enabled: true, strength: s)
+
+        // Teaching cues: arrows fade as stability increases; base plate tint shifts subtly
+        let arrowOpacity = CGFloat(1.0 - smoothstep(edge0: 0.08, edge1: 0.5, x: s))
+        mixingArrowsNode.opacity = arrowOpacity
+        if let basePlate = cityNode.childNode(withName: "basePlate", recursively: false),
+           let mat = basePlate.geometry?.firstMaterial {
+            let warm = UIColor(red: 0.28, green: 0.25, blue: 0.22, alpha: 1)
+            let cool = UIColor(red: 0.18, green: 0.2, blue: 0.24, alpha: 1)
+            let mix = CGFloat(smoothstep(edge0: 0.12, edge1: 0.28, x: s))
+            mat.diffuse.contents = blend(colorA: warm, colorB: cool, t: mix)
+        }
 
         // Align helper nodes (for completeness)
         boundarySlabNode.position.y = Float(boundaryHeight)
@@ -310,7 +391,10 @@ final class InversionController: NSObject {
         let baseSize: CGFloat = 0.34 // 34 cm square platform
         let base = SCNBox(width: baseSize, height: 0.01, length: baseSize, chamferRadius: 0.004)
         let baseNode = SCNNode(geometry: base)
+        base.firstMaterial = SCNMaterial()
         base.firstMaterial?.diffuse.contents = UIColor(white: 0.15, alpha: 1)
+        base.firstMaterial?.lightingModel = .lambert
+        baseNode.name = "basePlate"
         baseNode.position = SCNVector3(0, 0, 0)
         cityNode.addChildNode(baseNode)
 
@@ -365,7 +449,7 @@ final class InversionController: NSObject {
             SCNVector3(-0.12, 0.012,  0.12), SCNVector3(0.0, 0.012,  0.12), SCNVector3(0.12, 0.012,  0.12)
         ]
         for i in intersections {
-            let n = makeSourceEmitterPair()
+            let n = makeSourceEmitterTriple()
             n.position = i
             sourcesNode.addChildNode(n)
             sourceEmitters.append(n)
@@ -373,7 +457,7 @@ final class InversionController: NSObject {
 
         // A few rooftop sources
         for _ in 0..<6 {
-            let n = makeSourceEmitterPair()
+            let n = makeSourceEmitterTriple()
             let x = Float.random(in: -0.12...0.12)
             let z = Float.random(in: -0.12...0.12)
             let y = Float.random(in: 0.03...0.09)
@@ -383,9 +467,49 @@ final class InversionController: NSObject {
         }
     }
 
+    // Upward mixing arrows for normal atmosphere teaching
+    private func buildMixingArrows() {
+        mixingArrowsNode.removeFromParentNode()
+        mixingArrowsNode.childNodes.forEach { $0.removeFromParentNode() }
+        root.addChildNode(mixingArrowsNode)
+
+        let positions: [SCNVector3] = [
+            SCNVector3(-0.12, 0.015, -0.12), SCNVector3(0.0, 0.015, -0.12), SCNVector3(0.12, 0.015, -0.12),
+            SCNVector3(-0.12, 0.015,  0.0),  SCNVector3(0.0, 0.015,  0.0),  SCNVector3(0.12, 0.015,  0.0),
+            SCNVector3(-0.12, 0.015,  0.12), SCNVector3(0.0, 0.015,  0.12), SCNVector3(0.12, 0.015,  0.12)
+        ]
+        for p in positions {
+            let shaft = SCNCylinder(radius: 0.001, height: 0.014)
+            let head = SCNCone(topRadius: 0.0, bottomRadius: 0.003, height: 0.006)
+            let m = SCNMaterial()
+            m.diffuse.contents = UIColor(white: 1.0, alpha: 0.6)
+            m.lightingModel = .constant
+            shaft.materials = [m]
+            head.materials = [m]
+
+            let shaftNode = SCNNode(geometry: shaft)
+            shaftNode.position = SCNVector3(p.x, p.y + 0.007, p.z)
+            let headNode = SCNNode(geometry: head)
+            headNode.position = SCNVector3(p.x, p.y + 0.016, p.z)
+            mixingArrowsNode.addChildNode(shaftNode)
+            mixingArrowsNode.addChildNode(headNode)
+
+            // Gentle up-down oscillation
+            let moveUp = SCNAction.moveBy(x: 0, y: 0.004, z: 0, duration: 1.4)
+            let moveDown = SCNAction.moveBy(x: 0, y: -0.004, z: 0, duration: 1.4)
+            moveUp.timingMode = .easeInEaseOut
+            moveDown.timingMode = .easeInEaseOut
+            let seq = SCNAction.sequence([moveUp, moveDown])
+            shaftNode.runAction(SCNAction.repeatForever(seq))
+            headNode.runAction(SCNAction.repeatForever(seq))
+        }
+        mixingArrowsNode.opacity = 0
+    }
+
     private func buildAtmosphere() {
         atmosphereNode.removeFromParentNode()
         root.addChildNode(atmosphereNode)
+        root.addChildNode(mixingArrowsNode)
 
         // Broad background haze across volume (neutral pollution)
         backgroundHaze = SCNParticleSystem()
@@ -503,27 +627,45 @@ final class InversionController: NSObject {
         // Color is carried by particles, no extra slabs
     }
 
-    private func makeSourceEmitterPair() -> SCNNode {
+    private func makeSourceEmitterTriple() -> SCNNode {
         let n = SCNNode()
         let sphere = SCNSphere(radius: 0.01)
 
-        // Trapped system (collides with boundary)
-        let trapped = SCNParticleSystem()
-        trapped.loops = true
-        trapped.birthRate = 0
-        trapped.particleLifeSpan = 8
-        trapped.particleLifeSpanVariation = 2
-        trapped.particleVelocity = 0.02
-        trapped.particleVelocityVariation = 0.012
-        trapped.emittingDirection = SCNVector3(0, 1, 0)
-        trapped.spreadingAngle = 10
-        trapped.particleSize = 0.0024
-        trapped.particleSizeVariation = 0.001
-        trapped.particleColor = UIColor(red: 0.65, green: 0.62, blue: 0.60, alpha: 0.28)
-        trapped.particleImage = InversionController.makeDiscImage()
-        trapped.isAffectedByPhysicsFields = true
-        trapped.emitterShape = sphere
-        n.addParticleSystem(trapped)
+        // Trapped fresh
+        let trappedFresh = SCNParticleSystem()
+        trappedFresh.loops = true
+        trappedFresh.birthRate = 0
+        trappedFresh.particleLifeSpan = 7
+        trappedFresh.particleLifeSpanVariation = 1.5
+        trappedFresh.particleVelocity = 0.02
+        trappedFresh.particleVelocityVariation = 0.012
+        trappedFresh.emittingDirection = SCNVector3(0, 1, 0)
+        trappedFresh.spreadingAngle = 10
+        trappedFresh.particleSize = 0.0020
+        trappedFresh.particleSizeVariation = 0.001
+        trappedFresh.particleColor = UIColor(red: 0.68, green: 0.66, blue: 0.64, alpha: 0.30)
+        trappedFresh.particleImage = InversionController.makeDiscImage()
+        trappedFresh.isAffectedByPhysicsFields = true
+        trappedFresh.emitterShape = sphere
+        n.addParticleSystem(trappedFresh)
+
+        // Trapped haze (sheet-like)
+        let trappedHaze = SCNParticleSystem()
+        trappedHaze.loops = true
+        trappedHaze.birthRate = 0
+        trappedHaze.particleLifeSpan = 10
+        trappedHaze.particleLifeSpanVariation = 2
+        trappedHaze.particleVelocity = 0.015
+        trappedHaze.particleVelocityVariation = 0.010
+        trappedHaze.emittingDirection = SCNVector3(0, 1, 0)
+        trappedHaze.spreadingAngle = 18
+        trappedHaze.particleSize = 0.0028
+        trappedHaze.particleSizeVariation = 0.0012
+        trappedHaze.particleColor = UIColor(red: 0.62, green: 0.60, blue: 0.58, alpha: 0.28)
+        trappedHaze.particleImage = InversionController.makeDiscImage()
+        trappedHaze.isAffectedByPhysicsFields = true
+        trappedHaze.emitterShape = sphere
+        n.addParticleSystem(trappedHaze)
 
         // Free system (passes when inversion weak)
         let free = SCNParticleSystem()
@@ -558,15 +700,17 @@ final class InversionController: NSObject {
         let extraDamping: CGFloat = enabled ? friction * 0.6 : 0.0
         for node in sourceEmitters {
             guard let systems = node.particleSystems, systems.count > 0 else { continue }
-            // Apply collider only to the first system (trapped)
-            let trapped = systems[0]
-            if enabled {
-                trapped.colliderNodes = [boundaryColliderNode]
-                trapped.particleDiesOnCollision = false
-                trapped.dampingFactor = min(0.9, trapped.dampingFactor + extraDamping)
-            } else {
-                trapped.colliderNodes = []
-                trapped.dampingFactor = max(0.0, trapped.dampingFactor - extraDamping)
+            // Apply collider to trappedFresh (0) and trappedHaze (1)
+            for idx in 0..<(min(2, systems.count)) {
+                let s = systems[idx]
+                if enabled {
+                    s.colliderNodes = [boundaryColliderNode]
+                    s.particleDiesOnCollision = false
+                    s.dampingFactor = min(0.9, s.dampingFactor + extraDamping)
+                } else {
+                    s.colliderNodes = []
+                    s.dampingFactor = max(0.0, s.dampingFactor - extraDamping)
+                }
             }
         }
     }
@@ -618,6 +762,17 @@ private func lerp(_ a: Double, _ b: Double, _ t: Double) -> Double { a + (b - a)
 private func smoothstep(edge0: Double, edge1: Double, x: Double) -> Double {
     let t = min(max((x - edge0) / max(1e-6, (edge1 - edge0)), 0.0), 1.0)
     return t * t * (3 - 2 * t)
+}
+private func blend(colorA: UIColor, colorB: UIColor, t: CGFloat) -> UIColor {
+    var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
+    var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
+    colorA.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+    colorB.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+    let u = max(0, min(1, t))
+    return UIColor(red: r1 + (r2 - r1) * u,
+                   green: g1 + (g2 - g1) * u,
+                   blue: b1 + (b2 - b1) * u,
+                   alpha: a1 + (a2 - a1) * u)
 }
 
 extension InversionController {
@@ -699,3 +854,4 @@ private extension InversionController {
         }
     }
 }
+
