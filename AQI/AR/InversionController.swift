@@ -18,8 +18,10 @@ final class InversionController: NSObject {
     // Particle systems
     private var backgroundHaze: SCNParticleSystem = SCNParticleSystem() // pollution aloft
     private var groundHaze: SCNParticleSystem = SCNParticleSystem()      // pollution near ground
-    private var coolAirTracers: SCNParticleSystem = SCNParticleSystem()  // cool layer visualization
-    private var warmAirTracers: SCNParticleSystem = SCNParticleSystem()  // warm layer visualization
+    private var coolAirTracers: SCNParticleSystem = SCNParticleSystem()  // cool layer halo
+    private var warmAirTracers: SCNParticleSystem = SCNParticleSystem()  // warm layer halo
+    private var coolCoreTracers: SCNParticleSystem = SCNParticleSystem() // cool layer core
+    private var warmCoreTracers: SCNParticleSystem = SCNParticleSystem() // warm layer core
     private var sourceEmitters: [SCNNode] = []
     private let planarTurbulenceNode = SCNNode()
 
@@ -31,6 +33,8 @@ final class InversionController: NSObject {
     private let boundaryDragNode = SCNNode()
     private let coolLayerNode = SCNNode()
     private let warmLayerNode = SCNNode()
+    private let boundaryTangentTurbulenceNode = SCNNode()
+    private let groundTurbulenceNode = SCNNode()
     private let coolLayerGeomNode = SCNNode()
     private let warmLayerGeomNode = SCNNode()
     private let buoyancyNode = SCNNode()
@@ -41,6 +45,7 @@ final class InversionController: NSObject {
     private var boundaryHeight: CGFloat = 0.18 // meters (tabletop scale)
     private var boundaryThickness: CGFloat = 0.06
     private var lastUpdateTime: TimeInterval = 0
+    private var timeAccum: Double = 0
 
     // Failure moments timer
     private var failureTimer: Timer?
@@ -54,10 +59,12 @@ final class InversionController: NSObject {
         stability = max(0.0, min(1.0, s))
         compScale = CGFloat(max(0.5, min(complexity, 1.25)))
         // Particle-based colored air layers (high contrast)
-        let coolColor = UIColor(hue: 210.0/360.0, saturation: 0.85, brightness: 1.0, alpha: 0.55)
-        let warmColor = UIColor(hue: 0.0/360.0, saturation: 0.90, brightness: 1.0, alpha: 0.55)
+        let coolColor = UIColor(hue: 210.0/360.0, saturation: 0.85, brightness: 1.0, alpha: 0.5)
+        let warmColor = UIColor(hue: 0.0/360.0, saturation: 0.90, brightness: 1.0, alpha: 0.5)
         coolAirTracers.particleColor = coolColor
         warmAirTracers.particleColor = warmColor
+        coolCoreTracers.particleColor = coolColor.withAlphaComponent(0.7)
+        warmCoreTracers.particleColor = warmColor.withAlphaComponent(0.7)
         // Other dynamics are updated per frame in tick() for smooth transitions
     }
 
@@ -75,7 +82,7 @@ final class InversionController: NSObject {
         parentNode.addChildNode(root)
 
         // Apply colliders based on current stability and start failure moments
-        applyPollutionCollider(enabled: stability > 0.2, strength: stability)
+        applyPollutionCollider(enabled: true, strength: stability)
         scheduleFailureMoments()
     }
 
@@ -113,6 +120,7 @@ final class InversionController: NSObject {
         if lastUpdateTime == 0 { lastUpdateTime = time }
         let dt = time - lastUpdateTime
         lastUpdateTime = time
+        timeAccum += dt
 
         // Smooth the stability for continuous transitions
         let tau: Double = 0.6
@@ -121,7 +129,11 @@ final class InversionController: NSObject {
         let s = smoothedStability
 
         // Derive parameters
-        boundaryHeight = CGFloat(lerp(0.12, 0.32, s))
+        var baseHB = CGFloat(lerp(0.12, 0.32, s))
+        let wobbleAmp: CGFloat = 0.004
+        let wobble = wobbleAmp * CGFloat(sin(timeAccum * 2 * .pi * 0.05)) // ~0.05 Hz
+        let hbEff = max(0.08, baseHB + wobble)
+        boundaryHeight = hbEff
         boundaryThickness = CGFloat(lerp(0.09, 0.03, s))
 
         // Update fields
@@ -130,8 +142,10 @@ final class InversionController: NSObject {
 
         // Fog-like air layers density (small particles)
         let layerScale = max(0.0, min(1.0, (s - 0.05) / 0.95))
-        coolAirTracers.birthRate = CGFloat(300 + 1600 * layerScale) * compScale
-        warmAirTracers.birthRate = CGFloat(300 + 1400 * layerScale) * compScale
+        coolAirTracers.birthRate = CGFloat(240 + 1200 * layerScale) * compScale
+        warmAirTracers.birthRate = CGFloat(240 + 1100 * layerScale) * compScale
+        coolCoreTracers.birthRate = CGFloat(140 + 900 * layerScale) * compScale
+        warmCoreTracers.birthRate = CGFloat(120 + 800 * layerScale) * compScale
 
         // Pollution mixing: split total emission per source into free vs trapped
         let totalPerSource: CGFloat = 80 * compScale
@@ -152,27 +166,37 @@ final class InversionController: NSObject {
             systems[0].spreadingAngle = CGFloat(lerp(10, 35, s))
         }
 
-        // Update layer emitter shapes
+        // Update layer emitter shapes (halo + core) with wobble
         if let coolShape = coolAirTracers.emitterShape as? SCNBox {
-            coolShape.height = max(0.04, boundaryHeight)
+            coolShape.height = max(0.04, hbEff)
             coolLayerNode.position.y = Float(coolShape.height/2)
+        }
+        if let coolCoreShape = coolCoreTracers.emitterShape as? SCNBox {
+            coolCoreShape.height = max(0.02, hbEff * 0.45)
         }
         if let warmShape = warmAirTracers.emitterShape as? SCNBox {
             let top: CGFloat = 0.22
-            let height = max(0.03, top - boundaryHeight)
+            let height = max(0.03, top - hbEff)
             warmShape.height = height
-            warmLayerNode.position.y = Float(boundaryHeight + height/2)
+            warmLayerNode.position.y = Float(hbEff + height/2)
+        }
+        if let warmCoreShape = warmCoreTracers.emitterShape as? SCNBox {
+            let top: CGFloat = 0.22
+            let height = max(0.015, (top - hbEff) * 0.4)
+            warmCoreShape.height = height
         }
 
         // Update boundary collider & drag band and planar diffusion
-        boundaryColliderNode.position.y = Float(boundaryHeight)
-        boundaryDragNode.position.y = Float(boundaryHeight)
-        boundaryDragNode.physicsField?.strength = CGFloat(lerp(0.0, 0.6, pow(s, 1.2)))
-        planarTurbulenceNode.position.y = Float(max(0.03, boundaryHeight * 0.45))
+        boundaryColliderNode.position.y = Float(hbEff)
+        boundaryDragNode.position.y = Float(hbEff)
+        boundaryDragNode.physicsField?.strength = CGFloat(lerp(0.0, 0.5, pow(s, 1.2)))
+        boundaryTangentTurbulenceNode.position.y = Float(hbEff)
+        boundaryTangentTurbulenceNode.physicsField?.strength = CGFloat(lerp(0.0, 0.25, pow(s, 1.3)))
+        planarTurbulenceNode.position.y = Float(max(0.03, hbEff * 0.45))
         planarTurbulenceNode.physicsField?.strength = CGFloat(lerp(0.02, 0.22, pow(s, 1.2)))
 
-        // Enable barrier as inversion appears
-        applyPollutionCollider(enabled: s > 0.2, strength: s)
+        // Always enable barrier; leakage handled by free fraction and drag band
+        applyPollutionCollider(enabled: true, strength: s)
 
         // Align helper nodes (for completeness)
         boundarySlabNode.position.y = Float(boundaryHeight)
@@ -239,6 +263,15 @@ final class InversionController: NSObject {
         boundaryDragNode.position = SCNVector3(0, Float(boundaryHeight), 0)
         root.addChildNode(boundaryDragNode)
 
+        // Tangent turbulence near boundary to encourage sideways sliding along the cap
+        let tangentTurb = SCNPhysicsField.turbulenceField(smoothness: 0.75, animationSpeed: 0.15)
+        tangentTurb.strength = 0.0
+        tangentTurb.halfExtent = SCNVector3(0.22, 0.01, 0.22)
+        tangentTurb.usesEllipsoidalExtent = true
+        boundaryTangentTurbulenceNode.physicsField = tangentTurb
+        boundaryTangentTurbulenceNode.position = SCNVector3(0, Float(boundaryHeight), 0)
+        root.addChildNode(boundaryTangentTurbulenceNode)
+
         // Collision plane to block upward crossing when inversion is active
         let planeGeom = SCNBox(width: 0.34, height: 0.002, length: 0.34, chamferRadius: 0)
         let mat = SCNMaterial()
@@ -259,6 +292,15 @@ final class InversionController: NSObject {
         buoy.usesEllipsoidalExtent = true
         buoyancyNode.physicsField = buoy
         root.addChildNode(buoyancyNode)
+
+        // Subtle near-ground micro-turbulence for pollution (not wind, affects low layer)
+        let groundTurb = SCNPhysicsField.turbulenceField(smoothness: 0.8, animationSpeed: 0.12)
+        groundTurb.strength = 0.03
+        groundTurb.halfExtent = SCNVector3(0.20, 0.03, 0.20)
+        groundTurb.usesEllipsoidalExtent = true
+        groundTurbulenceNode.physicsField = groundTurb
+        groundTurbulenceNode.position = SCNVector3(0, 0.03, 0)
+        root.addChildNode(groundTurbulenceNode)
     }
 
     private func buildCity() {
@@ -422,6 +464,41 @@ final class InversionController: NSObject {
         warmLayerNode.addParticleSystem(warmAirTracers)
         warmLayerNode.position.y = Float(boundaryHeight + warmHeight/2)
         atmosphereNode.addChildNode(warmLayerNode)
+
+        // Add denser core sheets for each layer (thin height)
+        coolCoreTracers = SCNParticleSystem()
+        coolCoreTracers.loops = true
+        coolCoreTracers.birthRate = 0
+        coolCoreTracers.particleLifeSpan = 9
+        coolCoreTracers.particleVelocity = 0.004
+        coolCoreTracers.particleVelocityVariation = 0.003
+        coolCoreTracers.particleSize = 0.0009
+        coolCoreTracers.particleImage = InversionController.makeDiscImage()
+        coolCoreTracers.dampingFactor = 0.14
+        coolCoreTracers.isAffectedByPhysicsFields = true
+        let coolCoreShape = SCNBox(width: 0.34, height: max(0.02, boundaryHeight * 0.45), length: 0.34, chamferRadius: 0)
+        coolCoreTracers.emitterShape = coolCoreShape
+        let coolCoreNode = SCNNode()
+        coolCoreNode.addParticleSystem(coolCoreTracers)
+        coolCoreNode.position.y = Float(coolCoreShape.height/2)
+        atmosphereNode.addChildNode(coolCoreNode)
+
+        warmCoreTracers = SCNParticleSystem()
+        warmCoreTracers.loops = true
+        warmCoreTracers.birthRate = 0
+        warmCoreTracers.particleLifeSpan = 9
+        warmCoreTracers.particleVelocity = 0.004
+        warmCoreTracers.particleVelocityVariation = 0.003
+        warmCoreTracers.particleSize = 0.0008
+        warmCoreTracers.particleImage = InversionController.makeDiscImage()
+        warmCoreTracers.dampingFactor = 0.14
+        warmCoreTracers.isAffectedByPhysicsFields = true
+        let warmCoreShape = SCNBox(width: 0.34, height: max(0.015, warmHeight * 0.4), length: 0.34, chamferRadius: 0)
+        warmCoreTracers.emitterShape = warmCoreShape
+        let warmCoreNode = SCNNode()
+        warmCoreNode.addParticleSystem(warmCoreTracers)
+        warmCoreNode.position.y = Float(boundaryHeight + warmCoreShape.height/2)
+        atmosphereNode.addChildNode(warmCoreNode)
 
         // Color is carried by particles, no extra slabs
     }
@@ -622,4 +699,3 @@ private extension InversionController {
         }
     }
 }
-
