@@ -29,11 +29,6 @@ struct ContentView: View {
                 .tabItem {
                     Label("AR", systemImage: "camera.viewfinder")
                 }
-
-            InversionOverlayView()
-                .tabItem {
-                    Label("Inversion", systemImage: "cloud.fog")
-                }
         }
         .tint(.white)
     }
