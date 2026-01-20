@@ -27,6 +27,19 @@ final class InversionController: NSObject {
     private let planarTurbulenceNode = SCNNode()
     private let boundaryTangentTurbulenceNode = SCNNode()
     private let groundTurbulenceNode = SCNNode()
+    // Additional visual tracer systems (no physics change)
+    private var groundRedTracers: SCNParticleSystem = SCNParticleSystem()
+    private var groundBlueTracers: SCNParticleSystem = SCNParticleSystem()
+    private var coolHaloPatchTracers: [SCNParticleSystem] = []
+    private var warmHaloPatchTracers: [SCNParticleSystem] = []
+    private var coolHaloPatchNodes: [SCNNode] = []
+    private var warmHaloPatchNodes: [SCNNode] = []
+    private var coolEdgeTracers: [SCNParticleSystem] = []
+    private var warmEdgeTracers: [SCNParticleSystem] = []
+    private var coolEdgeNodes: [SCNNode] = []
+    private var warmEdgeNodes: [SCNNode] = []
+    private var lidShearTracers: SCNParticleSystem = SCNParticleSystem()
+    private var lidShearNode: SCNNode = SCNNode()
 
     // Physics fields controlling motion
     private let baseTurbulenceNode = SCNNode()
@@ -207,6 +220,41 @@ final class InversionController: NSObject {
             let top: CGFloat = 0.22
             let height = max(0.015, (top - hbEff) * 0.4)
             warmCoreShape.height = height
+        }
+
+        // Lid shear band just below lid (visual shear layer)
+        lidShearNode.position.y = Float(max(0.02, hbEff - 0.012))
+
+        // Subtle vertical waviness for halo/edge patch nodes to avoid perfectly flat bands
+        let waveAmp: Float = 0.003
+        let waveFreq: Double = 0.07
+        for (i, n) in coolHaloPatchNodes.enumerated() {
+            if let box = coolHaloPatchTracers[safe: i]?.emitterShape as? SCNBox {
+                let baseY = Float(box.height/2)
+                let phase = Float(Double(i) * 1.7)
+                n.position.y = baseY + waveAmp * sin(Float(timeAccum * waveFreq) + phase)
+            }
+        }
+        for (i, n) in warmHaloPatchNodes.enumerated() {
+            if let box = warmHaloPatchTracers[safe: i]?.emitterShape as? SCNBox {
+                let baseY = Float(hbEff + box.height/2)
+                let phase = Float(Double(i) * 1.9)
+                n.position.y = baseY + waveAmp * sin(Float(timeAccum * waveFreq) + phase)
+            }
+        }
+        for (i, n) in coolEdgeNodes.enumerated() {
+            if let box = coolEdgeTracers[safe: i]?.emitterShape as? SCNBox {
+                let baseY = Float(box.height/2)
+                let phase = Float(Double(i) * 2.1)
+                n.position.y = baseY + waveAmp * sin(Float(timeAccum * waveFreq) + phase)
+            }
+        }
+        for (i, n) in warmEdgeNodes.enumerated() {
+            if let box = warmEdgeTracers[safe: i]?.emitterShape as? SCNBox {
+                let baseY = Float(hbEff + box.height/2)
+                let phase = Float(Double(i) * 2.3)
+                n.position.y = baseY + waveAmp * sin(Float(timeAccum * waveFreq) + phase)
+            }
         }
 
         // Update boundary collider & bands and planar diffusion
@@ -865,5 +913,11 @@ private extension InversionController {
             warmBox.height = h
             warmLayerGeomNode.position.y = Float(boundaryHeight + h/2)
         }
+    }
+}
+// Safe subscript helper for arrays
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        (0..<count).contains(index) ? self[index] : nil
     }
 }
