@@ -214,6 +214,11 @@ final class InversionController: NSObject {
         boundaryDragNode.position.y = Float(hbEff)
         boundaryTangentTurbulenceNode.position.y = Float(hbEff)
         planarTurbulenceNode.position.y = Float(max(0.03, hbEff * 0.45))
+        // Horizontal diffusion in trapped layer grows with inversion and accumulated trapped load
+        let planarBase: Double = 0.02
+        let planarWithS: Double = planarBase + 0.18 * pow(s, 1.2)
+        let planarWithLoad: Double = planarWithS + 0.14 * trappedLoad
+        planarTurbulenceNode.physicsField?.strength = CGFloat(min(0.35, planarWithLoad))
 
         // Intermittent micro-mixing pulses under weak inversion
         var pulseEnv: Double = 0
@@ -258,7 +263,15 @@ final class InversionController: NSObject {
             systems[2].birthRate = freeRate
             // Haze longer lifetime and wider spread as inversion strengthens
             systems[1].particleLifeSpan = CGFloat(lerp(9, 16, s))
-            systems[1].spreadingAngle = CGFloat(lerp(18, 35, s))
+            systems[1].spreadingAngle = CGFloat(lerp(18, 40, s))
+            systems[1].dampingFactor = CGFloat(lerp(0.08, 0.18, s))
+            // Broaden trapped haze emitter for fog-like sheet (thin, wide)
+            if let box = systems[1].emitterShape as? SCNBox {
+                let w = min(0.34, max(0.06, 0.08 + 0.22 * s))
+                box.width = w
+                box.length = w
+                box.height = max(0.004, 0.01 * (1.0 - CGFloat(s)))
+            }
             // Slightly reduce drag during pulse to hint near-escape
             // (implemented by boundaryDrag strength above)
             // Free gets a tiny upward boost during pulse
@@ -664,7 +677,7 @@ final class InversionController: NSObject {
         trappedHaze.particleColor = UIColor(red: 0.62, green: 0.60, blue: 0.58, alpha: 0.28)
         trappedHaze.particleImage = InversionController.makeDiscImage()
         trappedHaze.isAffectedByPhysicsFields = true
-        trappedHaze.emitterShape = sphere
+        trappedHaze.emitterShape = SCNBox(width: 0.08, height: 0.01, length: 0.08, chamferRadius: 0)
         n.addParticleSystem(trappedHaze)
 
         // Free system (passes when inversion weak)
@@ -854,4 +867,3 @@ private extension InversionController {
         }
     }
 }
-
