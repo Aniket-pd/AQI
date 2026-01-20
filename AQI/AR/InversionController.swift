@@ -27,6 +27,21 @@ final class InversionController: NSObject {
     private let planarTurbulenceNode = SCNNode()
     private let boundaryTangentTurbulenceNode = SCNNode()
     private let groundTurbulenceNode = SCNNode()
+    // Ground sheet tracers (emitted near ground)
+    private var groundRedTracers: SCNParticleSystem = SCNParticleSystem()
+    private var groundBlueTracers: SCNParticleSystem = SCNParticleSystem()
+    // Edge and patch systems for halo/core soft boundaries
+    private var coolEdgeTracers: [SCNParticleSystem] = []
+    private var warmEdgeTracers: [SCNParticleSystem] = []
+    private var coolEdgeNodes: [SCNNode] = []
+    private var warmEdgeNodes: [SCNNode] = []
+    private var coolHaloPatchTracers: [SCNParticleSystem] = []
+    private var warmHaloPatchTracers: [SCNParticleSystem] = []
+    private var coolHaloPatchNodes: [SCNNode] = []
+    private var warmHaloPatchNodes: [SCNNode] = []
+    // Lid shear band tracer
+    private var lidShearTracers: SCNParticleSystem = SCNParticleSystem()
+    private var lidShearNode: SCNNode = SCNNode()
 
     // Physics fields controlling motion
     private let baseTurbulenceNode = SCNNode()
@@ -209,6 +224,9 @@ final class InversionController: NSObject {
             warmCoreShape.height = height
         }
 
+        // Position lid shear band just below lid
+        lidShearNode.position.y = Float(max(0.02, hbEff - 0.012))
+
         // Update boundary collider & bands and planar diffusion
         boundaryColliderNode.position.y = Float(hbEff)
         boundaryDragNode.position.y = Float(hbEff)
@@ -277,6 +295,35 @@ final class InversionController: NSObject {
             // Free gets a tiny upward boost during pulse
             systems[2].particleVelocity = CGFloat(0.02 + 0.004 * pulseEnv)
         }
+
+        // Distribute halo birth rates: keep main at 70%, patch emitters share 30%
+        if !coolHaloPatchTracers.isEmpty {
+            let total = coolAirTracers.birthRate
+            coolAirTracers.birthRate = total * 0.7
+            let per = (total * 0.3) / CGFloat(coolHaloPatchTracers.count)
+            for t in coolHaloPatchTracers { t.birthRate = per }
+        }
+        if !warmHaloPatchTracers.isEmpty {
+            let total = warmAirTracers.birthRate
+            warmAirTracers.birthRate = total * 0.7
+            let per = (total * 0.3) / CGFloat(warmHaloPatchTracers.count)
+            for t in warmHaloPatchTracers { t.birthRate = per }
+        }
+
+        // Edge systems: low-rate soft boundaries scaling with stability
+        let coolEdgeTotal = coolCoreTracers.birthRate * 0.35
+        let warmEdgeTotal = warmCoreTracers.birthRate * 0.35
+        if !coolEdgeTracers.isEmpty {
+            let per = coolEdgeTotal / CGFloat(coolEdgeTracers.count)
+            for t in coolEdgeTracers { t.birthRate = per }
+        }
+        if !warmEdgeTracers.isEmpty {
+            let per = warmEdgeTotal / CGFloat(warmEdgeTracers.count)
+            for t in warmEdgeTracers { t.birthRate = per }
+        }
+
+        // Lid shear: ramps with inversion intensity (low near zero, higher when strong inversion)
+        lidShearTracers.birthRate = CGFloat(lerp(0, 320, pow(s, 1.3))) * compScale
 
         // Always enable barrier; leakage handled by free fraction and cushion band
         applyPollutionCollider(enabled: true, strength: s)
@@ -636,6 +683,73 @@ final class InversionController: NSObject {
         warmCoreNode.addParticleSystem(warmCoreTracers)
         warmCoreNode.position.y = Float(boundaryHeight + warmCoreShape.height/2)
         atmosphereNode.addChildNode(warmCoreNode)
+
+        // Halo patchiness: add two small halo emitters per layer to avoid uniform fill
+        coolHaloPatchTracers.removeAll(); coolHaloPatchNodes.forEach { $0.removeFromParentNode() }; coolHaloPatchNodes.removeAll()
+        warmHaloPatchTracers.removeAll(); warmHaloPatchNodes.forEach { $0.removeFromParentNode() }; warmHaloPatchNodes.removeAll()
+        for offset in [SCNVector3(-0.08, 0, -0.05), SCNVector3(0.09, 0, 0.06)] {
+            let t = SCNParticleSystem(); t.loops = true; t.birthRate = 0
+            t.particleLifeSpan = 8.5; t.particleVelocity = 0.006; t.particleVelocityVariation = 0.004
+            t.particleSize = 0.0012; t.particleImage = InversionController.makeDiscImage(); t.dampingFactor = 0.1; t.isAffectedByPhysicsFields = true
+            t.particleColor = UIColor(hue: 210.0/360.0, saturation: 0.85, brightness: 1.0, alpha: 0.45)
+            let box = SCNBox(width: 0.18, height: max(0.03, boundaryHeight * 0.45), length: 0.18, chamferRadius: 0)
+            t.emitterShape = box
+            let n = SCNNode(); n.addParticleSystem(t); n.position = offset
+            atmosphereNode.addChildNode(n)
+            coolHaloPatchTracers.append(t); coolHaloPatchNodes.append(n)
+        }
+        for offset in [SCNVector3(0.07, 0, -0.06), SCNVector3(-0.09, 0, 0.07)] {
+            let t = SCNParticleSystem(); t.loops = true; t.birthRate = 0
+            t.particleLifeSpan = 8.5; t.particleVelocity = 0.006; t.particleVelocityVariation = 0.004
+            t.particleSize = 0.0011; t.particleImage = InversionController.makeDiscImage(); t.dampingFactor = 0.1; t.isAffectedByPhysicsFields = true
+            t.particleColor = UIColor(hue: 0.0, saturation: 0.9, brightness: 1.0, alpha: 0.45)
+            let box = SCNBox(width: 0.18, height: max(0.02, warmHeight * 0.45), length: 0.18, chamferRadius: 0)
+            t.emitterShape = box
+            let n = SCNNode(); n.addParticleSystem(t); n.position = offset
+            atmosphereNode.addChildNode(n)
+            warmHaloPatchTracers.append(t); warmHaloPatchNodes.append(n)
+        }
+
+        // Edge systems: soft vertical boundaries (slightly taller, lower alpha, lower birth)
+        coolEdgeTracers.removeAll(); coolEdgeNodes.forEach { $0.removeFromParentNode() }; coolEdgeNodes.removeAll()
+        warmEdgeTracers.removeAll(); warmEdgeNodes.forEach { $0.removeFromParentNode() }; warmEdgeNodes.removeAll()
+        for offset in [SCNVector3(-0.06, 0, 0.05), SCNVector3(0.06, 0, -0.05), SCNVector3(0.0, 0, 0.09)] {
+            let t = SCNParticleSystem(); t.loops = true; t.birthRate = 0
+            t.particleLifeSpan = 10.0; t.particleVelocity = 0.006; t.particleVelocityVariation = 0.006
+            t.particleSize = 0.0013; t.particleImage = InversionController.makeDiscImage(); t.dampingFactor = 0.1; t.isAffectedByPhysicsFields = true
+            t.particleColor = UIColor(hue: 210.0/360.0, saturation: 0.85, brightness: 1.0, alpha: 0.35)
+            let box = SCNBox(width: 0.26, height: max(0.05, boundaryHeight * 0.6), length: 0.26, chamferRadius: 0)
+            t.emitterShape = box
+            let n = SCNNode(); n.addParticleSystem(t); n.position = offset
+            atmosphereNode.addChildNode(n)
+            coolEdgeTracers.append(t); coolEdgeNodes.append(n)
+        }
+        for offset in [SCNVector3(0.05, 0, 0.06), SCNVector3(-0.07, 0, -0.06), SCNVector3(0.0, 0, -0.1)] {
+            let t = SCNParticleSystem(); t.loops = true; t.birthRate = 0
+            t.particleLifeSpan = 10.0; t.particleVelocity = 0.006; t.particleVelocityVariation = 0.006
+            t.particleSize = 0.0012; t.particleImage = InversionController.makeDiscImage(); t.dampingFactor = 0.1; t.isAffectedByPhysicsFields = true
+            t.particleColor = UIColor(hue: 0.0, saturation: 0.9, brightness: 1.0, alpha: 0.35)
+            let box = SCNBox(width: 0.26, height: max(0.04, warmHeight * 0.6), length: 0.26, chamferRadius: 0)
+            t.emitterShape = box
+            let n = SCNNode(); n.addParticleSystem(t); n.position = offset
+            atmosphereNode.addChildNode(n)
+            warmEdgeTracers.append(t); warmEdgeNodes.append(n)
+        }
+
+        // Lid shear tracers: thin band just below the inversion lid, emphasizing lateral motion
+        lidShearTracers = SCNParticleSystem(); lidShearTracers.loops = true; lidShearTracers.birthRate = 0
+        lidShearTracers.particleLifeSpan = 2.2
+        lidShearTracers.particleVelocity = 0.012
+        lidShearTracers.particleVelocityVariation = 0.01
+        lidShearTracers.spreadingAngle = 80
+        lidShearTracers.emittingDirection = SCNVector3(1, 0, 0)
+        lidShearTracers.particleSize = 0.0009
+        lidShearTracers.particleImage = InversionController.makeDiscImage()
+        lidShearTracers.particleColor = UIColor(white: 1.0, alpha: 0.25)
+        lidShearTracers.dampingFactor = 0.12
+        lidShearTracers.emitterShape = SCNBox(width: 0.34, height: 0.008, length: 0.34, chamferRadius: 0)
+        lidShearNode = SCNNode(); lidShearNode.addParticleSystem(lidShearTracers)
+        atmosphereNode.addChildNode(lidShearNode)
 
         // Color is carried by particles, no extra slabs
     }
