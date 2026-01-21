@@ -12,16 +12,17 @@ struct PrecautionCardView: View {
     var onStartGuide: (() -> Void)? = nil
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: range.iconName)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(range.accentColor)
-                .frame(width: 36, height: 36)
-                .background(range.accentColor.opacity(0.15))
-                .clipShape(Circle())
+        HStack(alignment: .center, spacing: 14) {
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 3) {
                 HStack(alignment: .center, spacing: 8) {
+                    Image(systemName: range.iconName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(range.accentColor)
+                        .frame(width: 28, height: 28)
+                        .background(range.accentColor.opacity(0.15))
+                        .clipShape(Circle())
+
                     Text(range.title)
                         .font(.headline)
 
@@ -33,13 +34,18 @@ struct PrecautionCardView: View {
                         .clipShape(Capsule())
                 }
 
-                Text(range.summary)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(range.accentColor)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(range.summary)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(range.accentColor)
 
-                Text(range.detail)
-                    .font(.footnote)
-                    .foregroundColor(.white.opacity(0.7))
+                    Text(range.detail)
+                        .font(.footnote)
+                        .foregroundColor(.white.opacity(0.7))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .padding(.leading, 36)
             }
 
             Spacer(minLength: 12)
@@ -68,7 +74,7 @@ struct PrecautionCardView: View {
             detail: "Air quality is safe for most people.",
             iconName: "checkmark.seal.fill",
             accentColor: .green,
-            buttonTitle: "Start Guide"
+            buttonTitle: "Guide"
         )
     )
     .padding()
