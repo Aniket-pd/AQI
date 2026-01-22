@@ -35,7 +35,8 @@ struct ContentView: View {
                     Label("Inversion AR", systemImage: "building.2.fill")
                 }
         }
-        .tint(.white)
+        // Use system accent automatically for light/dark
+        .tint(.accentColor)
     }
 }
 

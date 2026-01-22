@@ -30,10 +30,10 @@ struct SignalDetailView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(title)
                                 .font(.title2.bold())
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.primary)
                             Text(subtitle)
                                 .font(.subheadline)
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundStyle(.secondary)
                         }
                     }
 
@@ -47,12 +47,12 @@ struct SignalDetailView: View {
                                     .padding(.top, 7)
                                 Text(text)
                                     .font(.subheadline)
-                                    .foregroundStyle(.white.opacity(0.9))
+                                    .foregroundStyle(.primary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
-                            .background(Color(red: 0.13, green: 0.13, blue: 0.17))
+                            .background(Color(.secondarySystemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         }
                     }
@@ -61,7 +61,7 @@ struct SignalDetailView: View {
                 .padding(.vertical, 20)
             }
         }
-        .background(Color(red: 0.08, green: 0.08, blue: 0.11).ignoresSafeArea())
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("Signal")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -83,4 +83,3 @@ struct SignalDetailView: View {
     }
     .preferredColorScheme(.dark)
 }
-

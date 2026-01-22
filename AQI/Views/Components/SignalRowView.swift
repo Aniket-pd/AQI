@@ -9,25 +9,29 @@ import SwiftUI
 
 struct SignalRowView: View {
     let item: SignalItem
+    var showsChevron: Bool = true
 
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: item.iconName)
-                .foregroundColor(item.tintColor)
+                .symbolRenderingMode(.multicolor)
+                .foregroundStyle(item.tintColor)
                 .frame(width: 28, height: 28)
-                .background(item.tintColor.opacity(0.15))
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
             Text(item.title)
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.9))
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.primary)
 
             Spacer()
 
-            Image(systemName: "chevron.right")
-                .foregroundColor(.white.opacity(0.4))
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
         }
-        .padding(.vertical, 6)
+        .contentShape(Rectangle())
+        .padding(.vertical, 10)
     }
 }
 
@@ -41,6 +45,6 @@ struct SignalRowView: View {
         )
     )
     .padding()
-    .background(Color.black)
+    .background(Color(.systemBackground))
     .preferredColorScheme(.dark)
 }

@@ -24,10 +24,10 @@ struct StepGuideView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(guideTitle)
                             .font(.largeTitle.bold())
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.primary)
                         Text(guideSubtitle)
                             .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.8))
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.top, 8)
 
@@ -63,7 +63,7 @@ struct StepGuideView: View {
                 .padding(.bottom, 20)
             }
         }
-        .background(Color(red: 0.08, green: 0.08, blue: 0.11).ignoresSafeArea())
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("Guide")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
@@ -76,7 +76,6 @@ struct StepGuideView: View {
                         Image(systemName: currentIndex < steps.count - 1 ? "arrow.right" : "checkmark")
                     }
                     .font(.headline)
-                    .foregroundColor(.white)
                     .padding()
                     .background(accentColor)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -86,7 +85,7 @@ struct StepGuideView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 8)
             }
-            .background(.ultraThinMaterial.opacity(0.15))
+            .background(.ultraThinMaterial)
         }
         .onAppear {
             // Ensure initial state: only first step expanded
@@ -130,4 +129,3 @@ struct StepGuideView: View {
     }
     .preferredColorScheme(.dark)
 }
-

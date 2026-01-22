@@ -23,29 +23,29 @@ struct ArticleCardView: View {
 
                 Image(systemName: article.bannerSymbol)
                     .font(.system(size: 52, weight: .bold))
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundStyle(.white.opacity(0.9))
             }
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(article.title)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.primary)
 
                 Text(article.subtitle)
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundStyle(.secondary)
 
                 Text(article.description)
                     .font(.footnote)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundStyle(.secondary)
 
                 Text(article.sectionCount)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundStyle(.tertiary)
             }
         }
         .padding(12)
-        .background(Color(red: 0.13, green: 0.13, blue: 0.17))
+        .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }

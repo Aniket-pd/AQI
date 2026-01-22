@@ -30,7 +30,7 @@ struct PrecautionCardView: View {
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.white.opacity(0.12))
+                        .background(Color(.tertiarySystemFill))
                         .clipShape(Capsule())
                 }
 
@@ -41,7 +41,7 @@ struct PrecautionCardView: View {
 
                     Text(range.detail)
                         .font(.footnote)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
@@ -60,7 +60,7 @@ struct PrecautionCardView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(red: 0.13, green: 0.13, blue: 0.17))
+                .fill(Color(.secondarySystemBackground))
         )
     }
 }

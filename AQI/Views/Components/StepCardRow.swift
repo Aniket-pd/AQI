@@ -19,30 +19,30 @@ struct StepCardRow: View {
             HStack(alignment: .center, spacing: 10) {
                 Text("Step \(index + 1)")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(.secondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.12))
+                    .background(Color(.tertiarySystemFill))
                     .clipShape(Capsule())
 
                 Text(step.title)
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
 
                 Spacer()
 
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundStyle(.tertiary)
                     .font(.system(size: 14, weight: .semibold))
             }
             .contentShape(Rectangle())
             .onTapGesture { onTap() }
 
             if isExpanded {
-                Divider().background(Color.white.opacity(0.1))
+                Divider()
                 Text(step.content)
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
@@ -50,7 +50,7 @@ struct StepCardRow: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(red: 0.13, green: 0.13, blue: 0.17))
+                .fill(Color(.secondarySystemBackground))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -66,6 +66,5 @@ struct StepCardRow: View {
     return StepCardRow(index: 0, step: step, accentColor: .green, isExpanded: $expanded, onTap: {})
         .preferredColorScheme(.dark)
         .padding()
-        .background(Color(red: 0.08, green: 0.08, blue: 0.11))
+        .background(Color(.systemGroupedBackground))
 }
-

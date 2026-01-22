@@ -23,12 +23,12 @@ struct ArticlesView: View {
                 .padding(.vertical, 20)
             }
             .navigationTitle("Articles")
-            .background(Color(red: 0.05, green: 0.05, blue: 0.07))
+            .background(Color(.systemGroupedBackground))
         }
     }
 }
 
 #Preview {
     ArticlesView()
-        .preferredColorScheme(.dark)
+    .preferredColorScheme(.dark)
 }

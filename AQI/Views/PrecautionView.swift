@@ -26,7 +26,7 @@ struct PrecautionView: View {
                 .padding(.vertical, 20)
             }
             .navigationTitle("Precaution")
-            .background(Color(red: 0.08, green: 0.08, blue: 0.11))
+            .background(Color(.systemGroupedBackground))
             .navigationDestination(item: $selectedGuide) { nav in
                 switch nav.kind {
                 case .good:

@@ -17,7 +17,7 @@ final class PrecautionViewModel: ObservableObject {
             detail: "Air quality poses little or no risk.",
             iconName: "checkmark.seal.fill",
             accentColor: Color(red: 0.23, green: 0.72, blue: 0.42),
-            buttonTitle: "Start Guide"
+            buttonTitle: "Guide"
         ),
         AQIRange(
             title: "Moderate",
@@ -26,7 +26,7 @@ final class PrecautionViewModel: ObservableObject {
             detail: "Acceptable; some concern for very sensitive people.",
             iconName: "exclamationmark.circle.fill",
             accentColor: Color(red: 0.96, green: 0.73, blue: 0.20),
-            buttonTitle: "Start Guide"
+            buttonTitle: "Guide"
         ),
         AQIRange(
             title: "USG",
@@ -35,7 +35,7 @@ final class PrecautionViewModel: ObservableObject {
             detail: "Unhealthy for sensitive groups (USG).",
             iconName: "heart.text.square.fill",
             accentColor: Color(red: 0.95, green: 0.55, blue: 0.20),
-            buttonTitle: "Start Guide"
+            buttonTitle: "Guide"
         ),
         AQIRange(
             title: "Unhealthy",
@@ -44,7 +44,7 @@ final class PrecautionViewModel: ObservableObject {
             detail: "Everyone may begin to experience health effects.",
             iconName: "lungs.fill",
             accentColor: Color(red: 0.96, green: 0.34, blue: 0.28),
-            buttonTitle: "Start Guide"
+            buttonTitle: "Guide"
         ),
         AQIRange(
             title: "Very Unhealthy",
@@ -53,7 +53,7 @@ final class PrecautionViewModel: ObservableObject {
             detail: "Health warnings of emergency conditions.",
             iconName: "exclamationmark.triangle.fill",
             accentColor: Color(red: 0.72, green: 0.33, blue: 0.82),
-            buttonTitle: "Start Guide"
+            buttonTitle: "Guide"
         ),
         AQIRange(
             title: "Hazardous",
@@ -62,7 +62,8 @@ final class PrecautionViewModel: ObservableObject {
             detail: "Serious risk of health effects.",
             iconName: "aqi.low",
             accentColor: Color(red: 0.55, green: 0.12, blue: 0.16),
-            buttonTitle: "Start Guide"
+            buttonTitle: "Guide"
         )
     ]
 }
+

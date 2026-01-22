@@ -13,7 +13,7 @@ struct SectionHeaderView: View {
     var body: some View {
         Text(title)
             .font(.caption.weight(.semibold))
-            .foregroundColor(.white.opacity(0.45))
+            .foregroundStyle(.secondary)
             .padding(.leading, 4)
     }
 }
@@ -21,6 +21,6 @@ struct SectionHeaderView: View {
 #Preview {
     SectionHeaderView(title: "DAILY AIR PREPAREDNESS")
         .padding()
-        .background(Color.black)
-        .preferredColorScheme(.dark)
+    .background(Color(.systemBackground))
+    .preferredColorScheme(.dark)
 }
