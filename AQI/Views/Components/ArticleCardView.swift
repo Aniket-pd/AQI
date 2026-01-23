@@ -11,42 +11,87 @@ struct ArticleCardView: View {
     let article: Article
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Banner (image/illustration area)
             ZStack {
                 LinearGradient(
                     colors: article.gradientColors,
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                .frame(height: 160)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
+                // Optional symbol overlay (subtle, like an illustration accent)
                 Image(systemName: article.bannerSymbol)
                     .font(.system(size: 52, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.9))
-            }
+                    .foregroundStyle(.white.opacity(0.18))
+                    .padding(24)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
 
-            VStack(alignment: .leading, spacing: 6) {
+                // Subtle dark fade at the bottom edge so the transition to the text area feels natural
+                LinearGradient(
+                    colors: [Color.black.opacity(0.0), Color.black.opacity(0.35)],
+                    startPoint: .center,
+                    endPoint: .bottom
+                )
+            }
+            .frame(height: 180)
+            .clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: 28,
+                    bottomLeadingRadius: 0,
+                    bottomTrailingRadius: 0,
+                    topTrailingRadius: 28
+                )
+            )
+
+            // Text area (dark card content like Apple Health style)
+            VStack(alignment: .leading, spacing: 12) {
                 Text(article.title)
-                    .font(.headline)
+                    .font(.system(size: 24, weight: .bold, design: .default))
                     .foregroundStyle(.primary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.9)
 
                 Text(article.subtitle)
-                    .font(.subheadline)
+                    .font(.system(size: 18, weight: .regular, design: .default))
                     .foregroundStyle(.secondary)
+                    .lineLimit(3)
 
-                Text(article.description)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-
+                // Keep sectionCount if you still want it. It reads like “6 sections”.
                 Text(article.sectionCount)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
+                    .padding(.top, 2)
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color(.secondarySystemBackground),
+                        Color(.secondarySystemBackground).opacity(0.96)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: 0,
+                    bottomLeadingRadius: 28,
+                    bottomTrailingRadius: 28,
+                    topTrailingRadius: 0
+                )
+            )
         }
-        .padding(12)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.25), radius: 18, x: 0, y: 10)
     }
 }
 
@@ -62,5 +107,6 @@ struct ArticleCardView: View {
         )
     )
     .padding()
+    .background(Color(.systemBackground))
     .preferredColorScheme(.dark)
 }
