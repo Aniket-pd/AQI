@@ -52,11 +52,10 @@ struct SignalDetailView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        }
-                    }
-                }
+                            .cardBackground(cornerRadius: 12, showShadow: false)
+                         }
+                     }
+                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 20)
             }

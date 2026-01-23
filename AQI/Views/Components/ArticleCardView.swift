@@ -45,8 +45,7 @@ struct ArticleCardView: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .cardBackground(cornerRadius: 18)
     }
 }
 
