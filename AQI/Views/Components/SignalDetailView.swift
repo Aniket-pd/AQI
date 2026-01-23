@@ -40,20 +40,20 @@ struct SignalDetailView: View {
                     // Points list
                     VStack(spacing: 12) {
                         ForEach(Array(points.enumerated()), id: \.offset) { _, text in
-                            HStack(alignment: .top, spacing: 10) {
-                                Circle()
-                                    .fill(accentColor)
-                                    .frame(width: 8, height: 8)
-                                    .padding(.top, 7)
-                                Text(text)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.primary)
-                                    .fixedSize(horizontal: false, vertical: true)
+                            CardContainer(cornerRadius: 12, padding: 12, showShadow: false) {
+                                HStack(alignment: .top, spacing: 10) {
+                                    Circle()
+                                        .fill(accentColor)
+                                        .frame(width: 8, height: 8)
+                                        .padding(.top, 7)
+                                    Text(text)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.primary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(12)
-                            .cardBackground(cornerRadius: 12, showShadow: false)
-                         }
+                        }
                      }
                  }
                 .padding(.horizontal, 16)
