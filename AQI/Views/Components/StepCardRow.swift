@@ -48,7 +48,10 @@ struct StepCardRow: View {
             }
         }
         .padding(16)
-        .cardBackground(cornerRadius: 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(isExpanded ? accentColor.opacity(0.5) : Color.clear, lineWidth: 1)

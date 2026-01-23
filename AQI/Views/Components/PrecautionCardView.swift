@@ -58,7 +58,10 @@ struct PrecautionCardView: View {
                 .controlSize(.regular)
         }
         .padding(16)
-        .cardBackground(cornerRadius: 20)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
     }
 }
 
