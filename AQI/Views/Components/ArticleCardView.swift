@@ -14,11 +14,11 @@ struct ArticleCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Banner (image/illustration area)
             ZStack {
-                LinearGradient(
-                    colors: article.gradientColors,
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                Image("Heat_inversion")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
 
                 // Optional symbol overlay (subtle, like an illustration accent)
                 Image(systemName: article.bannerSymbol)
@@ -34,7 +34,7 @@ struct ArticleCardView: View {
                     endPoint: .bottom
                 )
             }
-            .frame(height: 180)
+            .frame(height: 220)
             .clipShape(
                 UnevenRoundedRectangle(
                     topLeadingRadius: 28,
@@ -45,7 +45,7 @@ struct ArticleCardView: View {
             )
 
             // Text area (dark card content like Apple Health style)
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(article.title)
                     .font(.system(size: 24, weight: .bold, design: .default))
                     .foregroundStyle(.primary)
@@ -103,10 +103,11 @@ struct ArticleCardView: View {
             description: "Learn about cardiovascular diseases, their causes, symptoms, and prevention strategies.",
             sectionCount: "6 sections",
             bannerSymbol: "heart.fill",
-            gradientColors: [.red, .pink]
+            gradientColors: [Color.pink, Color.red, Color.orange]
         )
     )
     .padding()
     .background(Color(.systemBackground))
     .preferredColorScheme(.dark)
 }
+
