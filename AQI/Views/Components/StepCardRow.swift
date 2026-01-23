@@ -15,40 +15,40 @@ struct StepCardRow: View {
     let onTap: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center, spacing: 10) {
-                Text("Step \(index + 1)")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color(.tertiarySystemFill))
-                    .clipShape(Capsule())
+        CardContainer(cornerRadius: 16, padding: 16) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .center, spacing: 10) {
+                    Text("Step \(index + 1)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Capsule())
 
-                Text(step.title)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
+                    Text(step.title)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
 
-                Spacer()
+                    Spacer()
 
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .foregroundStyle(.tertiary)
-                    .font(.system(size: 14, weight: .semibold))
-            }
-            .contentShape(Rectangle())
-            .onTapGesture { onTap() }
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .foregroundStyle(.tertiary)
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { onTap() }
 
-            if isExpanded {
-                Divider()
-                Text(step.content)
-                    .font(.subheadline)
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                if isExpanded {
+                    Divider()
+                    Text(step.content)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
             }
         }
-        .padding(16)
-        .cardBackground(cornerRadius: 16)
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(isExpanded ? accentColor.opacity(0.5) : Color.clear, lineWidth: 1)
