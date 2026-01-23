@@ -12,53 +12,53 @@ struct PrecautionCardView: View {
     var onStartGuide: (() -> Void)? = nil
 
     var body: some View {
-        CardContainer(cornerRadius: 20, padding: 16) {
-            HStack(alignment: .center, spacing: 14) {
+        HStack(alignment: .center, spacing: 14) {
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(alignment: .center, spacing: 8) {
+                    Image(systemName: range.iconName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(range.accentColor)
+                        .frame(width: 28, height: 28)
+                        .background(range.accentColor.opacity(0.15))
+                        .clipShape(Circle())
+
+                    Text(range.title)
+                        .font(.headline)
+
+                    Text(range.aqiRange)
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Capsule())
+                }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(alignment: .center, spacing: 8) {
-                        Image(systemName: range.iconName)
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(range.accentColor)
-                            .frame(width: 28, height: 28)
-                            .background(range.accentColor.opacity(0.15))
-                            .clipShape(Circle())
+                    Text(range.summary)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(range.accentColor)
 
-                        Text(range.title)
-                            .font(.headline)
-
-                        Text(range.aqiRange)
-                            .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color(.tertiarySystemFill))
-                            .clipShape(Capsule())
-                    }
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(range.summary)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(range.accentColor)
-
-                        Text(range.detail)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                    }
-                    .padding(.leading, 36)
+                    Text(range.detail)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
-
-                Spacer(minLength: 12)
-
-                Button(range.buttonTitle) {
-                    onStartGuide?()
-                }
-                    .buttonStyle(.borderedProminent)
-                    .tint(range.accentColor)
-                    .controlSize(.regular)
+                .padding(.leading, 36)
             }
+
+            Spacer(minLength: 12)
+
+            Button(range.buttonTitle) {
+                onStartGuide?()
+            }
+                .buttonStyle(.borderedProminent)
+                .tint(range.accentColor)
+                .controlSize(.regular)
         }
+        .padding(16)
+        .cardBackground(cornerRadius: 20)
     }
 }
 
