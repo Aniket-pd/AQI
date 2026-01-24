@@ -15,7 +15,8 @@ struct PrecautionView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: 16) {
+                let columns = [GridItem(.flexible(), spacing: 0)]
+                LazyVGrid(columns: columns, spacing: 18) {
                     ForEach(viewModel.ranges) { range in
                         PrecautionCardView(range: range) {
                             selectedGuide = AQIGuideNav(kind: AQIGuideKind.from(range: range), accentColor: range.accentColor)

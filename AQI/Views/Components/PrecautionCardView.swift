@@ -12,68 +12,82 @@ struct PrecautionCardView: View {
     var onStartGuide: (() -> Void)? = nil
 
     var body: some View {
-        HStack(alignment: .center, spacing: 14) {
+        ZStack {
+            // Vibrant, softly blended gradient inspired by the mock
+            LinearGradient(
+                colors: [
+                    range.accentColor.opacity(0.95),
+                    range.accentColor.opacity(0.55)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
 
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(alignment: .center, spacing: 8) {
-                    Image(systemName: range.iconName)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(range.accentColor)
-                        .frame(width: 28, height: 28)
-                        .background(range.accentColor.opacity(0.15))
-                        .clipShape(Circle())
+            // Soft highlight blobs to add depth
+            Circle()
+                .fill(Color.white.opacity(0.15))
+                .frame(width: 140, height: 140)
+                .blur(radius: 20)
+                .offset(x: 60, y: 58)
 
-                    Text(range.title)
-                        .font(.headline)
+            Circle()
+                .fill(Color.white.opacity(0.08))
+                .frame(width: 120, height: 120)
+                .blur(radius: 18)
+                .offset(x: -50, y: -60)
 
-                    Text(range.aqiRange)
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(.tertiarySystemFill))
+            // Content
+            VStack(alignment: .leading, spacing: 2) {
+                Text(range.title)
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.9))
+
+                Text(range.aqiRange)
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+
+                Text(range.detail)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .lineLimit(2)
+
+                Spacer(minLength: 0)
+
+                HStack {
+                    Spacer()
+                    Button(range.buttonTitle) { onStartGuide?() }
+                        .font(.headline.weight(.semibold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .background(.white.opacity(0.22))
                         .clipShape(Capsule())
                 }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(range.summary)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(range.accentColor)
-
-                    Text(range.detail)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
-                .padding(.leading, 36)
             }
-
-            Spacer(minLength: 12)
-
-            Button(range.buttonTitle) {
-                onStartGuide?()
-            }
-                .buttonStyle(.borderedProminent)
-                .tint(range.accentColor)
-                .controlSize(.regular)
+            .padding(20)
         }
-        .padding(16)
-        .background(
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
+                .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
         )
+        .frame(maxWidth: .infinity)
+        .frame(height: 160)
+        .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
 #Preview {
     PrecautionCardView(
         range: AQIRange(
-            title: "Good Air",
-            aqiRange: "AQI 0–50",
-            summary: "Normal Day",
-            detail: "Air quality is safe for most people.",
-            iconName: "checkmark.seal.fill",
-            accentColor: .green,
+            title: "Moderate",
+            aqiRange: "AQI 51–100",
+            summary: "Be Aware",
+            detail: "Air quality is acceptable.",
+            iconName: "aqi.medium",
+            accentColor: .orange,
             buttonTitle: "Guide"
         )
     )
