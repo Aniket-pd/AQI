@@ -17,75 +17,68 @@ struct StepGuideView: View {
     @State private var expandedIndex: Int? = 0
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Top section
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(guideTitle)
-                            .font(.largeTitle.bold())
-                            .foregroundStyle(.primary)
-                        Text(guideSubtitle)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 16) {
+                // Subtitle / context
+                Text(guideSubtitle)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
                     .padding(.top, 8)
 
-                    // Steps section
-                    VStack(spacing: 12) {
-                        ForEach(steps.indices, id: \.self) { idx in
-                            StepCardRow(
-                                index: idx,
-                                step: steps[idx],
-                                accentColor: accentColor,
-                                isExpanded: Binding(
-                                    get: { expandedIndex == idx },
-                                    set: { newValue in
-                                        expandedIndex = newValue ? idx : nil
-                                        if newValue { currentIndex = idx }
-                                    }
-                                ),
-                                onTap: {
-                                    withAnimation {
-                                        if expandedIndex == idx {
-                                            expandedIndex = nil
-                                        } else {
-                                            expandedIndex = idx
-                                            currentIndex = idx
-                                        }
+                // Steps section
+                VStack(spacing: 12) {
+                    ForEach(steps.indices, id: \.self) { idx in
+                        StepCardRow(
+                            index: idx,
+                            step: steps[idx],
+                            accentColor: accentColor,
+                            isExpanded: Binding(
+                                get: { expandedIndex == idx },
+                                set: { newValue in
+                                    expandedIndex = newValue ? idx : nil
+                                    if newValue { currentIndex = idx }
+                                }
+                            ),
+                            onTap: {
+                                withAnimation {
+                                    if expandedIndex == idx {
+                                        expandedIndex = nil
+                                    } else {
+                                        expandedIndex = idx
+                                        currentIndex = idx
                                     }
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 20)
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 24)
         }
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
-        .navigationTitle("Guide")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(guideTitle)
+        .navigationBarTitleDisplayMode(.large)
         .safeAreaInset(edge: .bottom) {
             // Bottom Next button
             VStack(spacing: 10) {
-                Button(action: nextStep) {
-                    HStack {
+                HStack {
+                    Spacer()
+                    Button(action: nextStep) {
                         Text(currentIndex < steps.count - 1 ? "Next Step" : "Finish")
-                        Spacer()
-                        Image(systemName: currentIndex < steps.count - 1 ? "arrow.right" : "checkmark")
+                            .font(.headline)
                     }
-                    .font(.headline)
-                    .padding()
-                    .background(accentColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .buttonStyle(.borderedProminent)
+                    .tint(accentColor)
+                    .controlSize(.large)
+                    .buttonBorderShape(.capsule)
+                    .disabled(steps.isEmpty)
+                    Spacer()
                 }
-                .disabled(steps.isEmpty)
-                .opacity(steps.isEmpty ? 0.6 : 1)
                 .padding(.horizontal, 16)
-                .padding(.bottom, 8)
+                .padding(.bottom, 30)
             }
-            .background(.ultraThinMaterial)
         }
         .onAppear {
             // Ensure initial state: only first step expanded
