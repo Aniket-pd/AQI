@@ -53,16 +53,6 @@ struct StepCardRow: View {
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
-                    Circle()
-                        .fill(Color.white.opacity(0.12))
-                        .frame(width: 120, height: 120)
-                        .blur(radius: 18)
-                        .offset(x: 60, y: 48)
-                    Circle()
-                        .fill(Color.white.opacity(0.06))
-                        .frame(width: 100, height: 100)
-                        .blur(radius: 16)
-                        .offset(x: -50, y: -50)
                 } else {
                     Color(.secondarySystemGroupedBackground)
                 }
@@ -71,7 +61,7 @@ struct StepCardRow: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(isExpanded ? Color.white.opacity(0.12) : Color.clear, lineWidth: 1)
+                .strokeBorder(Color.clear, lineWidth: 0)
         )
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
     }
