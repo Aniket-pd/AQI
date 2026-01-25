@@ -65,9 +65,11 @@ struct ArticleDetailSheetView: View {
                 }
             }
             .toolbarBackground(.hidden, for: .navigationBar)
-            .background(Color(.secondarySystemBackground))
+            .background(Color(.systemBackground))
         }
-        .background(Color(.secondarySystemBackground))
+        .background(Color(.systemBackground))
+        .environment(\.colorScheme, .dark)
+        .background(Color(red: 28/255, green: 28/255, blue: 30/255))
     }
 
     private func headerTitle(for kind: ArticleKind) -> String {
