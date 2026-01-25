@@ -32,7 +32,7 @@ struct ArticleDetailSheetView: View {
                         if !article.description.isEmpty {
                             Text(article.description)
                                 .font(.body)
-                                .foregroundStyle(.secondary)
+                                .foregroundColor(.primary)
                         }
 
                         VStack(alignment: .leading, spacing: 24) {
@@ -58,12 +58,13 @@ struct ArticleDetailSheetView: View {
                     Button(action: { onClose?() }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.primary)
+                            .foregroundColor(.primary)
                             .frame(width: 36, height: 36)
                     }
                     .accessibilityLabel(Text("Close"))
                 }
             }
+            .toolbarBackground(.hidden, for: .navigationBar)
             .background(Color(.secondarySystemBackground))
         }
         .background(Color(.secondarySystemBackground))
@@ -88,10 +89,10 @@ struct ArticleSectionView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(.primary)
+                .foregroundColor(.primary)
             Text(bodyText)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.primary)
         }
     }
 }
