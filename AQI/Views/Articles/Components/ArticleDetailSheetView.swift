@@ -12,31 +12,7 @@ struct ArticleDetailSheetView: View {
     var onClose: (() -> Void)? = nil
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header: centered title with close button on the right
-            ZStack {
-                Text(headerTitle(for: article.kind))
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
-                    .accessibilityAddTraits(.isHeader)
-
-                HStack {
-                    Spacer()
-                    Button(action: { onClose?() }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .padding(10)
-                            .background(.thinMaterial, in: Circle())
-                    }
-                    .accessibilityLabel(Text("Close"))
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 8)
-
+        NavigationStack {
             ScrollView(showsIndicators: true) {
                 VStack(alignment: .leading, spacing: 0) {
                     // Hero image (edge-to-edge inside the sheet)
@@ -75,8 +51,22 @@ struct ArticleDetailSheetView: View {
                     .padding(.vertical, 20)
                 }
             }
+            .navigationTitle(headerTitle(for: article.kind))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { onClose?() }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .frame(width: 36, height: 36)
+                    }
+                    .accessibilityLabel(Text("Close"))
+                }
+            }
+            .background(Color(.secondarySystemBackground))
         }
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemBackground))
     }
 
     private func headerTitle(for kind: ArticleKind) -> String {
@@ -104,4 +94,19 @@ struct ArticleSectionView: View {
                 .foregroundStyle(.secondary)
         }
     }
+}
+
+#Preview {
+    ArticleDetailSheetView(
+        article: Article(
+            title: "Learn About Cardio Fitness",
+            subtitle: "Understanding VO₂ max and heart health",
+            description: "Cardio fitness, or cardiorespiratory fitness, is your body’s ability to take in, circulate and use oxygen.",
+            sectionCount: "5",
+            bannerSymbol: "heart.fill",
+            gradientColors: [.pink, .red],
+            kind: .cardiovascular
+        ),
+        onClose: {}
+    )
 }
