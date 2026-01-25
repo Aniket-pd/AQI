@@ -101,13 +101,14 @@ struct ArticleCardView: View {
             title: "Understanding Cardiovascular Disease",
             subtitle: "Heart health & air quality",
             description: "Learn about cardiovascular diseases, their causes, symptoms, and prevention strategies.",
+            body: "Preview body text for the article.",
             sectionCount: "6 sections",
             bannerSymbol: "heart.fill",
-            gradientColors: [Color.pink, Color.red, Color.orange]
+            gradientColors: [Color.pink, Color.red, Color.orange],
+            kind: .cardio
         )
     )
     .padding()
     .background(Color(.systemBackground))
     .preferredColorScheme(.dark)
 }
-
