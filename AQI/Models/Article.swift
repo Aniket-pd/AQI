@@ -23,3 +23,14 @@ struct Article: Identifiable {
     let gradientColors: [Color]
     let kind: ArticleKind
 }
+
+extension Article {
+    var hasARExperience: Bool {
+        switch kind {
+        case .cardiovascular, .epilepsy:
+            return true
+        case .aqiIndia:
+            return false
+        }
+    }
+}

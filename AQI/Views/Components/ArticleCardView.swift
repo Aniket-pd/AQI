@@ -44,7 +44,7 @@ struct ArticleCardView: View {
                 )
             )
 
-            // Text area (dark card content like Apple Health style)
+            // Text area (card footer)
             VStack(alignment: .leading, spacing: 8) {
                 Text(article.title)
                     .font(.system(size: 24, weight: .bold, design: .default))
@@ -57,11 +57,19 @@ struct ArticleCardView: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(3)
 
-                // Keep sectionCount if you still want it. It reads like “6 sections”.
-                Text(article.sectionCount)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .padding(.top, 2)
+                HStack(alignment: .center, spacing: 10) {
+                    Text(article.sectionCount)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+
+                    Spacer(minLength: 0)
+
+                    if article.hasARExperience {
+                        ArticleCardARBadge()
+                            .accessibilityLabel("Includes AR view")
+                    }
+                }
+                .padding(.top, 2)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
