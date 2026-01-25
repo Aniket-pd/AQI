@@ -103,11 +103,11 @@ struct ArticleCardView: View {
             description: "Learn about cardiovascular diseases, their causes, symptoms, and prevention strategies.",
             sectionCount: "6 sections",
             bannerSymbol: "heart.fill",
-            gradientColors: [Color.pink, Color.red, Color.orange]
+            gradientColors: [Color.pink, Color.red, Color.orange],
+            kind: .cardiovascular
         )
     )
     .padding()
     .background(Color(.systemBackground))
     .preferredColorScheme(.dark)
 }
-

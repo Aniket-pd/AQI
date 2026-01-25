@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+enum ArticleKind: String {
+    case cardiovascular
+    case epilepsy
+    case aqiIndia
+}
+
 struct Article: Identifiable {
     let id = UUID()
     let title: String
@@ -15,4 +21,5 @@ struct Article: Identifiable {
     let sectionCount: String
     let bannerSymbol: String
     let gradientColors: [Color]
+    let kind: ArticleKind
 }
