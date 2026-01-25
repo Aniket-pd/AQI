@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CardiovascularArticleView: View {
+    @State private var showAR = false
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             ArticleSectionView(
@@ -29,7 +30,17 @@ struct CardiovascularArticleView: View {
                 title: "When to talk to a doctor",
                 bodyText: "If you notice a rapid decline in steadiness, chest discomfort, shortness of breath, or dizziness, seek medical advice promptly."
             )
+
+            ArticleARSection(
+                title: "Try This in AR",
+                bodyText: "Visualize PM2.5 particles and understand how air quality can impact cardio fitness. Use your camera to place the particle simulation in your environment.",
+                buttonTitle: "Start PM2.5 AR"
+            ) {
+                showAR = true
+            }
+        }
+        .fullScreenCover(isPresented: $showAR) {
+            PM25OverlayView()
         }
     }
 }
-

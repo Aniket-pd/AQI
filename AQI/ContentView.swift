@@ -24,16 +24,6 @@ struct ContentView: View {
                 .tabItem {
                     Label("Articles", systemImage: "book.closed")
                 }
-
-            PM25OverlayView()
-                .tabItem {
-                    Label("AR", systemImage: "camera.viewfinder")
-                }
-
-            InversionOverlayView()
-                .tabItem {
-                    Label("Inversion AR", systemImage: "building.2.fill")
-                }
         }
         // Use system accent automatically for light/dark
         .tint(.accentColor)

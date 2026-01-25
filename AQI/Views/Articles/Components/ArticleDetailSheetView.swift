@@ -97,6 +97,31 @@ struct ArticleSectionView: View {
     }
 }
 
+struct ArticleARSection: View {
+    let title: String
+    let bodyText: String
+    let buttonTitle: String
+    var action: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.title3.weight(.semibold))
+                .foregroundColor(.primary)
+
+            Text(bodyText)
+                .font(.body)
+                .foregroundColor(.primary)
+
+            Button(buttonTitle, action: action)
+                .buttonStyle(.borderedProminent)
+                .tint(.accentColor)
+                .font(.body.weight(.semibold))
+                .accessibilityHint("Opens an AR experience")
+        }
+    }
+}
+
 #Preview {
     ArticleDetailSheetView(
         article: Article(
