@@ -34,6 +34,8 @@ struct SignalsView: View {
             .listStyle(.insetGrouped)
             .navigationTitle("Signals")
             .navigationBarTitleDisplayMode(.large)
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemBackground))
         }
     }
 }

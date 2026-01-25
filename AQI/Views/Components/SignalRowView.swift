@@ -14,10 +14,9 @@ struct SignalRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: item.iconName)
-                .font(.system(size: 20))
                 .symbolRenderingMode(.multicolor)
                 .foregroundStyle(item.tintColor)
-                .frame(width: 32, height: 32)
+                .frame(width: 28, height: 28)
 
             Text(item.title)
                 .font(.body.weight(.semibold))
@@ -32,7 +31,7 @@ struct SignalRowView: View {
             }
         }
         .contentShape(Rectangle())
-        .padding(.vertical, 6)
+        .padding(.vertical, 10)
     }
 }
 

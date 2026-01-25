@@ -10,7 +10,6 @@ import Combine
 
 struct ArticlesView: View {
     @StateObject private var viewModel = ArticlesViewModel()
-    @State private var selectedArticle: Article?
 
     var body: some View {
         NavigationStack {
@@ -18,8 +17,6 @@ struct ArticlesView: View {
                 LazyVStack(spacing: 20) {
                     ForEach(viewModel.articles) { article in
                         ArticleCardView(article: article)
-                            .onTapGesture { selectedArticle = article }
-                            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
                     }
                 }
                 .padding(.horizontal, 16)
@@ -27,12 +24,6 @@ struct ArticlesView: View {
             }
             .navigationTitle("Articles")
             .background(Color(.systemGroupedBackground))
-            .sheet(item: $selectedArticle) { article in
-                ArticleDetailContainer(article: article)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
-                    .presentationCornerRadius(28)
-            }
         }
     }
 }
