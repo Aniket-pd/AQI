@@ -18,24 +18,20 @@ struct SignalsView: View {
                     Section {
                         ForEach(section.items) { item in
                             NavigationLink(destination: destinationView(for: item.kind)) {
-                                // Let List show the chevron to match HIG
+                                // Use the native List/NavigationLink chevron (don’t draw a custom one)
                                 SignalRowView(item: item, showsChevron: false)
                             }
                         }
                     } header: {
                         Text(section.title)
-                            .font(.title2.weight(.semibold))
-                            .foregroundStyle(.primary)
-                            .padding(.leading, 4)
-                            .padding(.bottom, 4)
+                            .textCase(nil)
                     }
                 }
             }
             .listStyle(.insetGrouped)
+            .headerProminence(.increased)
             .navigationTitle("Signals")
             .navigationBarTitleDisplayMode(.large)
-            .scrollContentBackground(.hidden)
-            .background(Color(.systemBackground))
         }
     }
 }

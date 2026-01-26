@@ -68,8 +68,13 @@ struct ArticleDetailSheetView: View {
             .background(Color(.systemBackground))
         }
         .background(Color(.systemBackground))
-        .environment(\.colorScheme, .dark)
-        .background(Color(red: 28/255, green: 28/255, blue: 30/255))
+        .background(
+            Color(UIColor { trait in
+                trait.userInterfaceStyle == .dark
+                ? UIColor(red: 28/255, green: 28/255, blue: 30/255, alpha: 1)
+                : .white
+            })
+        )
     }
 
     private func headerTitle(for kind: ArticleKind) -> String {
