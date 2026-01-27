@@ -37,7 +37,7 @@ struct StepCardRow: View {
                     .font(.subheadline)
                     .foregroundStyle(isExpanded ? .white : .primary)
                     .fixedSize(horizontal: false, vertical: true)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(.opacity) // Avoid vertical move that could cross the divider line
             }
         }
         .padding(16)
@@ -57,8 +57,10 @@ struct StepCardRow: View {
                     Color(.secondarySystemGroupedBackground)
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         )
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous)) // Clip entire card container
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipped()
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(Color.clear, lineWidth: 0)

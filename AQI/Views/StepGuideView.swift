@@ -144,7 +144,7 @@ struct StepGuideView: View {
     let steps = [
         GuideStep(title: "Call Emergency Services", content: "Dial your local emergency number (e.g., 112/911) and provide your location and symptoms."),
         GuideStep(title: "Assess Safety", content: "Ensure the area is safe and avoid exposure to harmful air. Move indoors if possible."),
-        GuideStep(title: "Provide Care", content: "Follow recommended actions while awaiting professional help.")
+        GuideStep(title: "Provide Care", content: "Follow recommended actions while awaiting professional helpFollow recommended actions while awaiting professional helpFollow recommended actions while awaiting professional helpFollow recommended actions while awaiting professional helpFollow recommended actions while awaiting professional helpFollow recommended actions while awaiting professional help.")
     ]
     return NavigationStack {
         StepGuideView(
