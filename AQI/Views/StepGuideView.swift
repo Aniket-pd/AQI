@@ -18,7 +18,7 @@ struct StepGuideView: View {
     private let advanceAnimation: Animation = .spring(response: 0.38, dampingFraction: 0.9, blendDuration: 0.2)
 
     @State private var currentIndex: Int = 0
-    @State private var expandedIndex: Int? = 0
+    @State private var expandedIndex: Int? = nil
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -93,18 +93,9 @@ struct StepGuideView: View {
                 }
             }
             .onAppear {
-                // Ensure initial state: only first step expanded
-                if !steps.isEmpty {
-                    currentIndex = 0
-                    expandedIndex = 0
-                    DispatchQueue.main.async {
-                        withAnimation(expandAnimation) {
-                            proxy.scrollTo(0, anchor: .top)
-                        }
-                    }
-                } else {
-                    expandedIndex = nil
-                }
+                // Fresh open: start collapsed
+                currentIndex = 0
+                expandedIndex = nil
             }
             .onChange(of: expandedIndex) { _, newValue in
                 guard let idx = newValue else { return }
@@ -120,6 +111,16 @@ struct StepGuideView: View {
     private func nextStep() {
         guard !steps.isEmpty else { return }
         impact(.medium)
+
+        // If nothing is expanded, start from the first step.
+        if expandedIndex == nil {
+            withAnimation(advanceAnimation) {
+                currentIndex = 0
+                expandedIndex = 0
+            }
+            return
+        }
+
         withAnimation(advanceAnimation) {
             if currentIndex < steps.count - 1 {
                 // Advance to next step
