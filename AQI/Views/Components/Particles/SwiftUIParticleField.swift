@@ -12,10 +12,10 @@ struct SwiftUIParticleField: View {
     @State private var lastStep: Date? = nil
     @State private var pulseOpacity: Double = 0
 
-    // Slightly longer for a smoother, organic feel
-    private let duration: TimeInterval = 1.5
-    private let spawnWindow: TimeInterval = 0.28
-    private let globalFadeOutWindow: TimeInterval = 0.35
+    // Extended duration for a calmer, more organic feel
+    private let duration: TimeInterval = 2.2
+    private let spawnWindow: TimeInterval = 0.36
+    private let globalFadeOutWindow: TimeInterval = 0.5
 
     var body: some View {
         GeometryReader { geo in
@@ -115,7 +115,7 @@ struct SwiftUIParticleField: View {
             let speed = CGFloat.random(in: max(8, mood.velocity - 10)...(mood.velocity + 10)) * 0.2
             let vx = cos(angle) * speed
             let vy = sin(angle) * speed
-            let lifetime = Double.random(in: max(0.9, Double(mood.lifetime))...(Double(mood.lifetime) + 0.3))
+            let lifetime = Double.random(in: max(1.1, Double(mood.lifetime))...(Double(mood.lifetime) + 0.6))
             let scale = CGFloat.random(in: 1.0...(2.0 + mood.scale))
             let spawnDelay = Double.random(in: 0...spawnWindow)
             let fadeIn = Double.random(in: 0.18...0.28)
