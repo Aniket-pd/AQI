@@ -10,7 +10,7 @@ import SwiftUI
 struct SignalDetailView: View {
     let title: String
     let subtitle: String
-    let points: [String]
+    let sections: [SignalDetailSection]
     let accentColor: Color
     let iconName: String
 
@@ -37,23 +37,10 @@ struct SignalDetailView: View {
                         }
                     }
 
-                    // Points list
-                    VStack(spacing: 12) {
-                        ForEach(Array(points.enumerated()), id: \.offset) { _, text in
-                            HStack(alignment: .top, spacing: 10) {
-                                Circle()
-                                    .fill(accentColor)
-                                    .frame(width: 8, height: 8)
-                                    .padding(.top, 7)
-                                Text(text)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.primary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(12)
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    // Sections
+                    VStack(spacing: 14) {
+                        ForEach(sections) { section in
+                            SignalSectionRow(accentColor: accentColor, section: section)
                         }
                     }
                 }
@@ -71,11 +58,12 @@ struct SignalDetailView: View {
     NavigationStack {
         SignalDetailView(
             title: "Breathing discomfort",
-            subtitle: "Dummy guidance for breathing discomfort symptoms.",
-            points: [
-                "Limit heavy exertion and rest.",
-                "Move to a clean indoor environment.",
-                "Use a high‑filtration mask outdoors if needed."
+            subtitle: "Breathing feels heavier or less comfortable than usual.",
+            sections: [
+                .init(title: "What this signal is?", body: "Breathing discomfort means your breathing feels heavier or less comfortable than usual. You may notice shortness of breath, a tight feeling in your chest, or that it takes more effort to breathe during simple activities."),
+                .init(title: "Why it can happen on polluted days", body: "On polluted days, tiny particles like PM2.5 and gases such as ozone can irritate the airways and reduce airflow, which may lead to discomfort even while resting."),
+                .init(title: "What you can do right now?", body: "Pause heavy activity and move to a cleaner indoor space with windows closed. Breathe slowly and calmly, and consider using an air purifier if available."),
+                .init(title: "When to get extra help", body: "If breathing feels very hard, painful, or remains uncomfortable even after resting in clean air, seek medical advice.")
             ],
             accentColor: .red,
             iconName: "lungs.fill"
