@@ -12,7 +12,10 @@ struct SwiftUIParticleField: View {
     @State private var lastStep: Date? = nil
     @State private var pulseOpacity: Double = 0
 
-    private let duration: TimeInterval = 1.0
+    // Slightly longer for a smoother, organic feel
+    private let duration: TimeInterval = 1.5
+    private let spawnWindow: TimeInterval = 0.28
+    private let globalFadeOutWindow: TimeInterval = 0.35
 
     var body: some View {
         GeometryReader { geo in
@@ -27,7 +30,16 @@ struct SwiftUIParticleField: View {
                         // Update physics and draw
                         var newParticles: [Particle] = []
                         newParticles.reserveCapacity(particles.count)
-                        let alphaFalloff = max(0.0, 1.0 - elapsed / duration)
+                        // Global envelope for graceful disappearance near the end
+                        let fadeStart = max(0, duration - globalFadeOutWindow)
+                        let g: Double
+                        if elapsed <= fadeStart { g = 1.0 }
+                        else {
+                            let t = min(1.0, max(0.0, (elapsed - fadeStart) / globalFadeOutWindow))
+                            // smoothstep(1 - t)
+                            let s = t * t * (3 - 2 * t)
+                            g = 1.0 - s
+                        }
 
                         for var p in particles {
                             // Integrate simple drift
@@ -37,18 +49,25 @@ struct SwiftUIParticleField: View {
                             p.y += p.vy * dt
                             p.age += dt
 
+                            // Respect spawn delay for organic appearance
+                            let activeAge = p.age - p.spawnDelay
+                            if activeAge < 0 { continue }
+
                             // Keep inside bounds: bounce softly
                             if p.x < 0 { p.x = 0; p.vx = abs(p.vx) * 0.6 }
                             if p.x > size.width { p.x = size.width; p.vx = -abs(p.vx) * 0.6 }
                             if p.y < 0 { p.y = 0; p.vy = abs(p.vy) * 0.6 }
                             if p.y > size.height { p.y = size.height; p.vy = -abs(p.vy) * 0.6 }
 
-                            // Fade based on age and global alpha falloff
-                            let baseAlpha: CGFloat = CGFloat(0.6) * CGFloat(alphaFalloff)
-                            let alpha = max(0, baseAlpha - CGFloat(p.age / p.lifetime))
+                            // Per-particle fade in/out for natural feel
+                            let fin = min(1.0, max(0.0, activeAge / p.fadeIn))
+                            let finEase = fin * fin * (3 - 2 * fin) // smoothstep
+                            let life = max(0.0, 1.0 - activeAge / p.lifetime)
+                            let alpha = CGFloat(p.baseAlpha) * CGFloat(finEase) * CGFloat(life) * CGFloat(g)
                             if alpha > 0.01 {
                                 newParticles.append(p)
-                                let radius = max(1.0, p.scale)
+                                let scaleEase = max(0.35, finEase)
+                                let radius = max(1.0, p.scale * scaleEase)
                                 let rect = CGRect(x: p.x - radius, y: p.y - radius, width: radius * 2, height: radius * 2)
                                 let color = Color(uiColor: mood.color).opacity(alpha)
                                 ctx.fill(Path(ellipseIn: rect), with: .color(color))
@@ -61,7 +80,7 @@ struct SwiftUIParticleField: View {
                 }
                 // Reduce Motion fallback pulse overlay
                 Color.white.opacity(pulseOpacity)
-                    .animation(.easeInOut(duration: 0.45), value: pulseOpacity)
+                    .animation(.easeInOut(duration: 0.6), value: pulseOpacity)
             }
             .onChange(of: trigger) { _ in
                 if reduceMotion {
@@ -69,7 +88,7 @@ struct SwiftUIParticleField: View {
                     particles.removeAll()
                     startedAt = nil
                     lastStep = nil
-                    pulseOpacity = 0.18
+                    pulseOpacity = 0.16
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
                         pulseOpacity = 0
                     }
@@ -96,9 +115,13 @@ struct SwiftUIParticleField: View {
             let speed = CGFloat.random(in: max(8, mood.velocity - 10)...(mood.velocity + 10)) * 0.2
             let vx = cos(angle) * speed
             let vy = sin(angle) * speed
-            let lifetime = Double.random(in: max(0.6, Double(mood.lifetime) - 0.3)...Double(mood.lifetime))
+            let lifetime = Double.random(in: max(0.9, Double(mood.lifetime))...(Double(mood.lifetime) + 0.3))
             let scale = CGFloat.random(in: 1.0...(2.0 + mood.scale))
-            new.append(Particle(x: x, y: y, vx: vx, vy: vy, lifetime: lifetime, age: 0, scale: scale))
+            let spawnDelay = Double.random(in: 0...spawnWindow)
+            let fadeIn = Double.random(in: 0.18...0.28)
+            let fadeOut = Double.random(in: 0.28...0.4) // reserved for potential per-particle tail
+            let baseAlpha = Double.random(in: 0.45...0.75)
+            new.append(Particle(x: x, y: y, vx: vx, vy: vy, lifetime: lifetime, age: 0, scale: scale, spawnDelay: spawnDelay, fadeIn: fadeIn, fadeOut: fadeOut, baseAlpha: baseAlpha))
         }
 
         particles = new
@@ -123,4 +146,8 @@ private struct Particle: Identifiable {
     var lifetime: Double
     var age: Double
     var scale: CGFloat
+    var spawnDelay: Double
+    var fadeIn: Double
+    var fadeOut: Double
+    var baseAlpha: Double
 }
