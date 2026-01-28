@@ -10,6 +10,8 @@ import SwiftUI
 struct PrecautionCardView: View {
     let range: AQIRange
     var onStartGuide: (() -> Void)? = nil
+    @State private var particleTrigger = UUID()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -67,6 +69,13 @@ struct PrecautionCardView: View {
                 }
             }
             .padding(20)
+
+            // SwiftUI particle field (battery-friendly, clipped, subtle)
+            SwiftUIParticleField(
+                mood: AQIParticleMood.mood(for: range),
+                cornerRadius: 20,
+                trigger: particleTrigger
+            )
         }
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
@@ -76,6 +85,11 @@ struct PrecautionCardView: View {
         .frame(maxWidth: .infinity)
         .frame(height: 160)
         .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .onTapGesture {
+            // Tapping anywhere on the card except the Guide button triggers a short burst
+            // The inner Button consumes its own taps, so this gesture won't fire for it.
+            particleTrigger = UUID()
+        }
     }
 }
 
