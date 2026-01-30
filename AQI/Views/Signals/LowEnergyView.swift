@@ -6,21 +6,13 @@ struct LowEnergyView: View {
             title: "Feeling low on energy",
             subtitle: "Low motivation or sluggishness.",
             sections: [
-                .init(title: "What this signal is", body: "Feeling low on energy means you feel slow, drained, or unmotivated. Even simple tasks may feel harder than usual. You may feel like you need to rest more often."),
-                .init(title: "Why it can happen on polluted days", body: "Polluted air can make your body feel stressed and tired. When breathing feels more difficult, your energy levels may drop."),
-                .init(title: "What you can do right now", bullets: [
-                    "Rest in clean air",
-                    "Avoid overexertion",
-                    "Drink water"
-                ]),
-                .init(title: "When to get extra help", body: "If low energy is severe or does not improve, seek medical advice.")
+                .init(title: "What this signal is?", body: "A general feeling of sluggishness or reduced motivation, where everyday tasks feel more demanding than usual."),
+                .init(title: "Why it can happen on polluted days", body: "Pollutants can affect breathing and sleep quality, and trigger inflammation that makes your body feel more fatigued than normal."),
+                .init(title: "What you can do right now?", body: "Rest when needed, hydrate, and try light stretching indoors. Opt for simple meals and plan lighter tasks until air quality improves."),
+                .init(title: "When to get extra help", body: "If fatigue is severe, accompanied by chest pain, dizziness, or doesn’t improve with rest and cleaner air, consider medical advice.")
             ],
             accentColor: Color(red: 0.96, green: 0.73, blue: 0.20),
-            iconName: "battery.25",
-            sources: [
-                "https://www.who.int/teams/environment-climate-change-and-health/air-quality-and-health/health-impacts/types-of-pollutants",
-                "https://www.cdc.gov/wildfires/risk-factors/index.html"
-            ]
+            iconName: "battery.25"
         )
     }
 }
