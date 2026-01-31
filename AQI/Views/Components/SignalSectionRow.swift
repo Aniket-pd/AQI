@@ -3,7 +3,8 @@ import SwiftUI
 struct SignalDetailSection: Identifiable {
     let id = UUID()
     let title: String
-    let body: String
+    var body: String? = nil
+    var bullets: [String]? = nil
 }
 
 struct SignalSectionRow: View {
@@ -17,14 +18,34 @@ struct SignalSectionRow: View {
                 .frame(width: 8, height: 8)
                 .padding(.top, 8)
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(section.title)
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(.primary)
-                Text(section.body)
-                    .font(.subheadline)
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
+
+                if let body = section.body, !body.isEmpty {
+                    Text(body)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if let bullets = section.bullets, !bullets.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(bullets, id: \.self) { b in
+                            HStack(alignment: .top, spacing: 8) {
+                                Text("•")
+                                    .font(.subheadline.weight(.bold))
+                                    .foregroundStyle(.primary)
+                                Text(b)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.primary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                    .padding(.top, section.body == nil ? 0 : 2)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
