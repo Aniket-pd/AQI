@@ -2,12 +2,21 @@ import Foundation
 import ARKit
 import SceneKit
 
+protocol InversionControllerDelegate: AnyObject {
+    func inversionControllerDidStartLoadingModel(_ controller: InversionController)
+    func inversionControllerIsReadyToPlace(_ controller: InversionController)
+    func inversionControllerDidPlace(_ controller: InversionController)
+}
+
 final class InversionController: NSObject {
     private weak var view: ARSCNView?
+    weak var delegate: InversionControllerDelegate?
 
     // Derived state
     private var compScale: CGFloat = 1.0
     private var smoothedStability: Double = 0.0
+    private var modelScale: CGFloat = 1.0 // interactive scale for the whole composition
+    var currentModelScale: CGFloat { modelScale }
 
     // Scene nodes
     private let root = SCNNode()
@@ -73,9 +82,28 @@ final class InversionController: NSObject {
     // Failure moments timer
     private var failureTimer: Timer?
 
+    // Model preload
+    private var preparedCityContainer: SCNNode?
+    private var modelPreloadAttempted = false
+
+    // Particle scaling: scale sizes of all particle systems under root when modelScale changes
+    private var lastParticleScale: CGFloat = 1.0
+    private func scaleAllParticleSizes(by factor: CGFloat) {
+        guard factor != 1.0 else { return }
+        func walk(_ node: SCNNode) {
+            if let systems = node.particleSystems, !systems.isEmpty {
+                for s in systems { s.particleSize *= factor }
+            }
+            for child in node.childNodes { walk(child) }
+        }
+        walk(root)
+    }
+
     func attach(to view: ARSCNView) {
         self.view = view
         configureScene(view)
+        // Preload model so UI can show loading/ready state before placement.
+        preloadModelIfNeeded()
     }
 
     func update(stability s: Double, lightEstimate: ARLightEstimate?, complexity: Double) {
@@ -98,7 +126,7 @@ final class InversionController: NSObject {
 
         // Build atmosphere and city (order not critical, we apply colliders after)
         buildAtmosphere()
-        buildCity()
+        buildCityUsingPreparedIfAvailable()
         buildMixingArrows()
 
         // Position root at plane center (node is already positioned at plane)
@@ -108,6 +136,7 @@ final class InversionController: NSObject {
         // Apply colliders based on current stability and start failure moments
         applyPollutionCollider(enabled: true, strength: stability)
         scheduleFailureMoments()
+        delegate?.inversionControllerDidPlace(self)
     }
 
     func placeAtCameraStartIfNeeded(_ view: ARSCNView) {
@@ -125,7 +154,7 @@ final class InversionController: NSObject {
         placed = true
         smoothedStability = stability
 
-        buildCity()
+        buildCityUsingPreparedIfAvailable()
         buildAtmosphere()
         buildMixingArrows()
         // Compute a position in front of camera if requested
@@ -139,6 +168,7 @@ final class InversionController: NSObject {
         root.position = SCNVector3(position.x, position.y, position.z)
         view.scene.rootNode.addChildNode(root)
         scheduleFailureMoments()
+        delegate?.inversionControllerDidPlace(self)
     }
 
     func tick(time: TimeInterval) {
@@ -175,11 +205,13 @@ final class InversionController: NSObject {
         // Cushion zone thickness near cap and proximity-scaled behavior (field half-extents)
         let t = CGFloat(lerp(0.01, 0.03, pow(s, 0.8)))
         if let dragField = boundaryDragNode.physicsField {
-            dragField.halfExtent = SCNVector3(0.18, Float(max(0.006, t * 0.5)), 0.18)
+            let sF = Float(modelScale)
+            dragField.halfExtent = SCNVector3(0.18 * sF, Float(max(0.006, t * 0.5)) * sF, 0.18 * sF)
             dragField.strength = CGFloat(lerp(0.0, 0.5, pow(s, 1.2)))
         }
         if let tanField = boundaryTangentTurbulenceNode.physicsField {
-            tanField.halfExtent = SCNVector3(0.22, Float(max(0.004, t * 0.33)), 0.22)
+            let sF = Float(modelScale)
+            tanField.halfExtent = SCNVector3(0.22 * sF, Float(max(0.004, t * 0.33)) * sF, 0.22 * sF)
             tanField.strength = CGFloat(lerp(0.0, 0.25, pow(s, 1.3)))
         }
 
@@ -342,7 +374,87 @@ final class InversionController: NSObject {
 
         // Align helper nodes (for completeness)
         boundarySlabNode.position.y = Float(boundaryHeight)
-        boundarySlabNode.physicsField?.halfExtent = SCNVector3(0.18, Float(boundaryThickness * 0.5), 0.18)
+        if let slabField = boundarySlabNode.physicsField {
+            let sF = Float(modelScale)
+            slabField.halfExtent = SCNVector3(0.18 * sF, Float(boundaryThickness * 0.5) * sF, 0.18 * sF)
+        }
+    }
+
+    // MARK: - Model preload and building
+    private func preloadModelIfNeeded() {
+        guard !modelPreloadAttempted else { return }
+        modelPreloadAttempted = true
+        delegate?.inversionControllerDidStartLoadingModel(self)
+
+        // Try to synchronously load a USDZ; if unavailable, we are ready (procedural fallback).
+        let modelName = "Tiny_City (1)"
+        var modelURL: URL?
+        if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz", subdirectory: "AR/Assets") {
+            modelURL = url
+        } else if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz") {
+            modelURL = url
+        }
+        if let url = modelURL, let scene = try? SCNScene(url: url, options: nil) {
+            let container = SCNNode()
+            container.name = "cityModel"
+            for child in scene.rootNode.childNodes { container.addChildNode(child) }
+
+            var minVec = SCNVector3Zero
+            var maxVec = SCNVector3Zero
+            if container.__getBoundingBoxMin(&minVec, max: &maxVec) {
+                let sizeX = CGFloat(maxVec.x - minVec.x)
+                let sizeZ = CGFloat(maxVec.z - minVec.z)
+                let maxSpan = max(sizeX, sizeZ)
+                let targetSpan: CGFloat = 0.34
+                if maxSpan > 0.0001 { let s = Float(targetSpan / maxSpan); container.scale = SCNVector3(s, s, s) }
+                let centerX = (minVec.x + maxVec.x) * 0.5
+                let centerZ = (minVec.z + maxVec.z) * 0.5
+                let scaledMinY = Float(minVec.y) * container.scale.y
+                container.position = SCNVector3(-centerX * container.scale.x,
+                                                -scaledMinY + 0.006,
+                                                -centerZ * container.scale.z)
+            }
+            preparedCityContainer = container
+        }
+        delegate?.inversionControllerIsReadyToPlace(self)
+    }
+
+    private func buildCityUsingPreparedIfAvailable() {
+        cityNode.childNodes.forEach { $0.removeFromParentNode() }
+        root.addChildNode(cityNode)
+        if let prepared = preparedCityContainer {
+            // Base plate under model
+            let baseSize: CGFloat = 0.34
+            let base = SCNBox(width: baseSize, height: 0.01, length: baseSize, chamferRadius: 0.004)
+            let baseNode = SCNNode(geometry: base)
+            base.firstMaterial = SCNMaterial()
+            base.firstMaterial?.diffuse.contents = UIColor(white: 0.15, alpha: 1)
+            base.firstMaterial?.lightingModel = .lambert
+            baseNode.name = "basePlate"
+            baseNode.position = SCNVector3(0, 0, 0)
+            cityNode.addChildNode(baseNode)
+
+            cityNode.addChildNode(prepared)
+            buildSources()
+        } else {
+            buildCity()
+        }
+    }
+
+    // MARK: - Interactive transforms
+    func setModelScale(_ scale: CGFloat) {
+        let s = max(0.5, min(2.5, scale))
+        let prev = modelScale
+        modelScale = s
+        if lastParticleScale != 0 {
+            let factor = (s / max(0.0001, lastParticleScale))
+            scaleAllParticleSizes(by: factor)
+        }
+        lastParticleScale = s
+        root.scale = SCNVector3(Float(s), Float(s), Float(s))
+    }
+    func rotateModel(by radians: CGFloat) {
+        root.eulerAngles.y += Float(radians)
     }
 
     private func configureScene(_ view: ARSCNView) {
@@ -362,7 +474,7 @@ final class InversionController: NSObject {
         // Minimal turbulence for natural variation (non-directional)
         let turb = SCNPhysicsField.turbulenceField(smoothness: 0.6, animationSpeed: 0.2)
         turb.strength = 0.04
-        turb.halfExtent = SCNVector3(0.15, 0.1, 0.15)
+        do { let sF = Float(modelScale); turb.halfExtent = SCNVector3(0.15 * sF, 0.1 * sF, 0.15 * sF) }
         turb.usesEllipsoidalExtent = true
         baseTurbulenceNode.physicsField = turb
         baseTurbulenceNode.position = SCNVector3Zero
@@ -372,7 +484,7 @@ final class InversionController: NSObject {
         let linear = SCNPhysicsField.linearGravity()
         linear.direction = SCNVector3(1, 0, 0) // will not rotate with device; ok for miniature
         linear.strength = 0.0
-        linear.halfExtent = SCNVector3(0.25, 0.25, 0.25)
+        do { let sF = Float(modelScale); linear.halfExtent = SCNVector3(0.25 * sF, 0.25 * sF, 0.25 * sF) }
         linear.usesEllipsoidalExtent = true
         lateralDriftNode.physicsField = linear
         root.addChildNode(lateralDriftNode)
@@ -380,7 +492,7 @@ final class InversionController: NSObject {
         // Planar turbulence for horizontal diffusion (no mean wind)
         let planar = SCNPhysicsField.turbulenceField(smoothness: 0.8, animationSpeed: 0.12)
         planar.strength = 0.0
-        planar.halfExtent = SCNVector3(0.22, 0.03, 0.22)
+        do { let sF = Float(modelScale); planar.halfExtent = SCNVector3(0.22 * sF, 0.03 * sF, 0.22 * sF) }
         planar.usesEllipsoidalExtent = true
         planarTurbulenceNode.physicsField = planar
         planarTurbulenceNode.position = SCNVector3(0, Float(boundaryHeight * 0.4), 0)
@@ -390,7 +502,7 @@ final class InversionController: NSObject {
         let slab = SCNPhysicsField.linearGravity()
         slab.direction = SCNVector3(0, -1, 0)
         slab.strength = 0.0 // unused — we rely on collider plane
-        slab.halfExtent = SCNVector3(0.18, 0.03, 0.18)
+        do { let sF = Float(modelScale); slab.halfExtent = SCNVector3(0.18 * sF, 0.03 * sF, 0.18 * sF) }
         slab.usesEllipsoidalExtent = true
         boundarySlabNode.physicsField = slab
         boundarySlabNode.position = SCNVector3(0, Float(boundaryHeight), 0)
@@ -399,7 +511,7 @@ final class InversionController: NSObject {
         // Drag band around the inversion boundary to slow vertical motion progressively
         let drag = SCNPhysicsField.drag()
         drag.strength = 0.0
-        drag.halfExtent = SCNVector3(0.18, 0.015, 0.18)
+        do { let sF = Float(modelScale); drag.halfExtent = SCNVector3(0.18 * sF, 0.015 * sF, 0.18 * sF) }
         drag.usesEllipsoidalExtent = true
         boundaryDragNode.physicsField = drag
         boundaryDragNode.position = SCNVector3(0, Float(boundaryHeight), 0)
@@ -408,7 +520,7 @@ final class InversionController: NSObject {
         // Tangent turbulence near boundary to encourage sideways sliding along the cap
         let tangentTurb = SCNPhysicsField.turbulenceField(smoothness: 0.75, animationSpeed: 0.15)
         tangentTurb.strength = 0.0
-        tangentTurb.halfExtent = SCNVector3(0.22, 0.01, 0.22)
+        do { let sF = Float(modelScale); tangentTurb.halfExtent = SCNVector3(0.22 * sF, 0.01 * sF, 0.22 * sF) }
         tangentTurb.usesEllipsoidalExtent = true
         boundaryTangentTurbulenceNode.physicsField = tangentTurb
         boundaryTangentTurbulenceNode.position = SCNVector3(0, Float(boundaryHeight), 0)
@@ -430,7 +542,7 @@ final class InversionController: NSObject {
         let buoy = SCNPhysicsField.linearGravity()
         buoy.direction = SCNVector3(0, 1, 0)
         buoy.strength = 0.05
-        buoy.halfExtent = SCNVector3(0.2, 0.2, 0.2)
+        do { let sF = Float(modelScale); buoy.halfExtent = SCNVector3(0.2 * sF, 0.2 * sF, 0.2 * sF) }
         buoy.usesEllipsoidalExtent = true
         buoyancyNode.physicsField = buoy
         root.addChildNode(buoyancyNode)
@@ -438,7 +550,7 @@ final class InversionController: NSObject {
         // Subtle near-ground micro-turbulence for pollution (not wind, affects low layer)
         let groundTurb = SCNPhysicsField.turbulenceField(smoothness: 0.8, animationSpeed: 0.12)
         groundTurb.strength = 0.03
-        groundTurb.halfExtent = SCNVector3(0.20, 0.03, 0.20)
+        do { let sF = Float(modelScale); groundTurb.halfExtent = SCNVector3(0.20 * sF, 0.03 * sF, 0.20 * sF) }
         groundTurb.usesEllipsoidalExtent = true
         groundTurbulenceNode.physicsField = groundTurb
         groundTurbulenceNode.position = SCNVector3(0, 0.03, 0)

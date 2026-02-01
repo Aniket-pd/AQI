@@ -15,6 +15,7 @@ struct InversionOverlayView: View {
             VStack(spacing: 12) {
                 header
                 Spacer()
+                placementHint
                 stabilityControl
                 captionView
             }
@@ -25,6 +26,29 @@ struct InversionOverlayView: View {
             updateCaption(for: s)
         }
         .onAppear { updateCaption(for: vm.stability) }
+    }
+    
+    private var placementHint: some View {
+        Group {
+            switch vm.placementState {
+            case .loadingModel:
+                hintLabel("Loading model…")
+            case .readyToPlace:
+                hintLabel("Tap to place")
+            case .placed:
+                EmptyView()
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: vm.placementState)
+    }
+
+    private func hintLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(.ultraThinMaterial, in: Capsule())
     }
 
     private var captionView: some View {
