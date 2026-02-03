@@ -13,7 +13,9 @@ final class InversionController: NSObject {
     weak var delegate: InversionControllerDelegate?
 
     // Derived state
-    private var compScale: CGFloat = 1.0
+    private var compScale: CGFloat = 1.0 // effective (base * fpsScale)
+    private var baseCompScale: CGFloat = 1.0 // from UI complexity target
+    private var fpsScale: CGFloat = 1.0 // from measured FPS
     private var smoothedStability: Double = 0.0
     private var modelScale: CGFloat = 1.0 // interactive scale for the whole composition
     var currentModelScale: CGFloat { modelScale }
@@ -73,6 +75,9 @@ final class InversionController: NSObject {
     private var boundaryThickness: CGFloat = 0.06
     private var lastUpdateTime: TimeInterval = 0
     private var timeAccum: Double = 0
+    private var fpsFrameCount: Int = 0
+    private var lastFPSCheckTime: TimeInterval = 0
+    private var currentFPS: Double = 60
     private var trappedLoad: Double = 0 // 0..1 gradual fresh->haze mix
     private var mixPulseActive: Bool = false
     private var mixPulseElapsed: Double = 0
@@ -108,7 +113,7 @@ final class InversionController: NSObject {
 
     func update(stability s: Double, lightEstimate: ARLightEstimate?, complexity: Double) {
         stability = max(0.0, min(1.0, s))
-        compScale = CGFloat(max(0.5, min(complexity, 1.25)))
+        baseCompScale = CGFloat(max(0.5, min(complexity, 1.25)))
         // Particle-based colored air layers (high contrast)
         let coolColor = UIColor(hue: 210.0/360.0, saturation: 0.85, brightness: 1.0, alpha: 0.5)
         let warmColor = UIColor(hue: 0.0/360.0, saturation: 0.90, brightness: 1.0, alpha: 0.5)
@@ -177,6 +182,18 @@ final class InversionController: NSObject {
         lastUpdateTime = time
         timeAccum += dt
 
+        // Measure FPS and derive a performance scale (0.7..1.0)
+        fpsFrameCount += 1
+        if lastFPSCheckTime == 0 { lastFPSCheckTime = time }
+        let fpsWindow = time - lastFPSCheckTime
+        if fpsWindow >= 1.0 {
+            currentFPS = Double(fpsFrameCount) / fpsWindow
+            fpsFrameCount = 0
+            lastFPSCheckTime = time
+            let raw = currentFPS / 60.0
+            fpsScale = CGFloat(max(min(raw, 1.0), 0.7))
+        }
+
         // Smooth the stability for continuous transitions
         let tau: Double = 0.6
         let alpha = 1.0 - exp(-max(dt, 0.0) / tau)
@@ -194,6 +211,9 @@ final class InversionController: NSObject {
         // Update fields
         baseTurbulenceNode.physicsField?.strength = CGFloat(lerp(0.06, 0.03, s))
         buoyancyNode.physicsField?.strength = CGFloat(lerp(0.05, 0.0, s))
+
+        // Effective complexity: UI target scaled by FPS
+        compScale = max(0.4, min(1.5, baseCompScale * fpsScale))
 
         // Fog-like air layers density (small particles)
         let layerScale = max(0.0, min(1.0, (s - 0.05) / 0.95))
@@ -471,6 +491,22 @@ final class InversionController: NSObject {
         ambientNode.light = ambient
         root.addChildNode(ambientNode)
 
+        // Directional sun light with soft shadows for grounding
+        let sun = SCNLight()
+        sun.type = .directional
+        sun.intensity = 650
+        sun.castsShadow = true
+        sun.shadowMode = .deferred
+        sun.shadowSampleCount = 8
+        sun.shadowRadius = 4
+        sun.shadowBias = 8
+        sun.shadowColor = UIColor.black.withAlphaComponent(0.45)
+        let sunNode = SCNNode()
+        sunNode.light = sun
+        sunNode.eulerAngles = SCNVector3(-Float.pi/3, Float.pi/6, 0) // angled down and from side
+        sunNode.position = SCNVector3(0, 0.3, 0)
+        root.addChildNode(sunNode)
+
         // Minimal turbulence for natural variation (non-directional)
         let turb = SCNPhysicsField.turbulenceField(smoothness: 0.6, animationSpeed: 0.2)
         turb.strength = 0.04
@@ -537,6 +573,8 @@ final class InversionController: NSObject {
         boundaryColliderNode.position = SCNVector3(0, Float(boundaryHeight), 0)
         boundaryColliderNode.physicsBody = SCNPhysicsBody.static()
         root.addChildNode(boundaryColliderNode)
+
+        // Base plate already receives shadows; no separate shadow-only plane
 
         // Gentle upward buoyancy when not inverted
         let buoy = SCNPhysicsField.linearGravity()
