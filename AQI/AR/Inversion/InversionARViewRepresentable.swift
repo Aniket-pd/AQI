@@ -46,7 +46,9 @@ struct InversionARView: UIViewRepresentable {
 
     func updateUIView(_ uiView: ARSCNView, context: Context) {
         let light = uiView.session.currentFrame?.lightEstimate
-        context.coordinator.controller.update(stability: viewModel.stability,
+        // Drive stability from timeOfDay; sun system updated separately
+        context.coordinator.controller.setTimeOfDay(viewModel.timeOfDay)
+        context.coordinator.controller.update(stability: viewModel.derivedStability,
                                               lightEstimate: light,
                                               complexity: viewModel.targetComplexity)
     }

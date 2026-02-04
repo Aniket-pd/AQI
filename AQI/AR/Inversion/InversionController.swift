@@ -26,6 +26,16 @@ final class InversionController: NSObject {
     private let atmosphereNode = SCNNode()
     private let sourcesNode = SCNNode()
     private let mixingArrowsNode = SCNNode()
+    private var sunLightNode: SCNNode?
+    private var sunLight: SCNLight?
+    private var ambientLight: SCNLight?
+    private let skyNode = SCNNode()
+    private var sunVisualNode: SCNNode?
+    private let sunTargetNode = SCNNode()
+    private var sunAzimuth: Float = 0.0
+    private var sunAltitude: Float = 0.3
+    private var sunBaseDir: SIMD3<Float> = SIMD3<Float>(0, 0, -1)
+    private var sunRadius: Float = 2.8
 
     // Particle systems
     private var backgroundHaze: SCNParticleSystem = SCNParticleSystem() // pollution aloft
@@ -83,6 +93,8 @@ final class InversionController: NSObject {
     private var mixPulseElapsed: Double = 0
     private var mixPulseDuration: Double = 0
     private var nextPulseTimer: Double = 2.0
+    private var timeOfDay: Double = 0.15 // 0 = early morning, 1 = afternoon
+    private var shapeUpdateAccum: Double = 0
 
     // Failure moments timer
     private var failureTimer: Timer?
@@ -109,6 +121,68 @@ final class InversionController: NSObject {
         configureScene(view)
         // Preload model so UI can show loading/ready state before placement.
         preloadModelIfNeeded()
+        // Initialize sun and sky visuals
+        setTimeOfDay(timeOfDay)
+    }
+
+    private func setSunBaseDirectionFromCurrentCamera() {
+        guard let t = view?.session.currentFrame?.camera.transform else { return }
+        var fwd = SIMD3<Float>(-t.columns.2.x, -t.columns.2.y, -t.columns.2.z)
+        fwd = simd_normalize(fwd)
+        let horiz = SIMD3<Float>(fwd.x, 0, fwd.z)
+        let mag = simd_length(horiz)
+        if mag > 1e-3 { sunBaseDir = simd_normalize(horiz) } else { sunBaseDir = SIMD3<Float>(0, 0, -1) }
+    }
+
+    func setTimeOfDay(_ t: Double) {
+        timeOfDay = max(0.0, min(1.0, t))
+        // Compute solar arc
+        // Azimuth sweeps from east (-) to west (+)
+        // Subtle forward-hemisphere arc relative to base direction
+        let azMin = -Float.pi * 0.3  // ~-17°
+        let azMax =  Float.pi * 0.3  // ~+17°
+        let az = Float(azMin + (azMax - azMin) * Float(timeOfDay))
+        // Altitude follows a dome curve; 5° at morning, 65° midday
+        let minAlt: Float = 5.0 * .pi / 180.0
+        let maxAlt: Float = 65.0 * .pi / 180.0
+        let dome = sin(Float(timeOfDay) * .pi) // 0..1..0, but we clamp afternoon to near-peak
+        let alt = minAlt + (maxAlt - minAlt) * max(0, min(1, dome + 0.02))
+        sunAzimuth = az
+        sunAltitude = alt
+        if let _ = sunLightNode, let sun = sunLight {
+            // Warm color in morning, neutral by afternoon
+            let warm = UIColor(red: 1.0, green: 0.84, blue: 0.68, alpha: 1.0)
+            let neutral = UIColor(white: 1.0, alpha: 1.0)
+            let u = CGFloat(min(max(timeOfDay, 0), 1))
+            let color = blend(colorA: warm, colorB: neutral, t: min(1.0, u * 1.1))
+            sun.temperature = 6500 // ensure consistent model; use color via diffuse
+            sun.color = color
+            // Intensity ramps up with altitude
+            let middayBoost = pow(Double(max(0, min(1, dome))), 0.7)
+            sun.intensity = CGFloat(400 + 1200 * middayBoost)
+            sun.shadowColor = UIColor.black.withAlphaComponent(0.55 - 0.25 * CGFloat(middayBoost))
+            // Update light position immediately in world space relative to city
+            updateSunWorldTransformFromCity()
+        }
+        if let ambient = ambientLight {
+            let dome = sin(Float(timeOfDay) * .pi)
+            let boost = pow(Double(max(0, min(1, dome))), 0.8)
+            ambient.intensity = CGFloat(180 + 180 * boost)
+        }
+    }
+
+    private func updateSunWorldTransformFromCity() {
+        let cityPos = root.worldPosition
+        let up = SIMD3<Float>(0, 1, 0)
+        let b = simd_normalize(SIMD3<Float>(sunBaseDir.x, 0, sunBaseDir.z))
+        // Rotate base dir around Y by sunAzimuth
+        let cosA = cos(sunAzimuth), sinA = sin(sunAzimuth)
+        let rotatedH = SIMD3<Float>(b.x * cosA - b.z * sinA, 0, b.x * sinA + b.z * cosA)
+        let dir = simd_normalize(cos(sunAltitude) * rotatedH + sin(sunAltitude) * up)
+        let worldPos = SIMD3<Float>(cityPos.x, cityPos.y, cityPos.z) + dir * sunRadius
+        let pos = SCNVector3(worldPos.x, max(worldPos.y, cityPos.y + 0.4), worldPos.z)
+        sunLightNode?.worldPosition = pos
+        sunTargetNode.worldPosition = cityPos
     }
 
     func update(stability s: Double, lightEstimate: ARLightEstimate?, complexity: Double) {
@@ -137,6 +211,9 @@ final class InversionController: NSObject {
         // Position root at plane center (node is already positioned at plane)
         root.position = SCNVector3(plane.center.x, 0, plane.center.z)
         parentNode.addChildNode(root)
+        // Set sun base from current camera so sun is behind the city initially
+        setSunBaseDirectionFromCurrentCamera()
+        updateSunWorldTransformFromCity()
 
         // Apply colliders based on current stability and start failure moments
         applyPollutionCollider(enabled: true, strength: stability)
@@ -172,6 +249,8 @@ final class InversionController: NSObject {
         position.y += verticalOffset
         root.position = SCNVector3(position.x, position.y, position.z)
         view.scene.rootNode.addChildNode(root)
+        setSunBaseDirectionFromCurrentCamera()
+        updateSunWorldTransformFromCity()
         scheduleFailureMoments()
         delegate?.inversionControllerDidPlace(self)
     }
@@ -181,6 +260,8 @@ final class InversionController: NSObject {
         let dt = time - lastUpdateTime
         lastUpdateTime = time
         timeAccum += dt
+        // Keep sun anchored in world space relative to the city
+        updateSunWorldTransformFromCity()
 
         // Measure FPS and derive a performance scale (0.7..1.0)
         fpsFrameCount += 1
@@ -217,10 +298,10 @@ final class InversionController: NSObject {
 
         // Fog-like air layers density (small particles)
         let layerScale = max(0.0, min(1.0, (s - 0.05) / 0.95))
-        coolAirTracers.birthRate = CGFloat(240 + 1200 * layerScale) * compScale
-        warmAirTracers.birthRate = CGFloat(240 + 1100 * layerScale) * compScale
-        coolCoreTracers.birthRate = CGFloat(140 + 900 * layerScale) * compScale
-        warmCoreTracers.birthRate = CGFloat(120 + 800 * layerScale) * compScale
+        coolAirTracers.birthRate = CGFloat(140 + 700 * layerScale) * compScale
+        warmAirTracers.birthRate = CGFloat(130 + 650 * layerScale) * compScale
+        coolCoreTracers.birthRate = CGFloat(90 + 500 * layerScale) * compScale
+        warmCoreTracers.birthRate = CGFloat(80 + 450 * layerScale) * compScale
 
         // Cushion zone thickness near cap and proximity-scaled behavior (field half-extents)
         let t = CGFloat(lerp(0.01, 0.03, pow(s, 0.8)))
@@ -236,7 +317,7 @@ final class InversionController: NSObject {
         }
 
         // Pollution mixing: split total emission per source into free vs trapped
-        let totalPerSource: CGFloat = 80 * compScale
+        let totalPerSource: CGFloat = 55 * compScale
         let trappedFrac = CGFloat(smoothstep(edge0: 0.25, edge1: 0.85, x: s))
         let freeFrac = max(0.0, 1.0 - trappedFrac)
         let trappedBR = totalPerSource * trappedFrac
@@ -255,23 +336,27 @@ final class InversionController: NSObject {
         }
 
         // Update layer emitter shapes (halo + core) with wobble
-        if let coolShape = coolAirTracers.emitterShape as? SCNBox {
-            coolShape.height = max(0.04, hbEff)
-            coolLayerNode.position.y = Float(coolShape.height/2)
-        }
-        if let coolCoreShape = coolCoreTracers.emitterShape as? SCNBox {
-            coolCoreShape.height = max(0.02, hbEff * 0.45)
-        }
-        if let warmShape = warmAirTracers.emitterShape as? SCNBox {
-            let top: CGFloat = 0.22
-            let height = max(0.03, top - hbEff)
-            warmShape.height = height
-            warmLayerNode.position.y = Float(hbEff + height/2)
-        }
-        if let warmCoreShape = warmCoreTracers.emitterShape as? SCNBox {
-            let top: CGFloat = 0.22
-            let height = max(0.015, (top - hbEff) * 0.4)
-            warmCoreShape.height = height
+        shapeUpdateAccum += dt
+        if shapeUpdateAccum >= 0.05 { // throttle shape/geometry updates to ~20 Hz
+            if let coolShape = coolAirTracers.emitterShape as? SCNBox {
+                coolShape.height = max(0.04, hbEff)
+                coolLayerNode.position.y = Float(coolShape.height/2)
+            }
+            if let coolCoreShape = coolCoreTracers.emitterShape as? SCNBox {
+                coolCoreShape.height = max(0.02, hbEff * 0.45)
+            }
+            if let warmShape = warmAirTracers.emitterShape as? SCNBox {
+                let top: CGFloat = 0.22
+                let height = max(0.03, top - hbEff)
+                warmShape.height = height
+                warmLayerNode.position.y = Float(hbEff + height/2)
+            }
+            if let warmCoreShape = warmCoreTracers.emitterShape as? SCNBox {
+                let top: CGFloat = 0.22
+                let height = max(0.015, (top - hbEff) * 0.4)
+                warmCoreShape.height = height
+            }
+            shapeUpdateAccum = 0
         }
 
         // Lid shear band just below lid (visual shear layer)
@@ -343,7 +428,7 @@ final class InversionController: NSObject {
         }
 
         // Pollution mixing: per-source free vs trapped with pulse modulation
-        let totalPerSource2: CGFloat = 80 * compScale
+        let totalPerSource2: CGFloat = 55 * compScale
         let trappedFracBase = smoothstep(edge0: 0.25, edge1: 0.85, x: s)
         let trappedFracEff = max(0.0, min(1.0, trappedFracBase - 0.12 * pulseEnv))
 
@@ -380,6 +465,12 @@ final class InversionController: NSObject {
 
         // Always enable barrier; leakage handled by free fraction and cushion band
         applyPollutionCollider(enabled: true, strength: s)
+
+        // Morning fog and trapped haze lifting with sun
+        let fogMorning = 1.0 - smoothstep(edge0: 0.15, edge1: 0.7, x: timeOfDay)
+        let fogEff = max(0.0, min(1.0, 0.5 * fogMorning + 0.5 * s))
+        backgroundHaze.birthRate = CGFloat(70.0 * fogEff) * compScale
+        groundHaze.birthRate = CGFloat(140.0 * fogEff) * compScale
 
         // Teaching cues: arrows fade as stability increases; base plate tint shifts subtly
         let arrowOpacity = CGFloat(1.0 - smoothstep(edge0: 0.08, edge1: 0.5, x: s))
@@ -483,12 +574,17 @@ final class InversionController: NSObject {
         view.scene.background.contents = nil
         view.rendersContinuously = true
 
+        // Sky container and sun target live at scene root (world-anchored)
+        view.scene.rootNode.addChildNode(skyNode)
+        view.scene.rootNode.addChildNode(sunTargetNode)
+
         // Mild ambient light to see particles and city
         let ambient = SCNLight()
         ambient.type = .ambient
         ambient.intensity = 240
         let ambientNode = SCNNode()
         ambientNode.light = ambient
+        self.ambientLight = ambient
         root.addChildNode(ambientNode)
 
         // Directional sun light with soft shadows for grounding
@@ -497,15 +593,22 @@ final class InversionController: NSObject {
         sun.intensity = 650
         sun.castsShadow = true
         sun.shadowMode = .deferred
-        sun.shadowSampleCount = 8
-        sun.shadowRadius = 4
+        sun.shadowSampleCount = 4
+        sun.shadowRadius = 3
         sun.shadowBias = 8
         sun.shadowColor = UIColor.black.withAlphaComponent(0.45)
         let sunNode = SCNNode()
         sunNode.light = sun
-        sunNode.eulerAngles = SCNVector3(-Float.pi/3, Float.pi/6, 0) // angled down and from side
         sunNode.position = SCNVector3(0, 0.3, 0)
-        root.addChildNode(sunNode)
+        self.sunLightNode = sunNode
+        self.sunLight = sun
+        // Aim sun toward root with constraint so orientation updates as we move the sun
+        let look = SCNLookAtConstraint(target: sunTargetNode)
+        look.isGimbalLockEnabled = true
+        sunNode.constraints = [look]
+        view.scene.rootNode.addChildNode(sunNode)
+
+        // Visible sun disc removed per request (keep directional light/shadows)
 
         // Minimal turbulence for natural variation (non-directional)
         let turb = SCNPhysicsField.turbulenceField(smoothness: 0.6, animationSpeed: 0.2)
@@ -781,12 +884,12 @@ final class InversionController: NSObject {
         backgroundHaze = SCNParticleSystem()
         backgroundHaze.loops = true
         backgroundHaze.birthRate = 0
-        backgroundHaze.particleLifeSpan = 8
+        backgroundHaze.particleLifeSpan = 6.5
         backgroundHaze.particleLifeSpanVariation = 2
         backgroundHaze.particleVelocity = 0.02
         backgroundHaze.particleVelocityVariation = 0.015
-        backgroundHaze.particleSize = 0.003
-        backgroundHaze.particleSizeVariation = 0.001
+        backgroundHaze.particleSize = 0.0016
+        backgroundHaze.particleSizeVariation = 0.0006
         backgroundHaze.particleColor = UIColor(red: 0.78, green: 0.74, blue: 0.70, alpha: 0.22)
         backgroundHaze.particleImage = InversionController.makeDiscImage()
         backgroundHaze.isAffectedByPhysicsFields = true
@@ -800,11 +903,11 @@ final class InversionController: NSObject {
         groundHaze = SCNParticleSystem()
         groundHaze.loops = true
         groundHaze.birthRate = 0
-        groundHaze.particleLifeSpan = 10
+        groundHaze.particleLifeSpan = 7.8
         groundHaze.particleVelocity = 0.012
         groundHaze.particleVelocityVariation = 0.01
-        groundHaze.particleSize = 0.0035
-        groundHaze.particleSizeVariation = 0.001
+        groundHaze.particleSize = 0.0018
+        groundHaze.particleSizeVariation = 0.0006
         groundHaze.dampingFactor = 0.06
         groundHaze.particleColor = UIColor(red: 0.78, green: 0.74, blue: 0.70, alpha: 0.28)
         groundHaze.particleImage = InversionController.makeDiscImage()
@@ -820,10 +923,10 @@ final class InversionController: NSObject {
         coolAirTracers = SCNParticleSystem()
         coolAirTracers.loops = true
         coolAirTracers.birthRate = 0
-        coolAirTracers.particleLifeSpan = 9
+        coolAirTracers.particleLifeSpan = 7.5
         coolAirTracers.particleVelocity = 0.006
         coolAirTracers.particleVelocityVariation = 0.004
-        coolAirTracers.particleSize = 0.0012
+        coolAirTracers.particleSize = 0.0007
         coolAirTracers.particleImage = InversionController.makeDiscImage()
         coolAirTracers.dampingFactor = 0.1
         coolAirTracers.isAffectedByPhysicsFields = true
@@ -838,10 +941,10 @@ final class InversionController: NSObject {
         warmAirTracers = SCNParticleSystem()
         warmAirTracers.loops = true
         warmAirTracers.birthRate = 0
-        warmAirTracers.particleLifeSpan = 9
+        warmAirTracers.particleLifeSpan = 7.5
         warmAirTracers.particleVelocity = 0.006
         warmAirTracers.particleVelocityVariation = 0.004
-        warmAirTracers.particleSize = 0.0010
+        warmAirTracers.particleSize = 0.0006
         warmAirTracers.particleImage = InversionController.makeDiscImage()
         warmAirTracers.emittingDirection = SCNVector3(0, 1, 0)
         warmAirTracers.dampingFactor = 0.1
@@ -859,10 +962,10 @@ final class InversionController: NSObject {
         coolCoreTracers = SCNParticleSystem()
         coolCoreTracers.loops = true
         coolCoreTracers.birthRate = 0
-        coolCoreTracers.particleLifeSpan = 9
+        coolCoreTracers.particleLifeSpan = 7.2
         coolCoreTracers.particleVelocity = 0.004
         coolCoreTracers.particleVelocityVariation = 0.003
-        coolCoreTracers.particleSize = 0.0009
+        coolCoreTracers.particleSize = 0.0005
         coolCoreTracers.particleImage = InversionController.makeDiscImage()
         coolCoreTracers.dampingFactor = 0.14
         coolCoreTracers.isAffectedByPhysicsFields = true
@@ -876,10 +979,10 @@ final class InversionController: NSObject {
         warmCoreTracers = SCNParticleSystem()
         warmCoreTracers.loops = true
         warmCoreTracers.birthRate = 0
-        warmCoreTracers.particleLifeSpan = 9
+        warmCoreTracers.particleLifeSpan = 7.2
         warmCoreTracers.particleVelocity = 0.004
         warmCoreTracers.particleVelocityVariation = 0.003
-        warmCoreTracers.particleSize = 0.0008
+        warmCoreTracers.particleSize = 0.00045
         warmCoreTracers.particleImage = InversionController.makeDiscImage()
         warmCoreTracers.dampingFactor = 0.14
         warmCoreTracers.isAffectedByPhysicsFields = true
@@ -901,14 +1004,14 @@ final class InversionController: NSObject {
         let trappedFresh = SCNParticleSystem()
         trappedFresh.loops = true
         trappedFresh.birthRate = 0
-        trappedFresh.particleLifeSpan = 7
+        trappedFresh.particleLifeSpan = 6.0
         trappedFresh.particleLifeSpanVariation = 1.5
         trappedFresh.particleVelocity = 0.02
         trappedFresh.particleVelocityVariation = 0.012
         trappedFresh.emittingDirection = SCNVector3(0, 1, 0)
         trappedFresh.spreadingAngle = 10
-        trappedFresh.particleSize = 0.0020
-        trappedFresh.particleSizeVariation = 0.001
+        trappedFresh.particleSize = 0.0011
+        trappedFresh.particleSizeVariation = 0.0005
         trappedFresh.particleColor = UIColor(red: 0.68, green: 0.66, blue: 0.64, alpha: 0.30)
         trappedFresh.particleImage = InversionController.makeDiscImage()
         trappedFresh.isAffectedByPhysicsFields = true
@@ -919,14 +1022,14 @@ final class InversionController: NSObject {
         let trappedHaze = SCNParticleSystem()
         trappedHaze.loops = true
         trappedHaze.birthRate = 0
-        trappedHaze.particleLifeSpan = 10
+        trappedHaze.particleLifeSpan = 8.0
         trappedHaze.particleLifeSpanVariation = 2
         trappedHaze.particleVelocity = 0.015
         trappedHaze.particleVelocityVariation = 0.010
         trappedHaze.emittingDirection = SCNVector3(0, 1, 0)
         trappedHaze.spreadingAngle = 18
-        trappedHaze.particleSize = 0.0028
-        trappedHaze.particleSizeVariation = 0.0012
+        trappedHaze.particleSize = 0.0013
+        trappedHaze.particleSizeVariation = 0.0006
         trappedHaze.particleColor = UIColor(red: 0.62, green: 0.60, blue: 0.58, alpha: 0.28)
         trappedHaze.particleImage = InversionController.makeDiscImage()
         trappedHaze.isAffectedByPhysicsFields = true
@@ -937,14 +1040,14 @@ final class InversionController: NSObject {
         let free = SCNParticleSystem()
         free.loops = true
         free.birthRate = 0
-        free.particleLifeSpan = 7
+        free.particleLifeSpan = 6.0
         free.particleLifeSpanVariation = 1.5
         free.particleVelocity = 0.02
         free.particleVelocityVariation = 0.012
         free.emittingDirection = SCNVector3(0, 1, 0)
         free.spreadingAngle = 12
-        free.particleSize = 0.0024
-        free.particleSizeVariation = 0.001
+        free.particleSize = 0.0011
+        free.particleSizeVariation = 0.0005
         free.particleColor = UIColor(red: 0.65, green: 0.62, blue: 0.60, alpha: 0.26)
         free.particleImage = InversionController.makeDiscImage()
         free.isAffectedByPhysicsFields = true
@@ -996,11 +1099,11 @@ final class InversionController: NSObject {
         let cohort = SCNParticleSystem()
         cohort.loops = false
         cohort.birthRate = CGFloat(Int.random(in: 20...36))
-        cohort.particleLifeSpan = 2.8
+        cohort.particleLifeSpan = 2.2
         cohort.particleVelocity = 0.042 // stronger rise
         cohort.spreadingAngle = 10
         cohort.emittingDirection = SCNVector3(0, 1, 0)
-        cohort.particleSize = 0.0026
+        cohort.particleSize = 0.0012
         cohort.particleImage = InversionController.makeDiscImage()
         cohort.particleColor = UIColor(red: 0.78, green: 0.74, blue: 0.70, alpha: 0.36)
         cohort.isAffectedByPhysicsFields = true

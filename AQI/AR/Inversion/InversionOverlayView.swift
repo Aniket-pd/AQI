@@ -17,16 +17,16 @@ struct InversionOverlayView: View {
                 header
                 Spacer()
                 placementHint
-                stabilityControl
+                timeOfDayControl
                 captionView
             }
             .padding()
         }
         .sheet(isPresented: $showInfo) { infoSheet }
-        .onChange(of: vm.stability) { _, s in
-            updateCaption(for: s)
+        .onChange(of: vm.timeOfDay) { _, _ in
+            updateCaption(for: vm.derivedStability)
         }
-        .onAppear { updateCaption(for: vm.stability) }
+        .onAppear { updateCaption(for: vm.derivedStability) }
     }
     
     private var placementHint: some View {
@@ -95,14 +95,14 @@ struct InversionOverlayView: View {
     private var header: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Atmospheric Stability")
+                Text("Time of Day")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 HStack(spacing: 8) {
                     Text(vm.stabilityLabel)
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
                 }
-                Text("Higher stability traps pollution near ground")
+                Text("Sunlight weakens inversion and clears the air")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -116,11 +116,11 @@ struct InversionOverlayView: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private var stabilityControl: some View {
+    private var timeOfDayControl: some View {
         HStack(spacing: 12) {
-            Image(systemName: "thermometer.sun")
-            Slider(value: $vm.stability, in: 0...1)
-            Image(systemName: "thermometer.snowflake")
+            Image(systemName: "sunrise.fill")
+            Slider(value: $vm.timeOfDay, in: 0...1)
+            Image(systemName: "sun.max.fill")
         }
         .tint(.secondary)
         .padding(14)
@@ -134,7 +134,7 @@ struct InversionOverlayView: View {
             Text("Temperature Inversion")
                 .font(.title2.bold())
             Text("Pollution isn’t higher because more is produced; it’s higher because stable, warmer air aloft prevents vertical escape. Particles slow at an invisible boundary, spread sideways, and accumulate in street canyons.")
-            Text("Slide the ‘Atmospheric Stability’ control from Normal to Severe to see warm (red) air forming a stable cap above cool (blue) air, trapping pollution beneath.")
+            Text("Slide the ‘Time of Day’ control from early morning to afternoon to watch the sun rise along an arc. As sunlight increases, the inversion weakens: fog lifts, air mixes, and pollution disperses.")
             Spacer()
         }
         .padding()
