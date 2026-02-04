@@ -3,17 +3,18 @@ import SwiftUI
 import Combine
 
 final class InversionViewModel: ObservableObject {
-    // Time of day control (0 = early morning, 1 = afternoon)
+    // Time of day control (0 = sunrise, 0.5 = midday, 1 = sunset)
     @Published var timeOfDay: Double = 0.15
     // Legacy: atmospheric stability S: 0 = normal, 1 = severe inversion (derived from timeOfDay)
     // Use derivedStability for UI and controller updates.
     var derivedStability: Double {
-        // Map time to inversion strength: strong in early morning, weak by afternoon
-        // s = 1 at t=0, ~0.1 at t=1 with a gentle S-curve
+        // U-shaped inversion strength: high at sunrise/sunset, low at midday
+        // s(t) = (cos(2πt) + 1)/2, clamped to [0,1]
+        // Optionally sharpen with a gentle exponent
         let t = max(0.0, min(1.0, timeOfDay))
-        // Emphasize morning stability; accelerate weakening past mid-morning
-        let weaken = 0.5 * (1 - cos(.pi * min(1.0, max(0.0, (t - 0.1) / 0.9)))) // smooth 0..1
-        let s = 1.0 - 0.9 * weaken
+        let base = (cos(2 * .pi * t) + 1.0) * 0.5
+        let gamma = 1.15 // subtle sharpening; 1.0 for linear
+        let s = pow(base, gamma)
         return max(0.0, min(1.0, s))
     }
     // Scale factor for particle complexity (0.5–1.5)
