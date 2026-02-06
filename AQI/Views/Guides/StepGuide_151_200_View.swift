@@ -45,7 +45,8 @@ struct StepGuide_151_200_View: View {
             guideTitle: title,
             guideSubtitle: subtitle,
             steps: steps,
-            accentColor: accentColor
+            accentColor: accentColor,
+            aqiCategory: .unhealthy_151_200
         )
     }
 }

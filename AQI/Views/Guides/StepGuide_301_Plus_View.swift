@@ -44,7 +44,8 @@ struct StepGuide_301_Plus_View: View {
             guideTitle: title,
             guideSubtitle: subtitle,
             steps: steps,
-            accentColor: accentColor
+            accentColor: accentColor,
+            aqiCategory: .hazardous_300_plus
         )
     }
 }

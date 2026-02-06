@@ -13,6 +13,7 @@ struct StepGuideView: View {
     let guideSubtitle: String
     let steps: [GuideStep]
     let accentColor: Color
+    let aqiCategory: AQICategory
 
     private let expandAnimation: Animation = .spring(response: 0.35, dampingFraction: 0.88, blendDuration: 0.2)
     private let advanceAnimation: Animation = .spring(response: 0.38, dampingFraction: 0.9, blendDuration: 0.2)
@@ -24,11 +25,14 @@ struct StepGuideView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 16) {
+                    // Solutions row directly under the title
+                    solutionsRow
+                        .padding(.top, 6)
+
                     // Subtitle / context
                     Text(guideSubtitle)
                         .font(.body)
                         .foregroundStyle(.secondary)
-                        .padding(.top, 8)
 
                     // Steps section
                     VStack(spacing: 12) {
@@ -108,6 +112,21 @@ struct StepGuideView: View {
         }
     }
 
+    // MARK: - Components
+
+    private var solutionsRow: some View {
+        let statuses = SolutionsAdvisor.statuses(for: aqiCategory)
+        return HStack(spacing: 12) {
+            AirPurifierSolutionItem(status: statuses[.airPurifier] ?? "")
+                .frame(maxWidth: .infinity)
+            N95MaskSolutionItem(status: statuses[.n95Mask] ?? "")
+                .frame(maxWidth: .infinity)
+            StayIndoorSolutionItem(status: statuses[.stayIndoor] ?? "")
+                .frame(maxWidth: .infinity)
+        }
+        .padding(.vertical, 2)
+    }
+
     private func nextStep() {
         guard !steps.isEmpty else { return }
         impact(.medium)
@@ -151,7 +170,8 @@ struct StepGuideView: View {
             guideTitle: "Heart Attack",
             guideSubtitle: "Quick steps to follow during a suspected heart attack.",
             steps: steps,
-            accentColor: .red
+            accentColor: .red,
+            aqiCategory: .unhealthy_151_200
         )
     }
     .preferredColorScheme(.dark)

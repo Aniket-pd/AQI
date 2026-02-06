@@ -44,7 +44,8 @@ struct StepGuide_101_150_View: View {
             guideTitle: title,
             guideSubtitle: subtitle,
             steps: steps,
-            accentColor: accentColor
+            accentColor: accentColor,
+            aqiCategory: .usg_101_150
         )
     }
 }
@@ -52,4 +53,3 @@ struct StepGuide_101_150_View: View {
 #Preview {
     StepGuide_101_150_View()
 }
-
