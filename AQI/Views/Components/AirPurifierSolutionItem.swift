@@ -9,16 +9,9 @@ import SwiftUI
 
 struct AirPurifierSolutionItem: View {
     let status: String
-    private let brand: Color = .teal
 
     var body: some View {
-        SolutionItem(
-            type: .airPurifier,
-            status: status,
-            iconColor: brand,
-            titleColor: brand,
-            statusColor: brand.opacity(0.7)
-        )
+        SolutionItem(type: .airPurifier, status: status)
     }
 }
 
@@ -27,4 +20,3 @@ struct AirPurifierSolutionItem: View {
         .padding()
         .background(Color(.systemBackground))
 }
-

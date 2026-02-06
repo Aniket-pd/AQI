@@ -9,16 +9,9 @@ import SwiftUI
 
 struct N95MaskSolutionItem: View {
     let status: String
-    private let brand: Color = .blue
 
     var body: some View {
-        SolutionItem(
-            type: .n95Mask,
-            status: status,
-            iconColor: brand,
-            titleColor: brand,
-            statusColor: brand.opacity(0.7)
-        )
+        SolutionItem(type: .n95Mask, status: status)
     }
 }
 
@@ -27,4 +20,3 @@ struct N95MaskSolutionItem: View {
         .padding()
         .background(Color(.systemBackground))
 }
-

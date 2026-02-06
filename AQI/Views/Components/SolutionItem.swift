@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Minimal horizontal card with a large symbol and two-line text.
+/// Minimal flat row with a symbol and two-line text, system colors only.
 struct SolutionItem: View {
     let type: SolutionType
     let status: String
@@ -16,37 +16,33 @@ struct SolutionItem: View {
     var statusColor: Color? = nil
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             Image(systemName: type.systemImageName)
-                .font(.system(size: 34, weight: .regular))
-                .foregroundStyle(iconColor ?? .secondary)
-                .frame(width: 42, height: 42)
+                .font(.system(size: 26, weight: .regular))
+                .foregroundStyle(iconColor ?? .primary)
+                .frame(width: 30, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(type.title)
-                    .font(.headline)
+                    .font(.title3)
+                    .fontWeight(.semibold)
                     .foregroundStyle(titleColor ?? .primary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .allowsTightening(true)
+                    .layoutPriority(1)
                 Text(status)
                     .font(.subheadline)
                     .foregroundStyle(statusColor ?? .secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .allowsTightening(true)
+                    .layoutPriority(1)
             }
 
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(
-            // System-adaptive material keeps it clean on light/dark.
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(.regularMaterial)
-        )
-        .overlay(
-            // Subtle separator to keep definition across backgrounds.
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color(.separator), lineWidth: 0.5)
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("\(type.title), \(status)"))
     }

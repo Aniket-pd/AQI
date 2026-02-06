@@ -116,13 +116,11 @@ struct StepGuideView: View {
 
     private var solutionsRow: some View {
         let statuses = SolutionsAdvisor.statuses(for: aqiCategory)
-        return HStack(spacing: 12) {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .leading), count: 3)
+        return LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
             AirPurifierSolutionItem(status: statuses[.airPurifier] ?? "")
-                .frame(maxWidth: .infinity)
             N95MaskSolutionItem(status: statuses[.n95Mask] ?? "")
-                .frame(maxWidth: .infinity)
             StayIndoorSolutionItem(status: statuses[.stayIndoor] ?? "")
-                .frame(maxWidth: .infinity)
         }
         .padding(.vertical, 2)
     }

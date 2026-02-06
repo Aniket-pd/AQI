@@ -9,16 +9,9 @@ import SwiftUI
 
 struct StayIndoorSolutionItem: View {
     let status: String
-    private let brand: Color = .indigo
 
     var body: some View {
-        SolutionItem(
-            type: .stayIndoor,
-            status: status,
-            iconColor: brand,
-            titleColor: brand,
-            statusColor: brand.opacity(0.7)
-        )
+        SolutionItem(type: .stayIndoor, status: status)
     }
 }
 
@@ -27,4 +20,3 @@ struct StayIndoorSolutionItem: View {
         .padding()
         .background(Color(.systemBackground))
 }
-
