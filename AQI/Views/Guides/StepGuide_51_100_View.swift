@@ -28,7 +28,7 @@ struct StepGuide_51_100_View: View {
         ),
         GuideStep(
             title: "Who Needs Extra Care",
-            content: "• People with asthma or lung problems\n• People who get irritated easily by pollution\n\nEveryone else can live normally"
+            content: "• People with asthma or lung problems\n• People who get irritated easily by pollution\n"
         ),
         GuideStep(
             title: "Indoor vs Outdoor Tips",

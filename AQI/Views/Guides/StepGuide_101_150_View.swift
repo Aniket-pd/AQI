@@ -27,7 +27,7 @@ struct StepGuide_101_150_View: View {
         ),
         GuideStep(
             title: "Who Needs Extra Care",
-            content: "Sensitive groups include:\n• People with heart or lung disease\n• Older adults\n• Children and teenagers\n• Pregnant women\n• Minority populations\n• Outdoor workers"
+            content: "Sensitive groups include:\n• People with heart or lung disease\n• Older adults\n• Children and teenagers\n• Pregnant women\n• Outdoor workers"
         ),
         GuideStep(
             title: "Indoor vs Outdoor Tips",

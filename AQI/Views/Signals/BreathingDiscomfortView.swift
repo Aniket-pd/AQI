@@ -13,7 +13,7 @@ struct BreathingDiscomfortView: View {
                     "Move to an indoor space and keep windows closed if outside air is poor",
                     "Focus on slow, calm breathing to help your body relax"
                 ]),
-                .init(title: "When to get extra help", body: "If breathing feels very hard, painful, or does not improve after resting in clean air, seek medical advice.")
+                .init(title: "When to get extra help", body: "If breathing feels unusually difficult or does not improve after resting in cleaner air, consider seeking medical advice.")
             ],
             accentColor: Color(red: 0.86, green: 0.62, blue: 0.62),
             iconName: "lungs.fill",
