@@ -124,7 +124,7 @@ struct StepGuideView: View {
     private var precautionCard: some View {
         GeometryReader { proxy in
             let topInset = topSafeArea
-            let minHeight: CGFloat = 200 + topInset
+            let minHeight: CGFloat = 240 + topInset
             let y = proxy.frame(in: .named("scroll")).minY
             let stretch = max(0, y)
             let dynamicHeight = minHeight + stretch
@@ -139,7 +139,7 @@ struct StepGuideView: View {
 
                 // Large navigation-style title at bottom-left
                 Text(range.aqiRange)
-                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .font(.system(size: 34, weight: .heavy, design: .default))
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 2)
                     .lineLimit(2)
@@ -153,7 +153,7 @@ struct StepGuideView: View {
             .padding(.horizontal, -16) // edge-to-edge despite outer padding
             .ignoresSafeArea(edges: .top)
         }
-        .frame(height: 200 + topSafeArea) // occupy space including notch
+        .frame(height: 280 + topSafeArea) // increased height including notch
     }
 
     // Alias for naming consistency in code comments
