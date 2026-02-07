@@ -18,26 +18,22 @@ struct SolutionItem: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: type.systemImageName)
-                .font(.system(size: 26, weight: .regular))
+                .font(.headline) // smaller to balance three-in-row
                 .foregroundStyle(iconColor ?? .primary)
-                .frame(width: 30, alignment: .leading)
+                .frame(minWidth: 0, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(type.title)
-                    .font(.title3)
+                    .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundStyle(titleColor ?? .primary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-                    .allowsTightening(true)
-                    .layoutPriority(1)
+                    .truncationMode(.tail)
                 Text(status)
-                    .font(.subheadline)
+                    .font(.footnote)
                     .foregroundStyle(statusColor ?? .secondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-                    .allowsTightening(true)
-                    .layoutPriority(1)
+                    .truncationMode(.tail)
             }
 
             Spacer(minLength: 0)
@@ -54,10 +50,13 @@ typealias SaltItem = SolutionItem
 #endif
 
 #Preview {
-    VStack(spacing: 16) {
+    HStack(spacing: 16) {
         SolutionItem(type: .airPurifier, status: "Turn On")
+            .frame(maxWidth: .infinity)
         SolutionItem(type: .n95Mask, status: "Recommended")
+            .frame(maxWidth: .infinity)
         SolutionItem(type: .stayIndoor, status: "Must")
+            .frame(maxWidth: .infinity)
     }
     .padding()
     .background(Color(.systemBackground))
