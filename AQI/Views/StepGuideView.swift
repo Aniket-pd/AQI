@@ -124,7 +124,7 @@ struct StepGuideView: View {
 
     private var precautionCard: some View {
         GeometryReader { proxy in
-            let topInset = proxy.safeAreaInsets.top
+            let topInset = topSafeArea
             let minHeight: CGFloat = 200 + topInset
             let y = proxy.frame(in: .named("scroll")).minY
             let stretch = max(0, y)
@@ -137,7 +137,7 @@ struct StepGuideView: View {
             )
             .frame(maxWidth: .infinity)
             .frame(height: dynamicHeight)
-            .offset(y: -stretch)
+            .offset(y: -(topInset + stretch))
             .padding(.horizontal, -16) // edge-to-edge despite outer padding
             .ignoresSafeArea(edges: .top)
         }
