@@ -22,10 +22,8 @@ struct StepGuideView: View {
     @State private var isActive: Bool = false
 
     var body: some View {
-        GeometryReader { geo in
-            let topInset = geo.safeAreaInsets.top
-            ScrollViewReader { proxy in
-                ScrollView {
+        ScrollViewReader { proxy in
+            ScrollView {
                     LazyVStack(alignment: .leading, spacing: 20) {
                     // Top precaution card with particles (plays once on appear, retrigger on tap)
                     precautionCard
@@ -77,10 +75,11 @@ struct StepGuideView: View {
                     .animation(expandAnimation, value: expandedIndex)
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, 0)
                 .padding(.bottom, 24)
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .coordinateSpace(name: "scroll")
             .navigationBarTitleDisplayMode(.large)
             .safeAreaInset(edge: .bottom) {
                 // Bottom Next button
@@ -119,26 +118,34 @@ struct StepGuideView: View {
             }
             .toolbarBackground(.hidden, for: .navigationBar)
         }
-        }
     }
 
     // MARK: - Components
 
     private var precautionCard: some View {
-        GeometryReader { geo in
-            let topInset = geo.safeAreaInsets.top
+        GeometryReader { proxy in
+            let topInset = proxy.safeAreaInsets.top
+            let minHeight: CGFloat = 200 + topInset
+            let y = proxy.frame(in: .named("scroll")).minY
+            let stretch = max(0, y)
+            let dynamicHeight = minHeight + stretch
+
             PrecautionAnimationBackground(
                 range: rangeInfo(for: aqiCategory),
                 isActive: $isActive,
-                height: 200 + topInset
+                height: dynamicHeight
             )
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, -16) // extend to screen edges beyond stack padding
-            .padding(.top, -topInset)   // pull the card into the notch area
+            .frame(height: dynamicHeight)
+            .offset(y: -stretch)
+            .padding(.horizontal, -16) // edge-to-edge despite outer padding
             .ignoresSafeArea(edges: .top)
         }
-        .frame(height: 200) // keep the layout height stable in the stack
+        .frame(height: 200 + topSafeArea) // occupy space including notch
     }
+
+    // Alias for naming consistency in code comments
+    private var stretchyHeader: some View { precautionCard }
 
     private var solutionsGrid: some View {
         let statuses = SolutionsAdvisor.statuses(for: aqiCategory)
@@ -264,6 +271,16 @@ struct StepGuideView: View {
         generator.prepare()
         generator.impactOccurred()
     }
+}
+
+// MARK: - Safe area helper
+private var topSafeArea: CGFloat {
+    (UIApplication.shared.connectedScenes.first as? UIWindowScene)?
+        .keyWindow?.safeAreaInsets.top ?? 0
+}
+
+private extension UIWindowScene {
+    var keyWindow: UIWindow? { windows.first { $0.isKeyWindow } }
 }
 
 #Preview {
