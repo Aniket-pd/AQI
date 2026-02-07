@@ -9,8 +9,6 @@ import SwiftUI
 
 struct StepGuide_0_50_View: View {
     var accentColor: Color = Color(red: 0.23, green: 0.72, blue: 0.42)
-
-    private let title = "AQI 0–50 (Good)"
     private let subtitle = "The air is clean and healthy to breathe. It’s a great time to go outside, stay active, and enjoy your day as usual."
     private let steps: [GuideStep] = [
         GuideStep(title: "Air Overview", content: "• Air quality is good.\n• The air is safe for everyday activities."),
@@ -29,7 +27,6 @@ struct StepGuide_0_50_View: View {
 
     var body: some View {
         StepGuideView(
-            guideTitle: title,
             guideSubtitle: subtitle,
             steps: steps,
             accentColor: accentColor,

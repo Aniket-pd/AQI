@@ -10,7 +10,6 @@ import SwiftUI
 struct StepGuide_51_100_View: View {
     var accentColor: Color = Color(red: 0.96, green: 0.73, blue: 0.20)
 
-    private let title = "AQI 51–100 (Moderate)"
     private let subtitle = "The air quality is generally acceptable. However, some people who are unusually sensitive to air pollution may experience mild effects. For most people, the air is safe and does not cause problems."
 
     private let steps: [GuideStep] = [
@@ -42,7 +41,6 @@ struct StepGuide_51_100_View: View {
 
     var body: some View {
         StepGuideView(
-            guideTitle: title,
             guideSubtitle: subtitle,
             steps: steps,
             accentColor: accentColor,

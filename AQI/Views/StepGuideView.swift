@@ -9,7 +9,6 @@ import SwiftUI
 import UIKit
 
 struct StepGuideView: View {
-    let guideTitle: String
     let guideSubtitle: String
     let steps: [GuideStep]
     let accentColor: Color
@@ -23,9 +22,11 @@ struct StepGuideView: View {
     @State private var isActive: Bool = false
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 20) {
+        GeometryReader { geo in
+            let topInset = geo.safeAreaInsets.top
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 20) {
                     // Top precaution card with particles (plays once on appear, retrigger on tap)
                     precautionCard
 
@@ -80,7 +81,6 @@ struct StepGuideView: View {
                 .padding(.bottom, 24)
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
-            .navigationTitle(guideTitle)
             .navigationBarTitleDisplayMode(.large)
             .safeAreaInset(edge: .bottom) {
                 // Bottom Next button
@@ -117,16 +117,27 @@ struct StepGuideView: View {
                     }
                 }
             }
+            .toolbarBackground(.hidden, for: .navigationBar)
+        }
         }
     }
 
     // MARK: - Components
 
     private var precautionCard: some View {
-        PrecautionAnimationBackground(range: rangeInfo(for: aqiCategory), isActive: $isActive, height: 200)
+        GeometryReader { geo in
+            let topInset = geo.safeAreaInsets.top
+            PrecautionAnimationBackground(
+                range: rangeInfo(for: aqiCategory),
+                isActive: $isActive,
+                height: 200 + topInset
+            )
             .frame(maxWidth: .infinity)
             .padding(.horizontal, -16) // extend to screen edges beyond stack padding
-            .ignoresSafeArea(edges: .top) // extend into upper safe area
+            .padding(.top, -topInset)   // pull the card into the notch area
+            .ignoresSafeArea(edges: .top)
+        }
+        .frame(height: 200) // keep the layout height stable in the stack
     }
 
     private var solutionsGrid: some View {
@@ -263,7 +274,6 @@ struct StepGuideView: View {
     ]
     return NavigationStack {
         StepGuideView(
-            guideTitle: "Heart Attack",
             guideSubtitle: "Quick steps to follow during a suspected heart attack.",
             steps: steps,
             accentColor: .red,
