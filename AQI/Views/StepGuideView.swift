@@ -80,6 +80,8 @@ struct StepGuideView: View {
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .coordinateSpace(name: "scroll")
+            // Allow content (header) to extend behind the notch/nav bar
+            .ignoresSafeArea(edges: .top)
             .navigationBarTitleDisplayMode(.large)
             .safeAreaInset(edge: .bottom) {
                 // Bottom Next button
