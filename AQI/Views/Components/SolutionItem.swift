@@ -16,27 +16,28 @@ struct SolutionItem: View {
     var statusColor: Color? = nil
 
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: type.systemImageName)
-                .font(.footnote)
-                .foregroundStyle(iconColor ?? .primary)
-                .frame(minWidth: 0, alignment: .leading)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(type.title)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Image(systemName: type.systemImageName)
                     .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(titleColor ?? .primary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                    .foregroundStyle(iconColor ?? .primary)
+                    .frame(minWidth: 0, alignment: .leading)
+
                 Text(status)
                     .font(.caption2)
                     .foregroundStyle(statusColor ?? .secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
+
+                Spacer(minLength: 0)
             }
 
-            Spacer(minLength: 0)
+            Text(type.title)
+                .font(.footnote)
+                .fontWeight(.semibold)
+                .foregroundStyle(titleColor ?? .primary)
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
