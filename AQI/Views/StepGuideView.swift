@@ -19,7 +19,6 @@ struct StepGuideView: View {
 
     @State private var currentIndex: Int = 0
     @State private var expandedIndex: Int? = nil
-    @State private var isActive: Bool = false
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -107,9 +106,7 @@ struct StepGuideView: View {
                 // Fresh open: start collapsed
                 currentIndex = 0
                 expandedIndex = nil
-                isActive = true
             }
-            .onDisappear { isActive = false }
             .onChange(of: expandedIndex) { _, newValue in
                 guard let idx = newValue else { return }
                 DispatchQueue.main.async {
@@ -131,12 +128,25 @@ struct StepGuideView: View {
             let y = proxy.frame(in: .named("scroll")).minY
             let stretch = max(0, y)
             let dynamicHeight = minHeight + stretch
+            let range = rangeInfo(for: aqiCategory)
 
-            PrecautionAnimationBackground(
-                range: rangeInfo(for: aqiCategory),
-                isActive: $isActive,
-                height: dynamicHeight
-            )
+            ZStack(alignment: .bottomLeading) {
+                // Edge-to-edge animated background
+                PrecautionAnimationBackground(
+                    range: range,
+                    height: dynamicHeight
+                )
+
+                // Large navigation-style title at bottom-left
+                Text(range.aqiRange)
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 2)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .padding(.leading, 16)
+                    .padding(.bottom, 18)
+            }
             .frame(maxWidth: .infinity)
             .frame(height: dynamicHeight)
             .offset(y: -(topInset + stretch))

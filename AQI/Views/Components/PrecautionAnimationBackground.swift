@@ -3,14 +3,13 @@
 //  AQI
 //
 //  Renders only the animated background (gradient + particles).
-//  Optionally overlays the AQI range text when the parent view is active.
+//  No text overlays are included here.
 //
 
 import SwiftUI
 
 struct PrecautionAnimationBackground: View {
     let range: AQIRange
-    @Binding var isActive: Bool
     var height: CGFloat = 180
 
     @State private var particleTrigger = UUID()
@@ -47,13 +46,7 @@ struct PrecautionAnimationBackground: View {
                 trigger: particleTrigger
             )
 
-            // Only the AQI range text, shown only when StepGuideView is active
-            if isActive {
-                Text(range.aqiRange)
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 1)
-            }
+            // Intentionally text-free: all labels/titles are handled by parent views
         }
         .frame(maxWidth: .infinity)
         .frame(height: height)
@@ -69,7 +62,6 @@ struct PrecautionAnimationBackground: View {
 }
 
 #Preview {
-    @State var active = true
     let range = AQIRange(
         title: "Unhealthy",
         aqiRange: "AQI 151–200",
@@ -79,7 +71,7 @@ struct PrecautionAnimationBackground: View {
         accentColor: .red,
         buttonTitle: ""
     )
-    return PrecautionAnimationBackground(range: range, isActive: $active)
+    return PrecautionAnimationBackground(range: range)
         .padding()
         .preferredColorScheme(.dark)
 }
