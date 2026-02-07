@@ -21,15 +21,11 @@ struct SolutionItem: View {
                 Image(systemName: type.systemImageName)
                     .font(.footnote)
                     .foregroundStyle(iconColor ?? .primary)
-                    .frame(minWidth: 0, alignment: .leading)
-
                 Text(status)
                     .font(.caption2)
                     .foregroundStyle(statusColor ?? .secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
-
-                Spacer(minLength: 0)
             }
 
             Text(type.title)
@@ -40,6 +36,8 @@ struct SolutionItem: View {
                 .truncationMode(.tail)
         }
         .padding(.vertical, 4)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .multilineTextAlignment(.center)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("\(type.title), \(status)"))
     }
