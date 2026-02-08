@@ -12,28 +12,49 @@ struct PrecautionCardView: View {
     var onStartGuide: (() -> Void)? = nil
     @State private var particleTrigger = UUID()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var isLightMode: Bool { colorScheme == .light }
+
+    private var gradientColors: [Color] {
+        if isLightMode {
+            // Higher contrast in Light Mode so the card pops on white backgrounds
+            return [
+                range.accentColor.opacity(1.0),
+                range.accentColor.opacity(0.80)
+            ]
+        } else {
+            // Keep existing Dark Mode look
+            return [
+                range.accentColor.opacity(0.95),
+                range.accentColor.opacity(0.55)
+            ]
+        }
+    }
+
+    private var borderOpacity: Double { isLightMode ? 0.18 : 0.12 }
+    private var buttonBackgroundOpacity: Double { isLightMode ? 0.26 : 0.22 }
+    private var blob1Opacity: Double { isLightMode ? 0.12 : 0.15 }
+    private var blob2Opacity: Double { isLightMode ? 0.06 : 0.08 }
 
     var body: some View {
         ZStack {
             // Vibrant, softly blended gradient inspired by the mock
             LinearGradient(
-                colors: [
-                    range.accentColor.opacity(0.95),
-                    range.accentColor.opacity(0.55)
-                ],
+                colors: gradientColors,
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
 
             // Soft highlight blobs to add depth
             Circle()
-                .fill(Color.white.opacity(0.15))
+                .fill(Color.white.opacity(blob1Opacity))
                 .frame(width: 140, height: 140)
                 .blur(radius: 20)
                 .offset(x: 60, y: 58)
 
             Circle()
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.white.opacity(blob2Opacity))
                 .frame(width: 120, height: 120)
                 .blur(radius: 18)
                 .offset(x: -50, y: -60)
@@ -64,7 +85,7 @@ struct PrecautionCardView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 10)
-                        .background(.white.opacity(0.22))
+                        .background(.white.opacity(buttonBackgroundOpacity))
                         .clipShape(Capsule())
                 }
             }
@@ -80,8 +101,9 @@ struct PrecautionCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
+                .strokeBorder(Color.white.opacity(borderOpacity), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(isLightMode ? 0.14 : 0.0), radius: isLightMode ? 14 : 0, x: 0, y: isLightMode ? 8 : 0)
         .frame(maxWidth: .infinity)
         .frame(height: 160)
         .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
