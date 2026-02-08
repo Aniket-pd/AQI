@@ -46,6 +46,17 @@ struct GuideHeaderContainer: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
             }
+
+            // 5) Solutions row (matches SolutionItem preview layout)
+            let statuses = SolutionsAdvisor.statuses(for: aqiCategory)
+            HStack(spacing: 8) {
+                AirPurifierSolutionItem(status: statuses[.airPurifier] ?? "")
+                    .frame(maxWidth: .infinity)
+                N95MaskSolutionItem(status: statuses[.n95Mask] ?? "")
+                    .frame(maxWidth: .infinity)
+                StayIndoorSolutionItem(status: statuses[.stayIndoor] ?? "")
+                    .frame(maxWidth: .infinity)
+            }
         }
         .padding(.horizontal, hPadding)
         .padding(.vertical, vPadding)

@@ -27,10 +27,6 @@ struct StepGuideView: View {
                     // Top precaution card (animated background)
                     precautionCard
 
-                    // Solutions section header + grid
-                    solutionsGrid
-                        .padding(.top, 0)
-
                     // Reusable header card beneath the background
                     GuideHeaderContainer(
                         range: rangeInfo(for: aqiCategory),
@@ -163,17 +159,7 @@ struct StepGuideView: View {
     // Alias for naming consistency in code comments
     private var stretchyHeader: some View { precautionCard }
 
-    private var solutionsGrid: some View {
-        let statuses = SolutionsAdvisor.statuses(for: aqiCategory)
-        return HStack(alignment: .top, spacing: 8) {
-            AirPurifierSolutionItem(status: statuses[.airPurifier] ?? "")
-                .frame(maxWidth: .infinity)
-            N95MaskSolutionItem(status: statuses[.n95Mask] ?? "")
-                .frame(maxWidth: .infinity)
-            StayIndoorSolutionItem(status: statuses[.stayIndoor] ?? "")
-                .frame(maxWidth: .infinity)
-        }
-    }
+    // Solutions row is rendered inside GuideHeaderContainer
 
     private func rangeInfo(for category: AQICategory) -> AQIRange {
         switch category {
