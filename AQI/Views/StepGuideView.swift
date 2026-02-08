@@ -24,11 +24,15 @@ struct StepGuideView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 20) {
-                    // Top precaution card with particles (plays once on appear, retrigger on tap)
+                    // Top precaution card (animated background)
                     precautionCard
 
-                    // Optional short context beneath solutions (moved here)
-                    guideSubtitleContainer
+                    // Reusable header card beneath the background
+                    GuideHeaderContainer(
+                        range: rangeInfo(for: aqiCategory),
+                        guideSubtitle: guideSubtitle,
+                        aqiCategory: aqiCategory
+                    )
 
                     // Solutions section header + grid
                     SectionHeaderView(title: "SUGGESTED ACTIONS")
@@ -77,7 +81,8 @@ struct StepGuideView: View {
             .coordinateSpace(name: "scroll")
             // Allow content (header) to extend behind the notch/nav bar
             .ignoresSafeArea(edges: .top)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle(rangeInfo(for: aqiCategory).aqiRange)
+            .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
                 // Bottom Next button
                 VStack(spacing: 10) {
@@ -117,26 +122,7 @@ struct StepGuideView: View {
 
     // MARK: - Components
 
-    private var guideSubtitleContainer: some View {
-        Group {
-            if !guideSubtitle.isEmpty {
-                Text(guideSubtitle)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.leading)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(Color.white.opacity(0.10), lineWidth: 1)
-                    )
-                    .padding(.top, -62) // keep it close to the animated header
-            }
-        }
-    }
+    // removed old guideSubtitleContainer; replaced by GuideHeaderContainer component
 
     private var precautionCard: some View {
         GeometryReader { proxy in
