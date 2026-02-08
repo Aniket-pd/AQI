@@ -23,20 +23,16 @@ struct StepGuideView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 20) {
+                LazyVStack(alignment: .leading, spacing: 20) {
                     // Top precaution card with particles (plays once on appear, retrigger on tap)
                     precautionCard
+
+                    // Optional short context beneath solutions (moved here)
+                    guideSubtitleContainer
 
                     // Solutions section header + grid
                     SectionHeaderView(title: "SUGGESTED ACTIONS")
                     solutionsGrid
-
-                    // Optional short context beneath solutions
-                    if !guideSubtitle.isEmpty {
-                        Text(guideSubtitle)
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                    }
 
                     // Steps section (rest content)
                     VStack(spacing: 12) {
@@ -121,10 +117,31 @@ struct StepGuideView: View {
 
     // MARK: - Components
 
+    private var guideSubtitleContainer: some View {
+        Group {
+            if !guideSubtitle.isEmpty {
+                Text(guideSubtitle)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                    )
+                    .padding(.top, -62) // keep it close to the animated header
+            }
+        }
+    }
+
     private var precautionCard: some View {
         GeometryReader { proxy in
             let topInset = topSafeArea
-            let minHeight: CGFloat = 240 + topInset
+            let minHeight: CGFloat = 270 + topInset
             let y = proxy.frame(in: .named("scroll")).minY
             let stretch = max(0, y)
             let dynamicHeight = minHeight + stretch
@@ -303,7 +320,7 @@ private extension UIWindowScene {
     ]
     return NavigationStack {
         StepGuideView(
-            guideSubtitle: "Quick steps to follow during a suspected heart attack.",
+            guideSubtitle: "Quick steps to follow during a suspected heart attacQuick steps to follow during a suspected heart attacQuick steps to follow during a suspected heart attack.",
             steps: steps,
             accentColor: .red,
             aqiCategory: .unhealthy_151_200
