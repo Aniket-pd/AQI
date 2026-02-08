@@ -4,6 +4,11 @@ struct SwiftUIParticleField: View {
     var mood: AQIParticleMood
     var cornerRadius: CGFloat
     var trigger: UUID
+    // Active motion duration before beginning global fade-out.
+    // Total visible time ≈ activeDuration + fadeOutWindow.
+    var activeDuration: TimeInterval = 2.2
+    // Length of the global fade after active motion completes.
+    var fadeOutWindow: TimeInterval = 0.5
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -12,10 +17,7 @@ struct SwiftUIParticleField: View {
     @State private var lastStep: Date? = nil
     @State private var pulseOpacity: Double = 0
 
-    // Extended duration for a calmer, more organic feel
-    private let duration: TimeInterval = 2.2
     private let spawnWindow: TimeInterval = 0.36
-    private let globalFadeOutWindow: TimeInterval = 0.5
 
     var body: some View {
         GeometryReader { geo in
@@ -30,12 +32,12 @@ struct SwiftUIParticleField: View {
                         // Update physics and draw
                         var newParticles: [Particle] = []
                         newParticles.reserveCapacity(particles.count)
-                        // Global envelope for graceful disappearance near the end
-                        let fadeStart = max(0, duration - globalFadeOutWindow)
+                        // Global envelope for graceful disappearance after active motion
+                        let fadeStart = max(0, activeDuration)
                         let g: Double
                         if elapsed <= fadeStart { g = 1.0 }
                         else {
-                            let t = min(1.0, max(0.0, (elapsed - fadeStart) / globalFadeOutWindow))
+                            let t = min(1.0, max(0.0, (elapsed - fadeStart) / fadeOutWindow))
                             // smoothstep(1 - t)
                             let s = t * t * (3 - 2 * t)
                             g = 1.0 - s
@@ -107,6 +109,7 @@ struct SwiftUIParticleField: View {
         let count = particleCount(for: mood)
         var new: [Particle] = []
         new.reserveCapacity(count)
+        let minLifetime = activeDuration + fadeOutWindow
 
         for _ in 0..<count {
             let x = CGFloat.random(in: 0...size.width)
@@ -115,7 +118,10 @@ struct SwiftUIParticleField: View {
             let speed = CGFloat.random(in: max(8, mood.velocity - 10)...(mood.velocity + 10)) * 0.2
             let vx = cos(angle) * speed
             let vy = sin(angle) * speed
-            let lifetime = Double.random(in: max(1.1, Double(mood.lifetime))...(Double(mood.lifetime) + 0.6))
+            // Ensure particles persist through the active motion window so the
+            // field "keeps floating" until the global fade starts.
+            let baseMin = max(1.1, Double(mood.lifetime))
+            let lifetime = max(minLifetime, Double.random(in: baseMin...(Double(mood.lifetime) + 0.6)))
             let scale = CGFloat.random(in: 1.0...(2.0 + mood.scale))
             let spawnDelay = Double.random(in: 0...spawnWindow)
             let fadeIn = Double.random(in: 0.18...0.28)

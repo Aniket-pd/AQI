@@ -11,6 +11,8 @@ import SwiftUI
 struct PrecautionAnimationBackground: View {
     let range: AQIRange
     var height: CGFloat = 180
+    // Optional override for how long particles play; default uses the field default
+    var playDuration: TimeInterval? = nil
 
     @State private var particleTrigger = UUID()
 
@@ -43,7 +45,9 @@ struct PrecautionAnimationBackground: View {
             SwiftUIParticleField(
                 mood: AQIParticleMood.mood(for: range),
                 cornerRadius: 0,
-                trigger: particleTrigger
+                trigger: particleTrigger,
+                activeDuration: playDuration ?? 2.2,
+                fadeOutWindow: 0.9
             )
 
             // Intentionally text-free: all labels/titles are handled by parent views

@@ -140,7 +140,8 @@ struct StepGuideView: View {
                 // Edge-to-edge animated background
                 PrecautionAnimationBackground(
                     range: range,
-                    height: dynamicHeight
+                    height: dynamicHeight,
+                    playDuration: 10
                 )
 
                 // Large navigation-style title at bottom-left
