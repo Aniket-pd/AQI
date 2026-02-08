@@ -47,16 +47,14 @@ struct GuideHeaderContainer: View {
                     .multilineTextAlignment(.leading)
             }
 
-            // 5) Solutions row (matches SolutionItem preview layout)
-            let statuses = SolutionsAdvisor.statuses(for: aqiCategory)
-            HStack(spacing: 8) {
-                AirPurifierSolutionItem(status: statuses[.airPurifier] ?? "")
-                    .frame(maxWidth: .infinity)
-                N95MaskSolutionItem(status: statuses[.n95Mask] ?? "")
-                    .frame(maxWidth: .infinity)
-                StayIndoorSolutionItem(status: statuses[.stayIndoor] ?? "")
-                    .frame(maxWidth: .infinity)
-            }
+            // Divider separating context from solutions
+            Rectangle()
+                .fill(Color.white.opacity(0.12))
+                .frame(height: 1)
+                .padding(.top, 6)
+
+            // 5) Solutions row (equal widths, stable)
+            SolutionsRow(category: aqiCategory)
         }
         .padding(.horizontal, hPadding)
         .padding(.vertical, vPadding)
@@ -125,6 +123,89 @@ private struct AQISpectrumBar: View {
         }
         .frame(height: 3) // extra thin spectrum line
         .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Solutions Row (3 equal columns)
+private struct SolutionsRow: View {
+    let category: AQICategory
+
+    private var statuses: [SolutionType: String] {
+        SolutionsAdvisor.statuses(for: category)
+    }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 0) {
+            SolutionColumn(type: .airPurifier, status: statuses[.airPurifier] ?? "")
+                .frame(maxWidth: .infinity)
+
+            VerticalSeparator()
+
+            SolutionColumn(type: .n95Mask, status: statuses[.n95Mask] ?? "")
+                .frame(maxWidth: .infinity)
+
+            VerticalSeparator()
+
+            SolutionColumn(type: .stayIndoor, status: statuses[.stayIndoor] ?? "")
+                .frame(maxWidth: .infinity)
+        }
+        .padding(.vertical, 6)
+    }
+}
+
+private struct VerticalSeparator: View {
+    var body: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.12))
+            .frame(width: 1)
+            .padding(.vertical, 6)
+    }
+}
+
+private struct SolutionColumn: View {
+    let type: SolutionType
+    let status: String
+
+    private var statusColor: Color {
+        let s = status.lowercased()
+        if s.contains("optional") { return .orange }
+        if s.contains("turn on") { return .green }
+        if s.contains("recommended") { return .orange }
+        if s.contains("must") { return .red }
+        if s.contains("stay indoor") { return .red }
+        if s.contains("normal") { return .secondary }
+        return .secondary
+    }
+
+    var body: some View {
+        VStack(alignment: .center, spacing: 6) {
+            // Status (small)
+            Text(status)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(statusColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
+
+            // Icon
+            Image(systemName: type.systemImageName)
+                .font(.system(size: 22, weight: .regular))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(.primary)
+                .frame(height: 24)
+
+            // Title (bold)
+            Text(type.title)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.primary)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .padding(.horizontal, 6)
     }
 }
 

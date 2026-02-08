@@ -28,7 +28,7 @@ enum SolutionType: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .airPurifier: return "Air Purifier"
-        case .n95Mask:     return "N95 Safety Mask"
+        case .n95Mask:     return "N95 Mask"
         case .stayIndoor:  return "Stay Indoor"
         }
     }

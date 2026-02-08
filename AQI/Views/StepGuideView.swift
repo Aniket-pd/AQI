@@ -23,52 +23,56 @@ struct StepGuideView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 20) {
+                LazyVStack(alignment: .leading, spacing: 8) {
                     // Top precaution card (animated background)
                     precautionCard
 
-                    // Reusable header card beneath the background
-                    GuideHeaderContainer(
-                        range: rangeInfo(for: aqiCategory),
-                        guideSubtitle: guideSubtitle,
-                        aqiCategory: aqiCategory
-                    )
-                    .padding(.top, 12)
-
-                    // Steps section (rest content)
+                    // Header + steps in one stack so spacing stays even
                     VStack(spacing: 12) {
-                        ForEach(steps.indices, id: \.self) { idx in
-                            StepCardRow(
-                                index: idx,
-                                step: steps[idx],
-                                accentColor: accentColor,
-                                isExpanded: Binding(
-                                    get: { expandedIndex == idx },
-                                    set: { newValue in
+                        GuideHeaderContainer(
+                            range: rangeInfo(for: aqiCategory),
+                            guideSubtitle: guideSubtitle,
+                            aqiCategory: aqiCategory
+                        )
+
+                        // Steps section (rest content)
+                        VStack(spacing: 12) {
+                            ForEach(steps.indices, id: \.self) { idx in
+                                StepCardRow(
+                                    index: idx,
+                                    step: steps[idx],
+                                    accentColor: accentColor,
+                                    isExpanded: Binding(
+                                        get: { expandedIndex == idx },
+                                        set: { newValue in
+                                            withAnimation(expandAnimation) {
+                                                expandedIndex = newValue ? idx : nil
+                                                if newValue { currentIndex = idx }
+                                            }
+                                            if newValue { impact(.light) }
+                                        }
+                                    ),
+                                    onTap: {
                                         withAnimation(expandAnimation) {
-                                            expandedIndex = newValue ? idx : nil
-                                            if newValue { currentIndex = idx }
+                                            if expandedIndex == idx {
+                                                expandedIndex = nil
+                                            } else {
+                                                expandedIndex = idx
+                                                currentIndex = idx
+                                            }
                                         }
-                                        if newValue { impact(.light) }
+                                        impact(.light)
                                     }
-                                ),
-                                onTap: {
-                                    withAnimation(expandAnimation) {
-                                        if expandedIndex == idx {
-                                            expandedIndex = nil
-                                        } else {
-                                            expandedIndex = idx
-                                            currentIndex = idx
-                                        }
-                                    }
-                                    impact(.light)
-                                }
-                            )
-                            .id(idx)
-                            .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                                )
+                                .id(idx)
+                                .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                            }
                         }
+                        .animation(expandAnimation, value: expandedIndex)
                     }
-                    .animation(expandAnimation, value: expandedIndex)
+                    // Pull the whole block upward to reduce the gap to the animated header,
+                    // while keeping the header-to-steps spacing consistent.
+                    .padding(.top, -60)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 0)
