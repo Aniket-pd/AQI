@@ -16,6 +16,8 @@ struct StepGuideView: View {
 
     private let expandAnimation: Animation = .spring(response: 0.35, dampingFraction: 0.88, blendDuration: 0.2)
     private let advanceAnimation: Animation = .spring(response: 0.38, dampingFraction: 0.9, blendDuration: 0.2)
+    // Consistent visual gap between animated header and header card
+    private let headerGap: CGFloat = 12
 
     @State private var currentIndex: Int = 0
     @State private var expandedIndex: Int? = nil
@@ -70,9 +72,9 @@ struct StepGuideView: View {
                         }
                         .animation(expandAnimation, value: expandedIndex)
                     }
-                    // Pull the whole block upward to reduce the gap to the animated header,
-                    // while keeping the header-to-steps spacing consistent.
-                    .padding(.top, -60)
+                    // Add a fixed gap so spacing to the animated header looks
+                    // consistent across devices and never overlaps.
+                    .padding(.top, headerGap)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 0)
@@ -157,7 +159,10 @@ struct StepGuideView: View {
             .padding(.horizontal, -16) // edge-to-edge despite outer padding
             .ignoresSafeArea(edges: .top)
         }
-        .frame(height: 280 + topSafeArea) // increased height including notch
+        // Keep the header container's layout height constant so the next content
+        // starts exactly where the animated background visually ends. This removes
+        // safe-area dependent gaps and makes the overlap consistent.
+        .frame(height: 270)
     }
 
     // Alias for naming consistency in code comments
