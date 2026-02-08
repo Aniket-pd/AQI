@@ -50,6 +50,12 @@ struct StepCardRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .center, spacing: 10) {
+                // Leading symbol describing the section
+                Image(systemName: iconForTitle(step.title))
+                    .symbolRenderingMode(.monochrome)
+                    .foregroundStyle(isExpanded ? .white.opacity(0.9) : accentColor)
+                    .font(.system(size: 16, weight: .semibold))
+
                 Text(step.title)
                     .font(.headline)
                     .foregroundStyle(isExpanded ? .white : .primary)
@@ -102,6 +108,31 @@ struct StepCardRow: View {
             y: isLightMode ? 4 : 0
         )
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
+    }
+
+    // Map common guide titles to appropriate SF Symbols
+    private func iconForTitle(_ title: String) -> String {
+        let t = title.lowercased()
+
+        // Exact matches used across guides
+        if t == "understand your air" || t == "air overview" { return "wind" }
+        if t == "what you should do" { return "checkmark.circle" }
+        if t == "what to avoid" { return "nosign" }
+        if t == "who needs extra care" { return "person.2" }
+        if t == "indoor vs outdoor tips" { return "house" }
+        if t == "body signals to watch" { return "waveform.path.ecg" }
+
+        // Heuristic fallbacks for preview or new sections
+        if t.contains("emergency") || t.contains("911") { return "phone" }
+        if t.contains("safety") { return "exclamationmark.triangle" }
+        if t.contains("care") { return "cross.case" }
+        if t.contains("avoid") { return "nosign" }
+        if t.contains("should do") || t.contains("do") { return "checkmark.circle" }
+        if t.contains("indoor") || t.contains("outdoor") { return "house" }
+        if t.contains("body") || t.contains("symptom") || t.contains("signals") { return "waveform.path.ecg" }
+        if t.contains("air") { return "wind" }
+
+        return "list.bullet"
     }
 }
 

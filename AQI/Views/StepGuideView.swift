@@ -21,6 +21,9 @@ struct StepGuideView: View {
 
     @State private var currentIndex: Int = 0
     @State private var expandedIndex: Int? = nil
+    // Reuse prepared haptic generators to avoid first-tap latency
+    @State private var hapticLight = UIImpactFeedbackGenerator(style: .light)
+    @State private var hapticMedium = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -109,6 +112,9 @@ struct StepGuideView: View {
                 // Fresh open: start collapsed
                 currentIndex = 0
                 expandedIndex = nil
+                // Pre-warm haptics once to avoid first-use stall
+                hapticLight.prepare()
+                hapticMedium.prepare()
             }
             .onChange(of: expandedIndex) { _, newValue in
                 guard let idx = newValue else { return }
@@ -261,9 +267,23 @@ struct StepGuideView: View {
     }
 
     private func impact(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
-        let generator = UIImpactFeedbackGenerator(style: style)
-        generator.prepare()
-        generator.impactOccurred()
+        switch style {
+        case .light:
+            hapticLight.impactOccurred()
+            // prepare for the next usage to keep latency low
+            hapticLight.prepare()
+        case .medium:
+            hapticMedium.impactOccurred()
+            hapticMedium.prepare()
+        case .heavy:
+            // Create on demand if heavy is ever requested; keep behavior safe
+            let heavy = UIImpactFeedbackGenerator(style: .heavy)
+            heavy.prepare()
+            heavy.impactOccurred()
+        @unknown default:
+            hapticLight.impactOccurred()
+            hapticLight.prepare()
+        }
     }
 }
 
