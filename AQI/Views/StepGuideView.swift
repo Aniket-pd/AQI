@@ -27,16 +27,17 @@ struct StepGuideView: View {
                     // Top precaution card (animated background)
                     precautionCard
 
+                    // Solutions section header + grid
+                    solutionsGrid
+                        .padding(.top, 0)
+
                     // Reusable header card beneath the background
                     GuideHeaderContainer(
                         range: rangeInfo(for: aqiCategory),
                         guideSubtitle: guideSubtitle,
                         aqiCategory: aqiCategory
                     )
-
-                    // Solutions section header + grid
-                    SectionHeaderView(title: "SUGGESTED ACTIONS")
-                    solutionsGrid
+                    .padding(.top, 12)
 
                     // Steps section (rest content)
                     VStack(spacing: 12) {
@@ -164,30 +165,13 @@ struct StepGuideView: View {
 
     private var solutionsGrid: some View {
         let statuses = SolutionsAdvisor.statuses(for: aqiCategory)
-        let items: [(AnyView, String)] = [
-            (AnyView(AirPurifierSolutionItem(status: statuses[.airPurifier] ?? "")), "air"),
-            (AnyView(N95MaskSolutionItem(status: statuses[.n95Mask] ?? "")), "mask"),
-            (AnyView(StayIndoorSolutionItem(status: statuses[.stayIndoor] ?? "")), "indoor")
-        ]
-
-        let columns = [
-            GridItem(.flexible(), spacing: 16),
-            GridItem(.flexible(), spacing: 16)
-        ]
-
-        return LazyVGrid(columns: columns, spacing: 16) {
-            ForEach(Array(items.enumerated()), id: \.offset) { _, pair in
-                pair.0
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                    )
-            }
+        return HStack(alignment: .top, spacing: 8) {
+            AirPurifierSolutionItem(status: statuses[.airPurifier] ?? "")
+                .frame(maxWidth: .infinity)
+            N95MaskSolutionItem(status: statuses[.n95Mask] ?? "")
+                .frame(maxWidth: .infinity)
+            StayIndoorSolutionItem(status: statuses[.stayIndoor] ?? "")
+                .frame(maxWidth: .infinity)
         }
     }
 

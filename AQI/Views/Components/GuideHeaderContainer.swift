@@ -17,7 +17,7 @@ struct GuideHeaderContainer: View {
     private let vPadding: CGFloat = 14
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             // 1) Small uppercase label with subtle icon
             HStack(spacing: 6) {
                 Image(systemName: "circle.grid.3x3")
