@@ -84,8 +84,7 @@ struct StepGuideView: View {
             .coordinateSpace(name: "scroll")
             // Allow content (header) to extend behind the notch/nav bar
             .ignoresSafeArea(edges: .top)
-            .navigationTitle(rangeInfo(for: aqiCategory).aqiRange)
-            .navigationBarTitleDisplayMode(.inline)
+            // No navigation bar title; header shows the context
             .safeAreaInset(edge: .bottom) {
                 // Bottom Next button
                 VStack(spacing: 10) {
