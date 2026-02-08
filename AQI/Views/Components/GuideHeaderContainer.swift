@@ -149,7 +149,7 @@ private struct SolutionsRow: View {
             SolutionColumn(type: .stayIndoor, status: statuses[.stayIndoor] ?? "")
                 .frame(maxWidth: .infinity)
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
     }
 }
 
@@ -158,7 +158,7 @@ private struct VerticalSeparator: View {
         Rectangle()
             .fill(Color.white.opacity(0.12))
             .frame(width: 1)
-            .padding(.vertical, 6)
+            .padding(.vertical, 4)
     }
 }
 
@@ -178,10 +178,10 @@ private struct SolutionColumn: View {
     }
 
     var body: some View {
-        VStack(alignment: .center, spacing: 6) {
+        VStack(alignment: .center, spacing: 4) {
             // Status (small)
             Text(status)
-                .font(.footnote.weight(.semibold))
+                .font(.caption2.weight(.semibold))
                 .foregroundStyle(statusColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
@@ -189,14 +189,14 @@ private struct SolutionColumn: View {
 
             // Icon
             Image(systemName: type.systemImageName)
-                .font(.system(size: 22, weight: .regular))
+                .font(.system(size: 18, weight: .regular))
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(.primary)
-                .frame(height: 24)
+                .frame(height: 20)
 
             // Title (bold)
             Text(type.title)
-                .font(.footnote.weight(.semibold))
+                .font(.caption.weight(.semibold))
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
@@ -205,7 +205,7 @@ private struct SolutionColumn: View {
         }
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
-        .padding(.horizontal, 6)
+        .padding(.horizontal, 4)
     }
 }
 
