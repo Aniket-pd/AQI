@@ -112,12 +112,7 @@ struct PrecautionCardView: View {
             // The inner Button consumes its own taps, so this gesture won't fire for it.
             particleTrigger = UUID()
         }
-        .onAppear {
-            // Play once by default when the view first appears.
-            DispatchQueue.main.async {
-                particleTrigger = UUID()
-            }
-        }
+        // No auto-play on appear; animation triggers only on tap
     }
 }
 

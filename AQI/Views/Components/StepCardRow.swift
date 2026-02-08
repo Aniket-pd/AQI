@@ -14,6 +14,39 @@ struct StepCardRow: View {
     @Binding var isExpanded: Bool
     let onTap: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+    private var isLightMode: Bool { colorScheme == .light }
+
+    private var expandedGradient: [Color] {
+        if isLightMode {
+            // Stronger gradient for better contrast on white backgrounds
+            return [
+                accentColor.opacity(1.0),
+                accentColor.opacity(0.85)
+            ]
+        } else {
+            // Keep existing dark mode look
+            return [
+                accentColor.opacity(0.95),
+                accentColor.opacity(0.55)
+            ]
+        }
+    }
+
+    private var collapsedBackground: Color {
+        // Slightly stronger surface in Light Mode for better separation
+        isLightMode
+        ? Color(.systemGray6)
+        : Color(.secondarySystemGroupedBackground)
+    }
+
+    private var borderColor: Color {
+        // In light mode, subtle dark border for card separation
+        isLightMode
+        ? Color.black.opacity(0.08)
+        : Color.clear
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .center, spacing: 10) {
@@ -46,15 +79,12 @@ struct StepCardRow: View {
                 if isExpanded {
                     // Match PrecautionCard surface material & accent
                     LinearGradient(
-                        colors: [
-                            accentColor.opacity(0.95),
-                            accentColor.opacity(0.55)
-                        ],
+                        colors: expandedGradient,
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 } else {
-                    Color(.secondarySystemGroupedBackground)
+                    collapsedBackground
                 }
             }
         )
@@ -63,7 +93,13 @@ struct StepCardRow: View {
         .clipped()
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.clear, lineWidth: 0)
+                .strokeBorder(borderColor, lineWidth: isLightMode ? 1 : 0)
+        )
+        .shadow(
+            color: Color.black.opacity(isLightMode ? 0.08 : 0.0),
+            radius: isLightMode ? 10 : 0,
+            x: 0,
+            y: isLightMode ? 4 : 0
         )
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
     }
