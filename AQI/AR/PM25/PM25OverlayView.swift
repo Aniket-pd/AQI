@@ -9,6 +9,7 @@ struct PM25OverlayView: View {
         ZStack {
             // AR background
             PM25ARView(viewModel: vm)
+                .id("pm25-ar-view")
                 .edgesIgnoringSafeArea(.all)
 
             // UI overlay
@@ -18,8 +19,25 @@ struct PM25OverlayView: View {
                 controls
             }
             .padding()
+            // Info overlay (custom, non-modal to avoid AR resets)
+            if showInfo {
+                // Tappable backdrop to dismiss
+                Color.black.opacity(0.001)
+                    .ignoresSafeArea()
+                    .onTapGesture { withAnimation(.easeInOut) { showInfo = false } }
+
+                infoSheet
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Material.ultraThin)
+                    )
+                    .padding()
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
-        .sheet(isPresented: $showInfo) { infoSheet }
+        .animation(.easeInOut, value: showInfo)
     }
 
     private var topInfoCard: some View {
@@ -79,10 +97,19 @@ struct PM25OverlayView: View {
                 .font(.title2.bold())
             Text("You’re seeing a live particle field that represents PM2.5 (micrograms per cubic meter). More particles and faster motion means higher concentrations. Colors stay soft and neutral so it blends into your space.")
             Text("Interact by tapping to create a pulse or swiping to push particles aside.")
+            HStack {
+                Spacer()
+                Button {
+                    withAnimation(.easeInOut) { showInfo = false }
+                } label: {
+                    Text("Close")
+                        .font(.callout.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+            }
             Spacer()
         }
-        .padding()
-        .presentationDetents([.fraction(0.35), .medium])
+        .padding(12)
     }
 }
 
