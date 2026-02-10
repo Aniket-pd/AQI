@@ -5,7 +5,6 @@ import Combine
 final class PM25OverlayViewModel: ObservableObject {
     // Do NOT write to this in didSet to avoid recursion.
     @Published var pm25: Double = 12
-    @Published var isLive: Bool = false
 
     // Adaptive quality: requested max particles target
     @Published var targetComplexity: Double = 1.5 // 0.5 = low, 1.0 = normal, 1.5 = high

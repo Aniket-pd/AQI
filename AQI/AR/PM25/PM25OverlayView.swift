@@ -61,22 +61,10 @@ struct PM25OverlayView: View {
 
     private var controls: some View {
         VStack(spacing: 12) {
-            Picker("Mode", selection: $vm.isLive) {
-                Text("Demo slider").tag(false)
-                Text("Live").tag(true)
-            }
-            .pickerStyle(.segmented)
-
-            if !vm.isLive {
-                HStack(spacing: 12) {
-                    Image(systemName: "aqi.low")
-                    Slider(value: $vm.pm25, in: 0...300, step: 1)
-                    Image(systemName: "aqi.high")
-                }
-            } else {
-                Text("Live mode placeholder: wire to sensor/API")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            HStack(spacing: 12) {
+                Image(systemName: "aqi.low")
+                Slider(value: $vm.pm25, in: 0...300, step: 1)
+                Image(systemName: "aqi.high")
             }
         }
         .padding(14)
