@@ -125,8 +125,7 @@ struct SignalDetailView: View {
                 }
             }
         }
-        .navigationTitle("Signal")
-        .navigationBarTitleDisplayMode(.inline)
+        // No explicit navigation title; header content provides the context
         .toolbarBackground(.hidden, for: .navigationBar)
     }
 }
