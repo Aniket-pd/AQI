@@ -22,6 +22,11 @@ final class PM25ParticleController: NSObject {
     private var baseSize: CGFloat = 0.003
     private var pm25Value: Double = 12
     private var complexityScale: Double = 1.0
+    private var targetPM25Value: Double = 12
+    private var displayedPM25Value: Double = 12
+    private var cachedLightEstimate: ARLightEstimate?
+    private var lastParamsUpdateTime: TimeInterval = 0
+    private var lastFrameTime: TimeInterval = 0
 
     func attach(to view: ARSCNView) {
         self.sceneView = view
@@ -111,11 +116,49 @@ final class PM25ParticleController: NSObject {
 
     // MARK: - Updates
     func updatePM25(value: Double, lightEstimate: ARLightEstimate?, complexityScale: Double) {
-        self.pm25Value = value
+        // Defer heavy SceneKit parameter changes to render loop for smoothing and rate limiting.
+        self.targetPM25Value = min(max(value, 0), 300)
+        self.cachedLightEstimate = lightEstimate
         self.complexityScale = complexityScale
+    }
 
+    func placeAtCameraStart(_ view: ARSCNView) {
+        guard let frame = view.session.currentFrame else { return }
+        let cam = frame.camera
+        let transform = SCNMatrix4(cam.transform)
+        emitterNode.transform = transform
+        floorEmitterNode.transform = transform
+        floorEmitterNode.position.y -= 0.8
+        turbulenceNode.transform = transform
+    }
+
+    func updatePerFrame(time: TimeInterval) {
+        frameCount += 1
+        if lastFPSCheckTime == 0 { lastFPSCheckTime = time }
+        let fpsDt = time - lastFPSCheckTime
+        if fpsDt >= 1.0 {
+            currentFPS = Double(frameCount) / fpsDt
+            frameCount = 0
+            lastFPSCheckTime = time
+        }
+
+        // Smooth toward target value to avoid spikes when slider jumps.
+        let dt: TimeInterval
+        if lastFrameTime == 0 { dt = 0; lastFrameTime = time } else { dt = time - lastFrameTime; lastFrameTime = time }
+        // Exponential smoothing: ~150ms time constant
+        let alpha = min(1.0, dt * 6.0)
+        displayedPM25Value = displayedPM25Value + (targetPM25Value - displayedPM25Value) * alpha
+
+        // Rate-limit heavy parameter updates to ~30 Hz
+        if time - lastParamsUpdateTime >= (1.0 / 30.0) {
+            applyParameters(pm25: displayedPM25Value)
+            lastParamsUpdateTime = time
+        }
+    }
+
+    private func applyParameters(pm25: Double) {
         // Map PM2.5 to density, speed, size, slight color warmth
-        let clamped = min(max(value, 0), 300)
+        let clamped = min(max(pm25, 0), 300)
         let t = CGFloat(clamped / 300.0) // 0..1
 
         // Adaptive birth rate with complexity and FPS guard
@@ -135,43 +178,24 @@ final class PM25ParticleController: NSObject {
         // Color: slightly warmer/darker as PM increases
         let baseWhite: CGFloat = 0.94 - 0.18 * t
         let warm = CGFloat(1.0 - 0.1 * t)
-        let color = UIColor(red: baseWhite, green: min(baseWhite, warm), blue: warm, alpha: 0.36 + 0.12 * t)
-        particleSystem.particleColor = color
-        floorParticleSystem.particleColor = color.withAlphaComponent(color.cgColor.alpha * 1.05)
+        var color = UIColor(red: baseWhite, green: min(baseWhite, warm), blue: warm, alpha: 0.36 + 0.12 * t)
 
         // Light estimation influences brightness subtly
-        if let le = lightEstimate {
+        if let le = cachedLightEstimate {
             let intensity = CGFloat(min(max(le.ambientIntensity / 1000.0, 0.5), 1.2))
-            let adjusted = color.withAlphaComponent(min(max(color.cgColor.alpha * intensity, 0.2), 0.7))
-            particleSystem.particleColor = adjusted
-            floorParticleSystem.particleColor = adjusted
+            color = color.withAlphaComponent(min(max(color.cgColor.alpha * intensity, 0.2), 0.7))
         }
+
+        particleSystem.particleColor = color
+        floorParticleSystem.particleColor = color.withAlphaComponent(color.cgColor.alpha * 1.05)
 
         // Heavier clustering at higher PM: increase damping a bit
         let damp = CGFloat(0.01 + 0.1 * t)
         particleSystem.dampingFactor = damp
         floorParticleSystem.dampingFactor = damp
-    }
 
-    func placeAtCameraStart(_ view: ARSCNView) {
-        guard let frame = view.session.currentFrame else { return }
-        let cam = frame.camera
-        let transform = SCNMatrix4(cam.transform)
-        emitterNode.transform = transform
-        floorEmitterNode.transform = transform
-        floorEmitterNode.position.y -= 0.8
-        turbulenceNode.transform = transform
-    }
-
-    func updatePerFrame(time: TimeInterval) {
-        frameCount += 1
-        if lastFPSCheckTime == 0 { lastFPSCheckTime = time }
-        let dt = time - lastFPSCheckTime
-        if dt >= 1.0 {
-            currentFPS = Double(frameCount) / dt
-            frameCount = 0
-            lastFPSCheckTime = time
-        }
+        // Keep pm25Value in sync for cluster probabilities
+        pm25Value = clamped
     }
 
     // MARK: - Interactions
