@@ -7,7 +7,6 @@ final class PM25ParticleController: NSObject {
     private var emitterNode = SCNNode()
     private var floorEmitterNode = SCNNode()
     private var turbulenceNode = SCNNode()
-    private var breathFieldNode: SCNNode?
     private var clusterTimer: Timer?
 
     private var particleSystem: SCNParticleSystem = SCNParticleSystem()
@@ -188,26 +187,6 @@ final class PM25ParticleController: NSObject {
         makePulseField(at: world, strength: 2.5, duration: 0.35)
     }
 
-    func setBreath(active: Bool) {
-        guard let view = sceneView else { return }
-        if active {
-            if breathFieldNode == nil {
-                let linear = SCNPhysicsField.linearGravity()
-                linear.direction = view.cameraForward
-                linear.strength = 1.2
-                linear.halfExtent = SCNVector3(0.5, 0.5, 1.2)
-                linear.usesEllipsoidalExtent = true
-                let node = SCNNode()
-                node.physicsField = linear
-                node.position = view.cameraPosition + view.cameraForward * 0.15
-                view.scene.rootNode.addChildNode(node)
-                breathFieldNode = node
-            }
-        } else {
-            breathFieldNode?.removeFromParentNode()
-            breathFieldNode = nil
-        }
-    }
 
     private func makePulseField(at position: SCNVector3, strength: CGFloat, duration: TimeInterval) {
         guard let view = sceneView else { return }

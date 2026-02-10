@@ -40,7 +40,6 @@ struct PM25ARView: UIViewRepresentable {
     func updateUIView(_ uiView: ARSCNView, context: Context) {
         let light = uiView.session.currentFrame?.lightEstimate
         context.coordinator.controller.updatePM25(value: viewModel.pm25, lightEstimate: light, complexityScale: viewModel.targetComplexity)
-        context.coordinator.controller.setBreath(active: viewModel.breathActive)
     }
 
     final class Coordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {

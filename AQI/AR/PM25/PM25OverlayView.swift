@@ -18,16 +18,6 @@ struct PM25OverlayView: View {
                 controls
             }
             .padding()
-
-            // Breath button centered bottom
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    breathButton
-                }
-                .padding([.horizontal, .bottom])
-            }
         }
         .sheet(isPresented: $showInfo) { infoSheet }
     }
@@ -88,44 +78,9 @@ struct PM25OverlayView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
-
-            // Adaptive quality control (hidden by default, but handy during dev)
-            #if DEBUG
-            HStack(spacing: 10) {
-                Text("Quality")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                Slider(value: $vm.targetComplexity, in: 0.5...1.5)
-                    .tint(.secondary)
-                Text(String(format: "%.2fx", vm.targetComplexity))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 44, alignment: .trailing)
-            }
-            #endif
         }
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
-    private var breathButton: some View {
-        Button {
-            // no-op: handled by press states
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: vm.breathActive ? "wind" : "wind")
-                Text("Breath")
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(.ultraThinMaterial, in: Capsule())
-        }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in vm.breathActive = true }
-                .onEnded { _ in vm.breathActive = false }
-        )
-        .buttonStyle(.plain)
     }
 
     private var infoSheet: some View {
@@ -135,7 +90,7 @@ struct PM25OverlayView: View {
             Text("What am I seeing?")
                 .font(.title2.bold())
             Text("You’re seeing a live particle field that represents PM2.5 (micrograms per cubic meter). More particles and faster motion means higher concentrations. Colors stay soft and neutral so it blends into your space.")
-            Text("Interact by tapping to create a pulse or swiping to push particles aside. Hold ‘Breath’ to blow a gentle stream.")
+            Text("Interact by tapping to create a pulse or swiping to push particles aside.")
             Spacer()
         }
         .padding()
