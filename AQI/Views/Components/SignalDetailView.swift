@@ -17,6 +17,7 @@ struct SignalDetailView: View {
 
     // Track scroll to drive the header shade fade
     @State private var scrollY: CGFloat = 0
+    @Environment(\.colorScheme) private var scheme
 
     init(title: String,
          subtitle: String,
@@ -53,25 +54,21 @@ struct SignalDetailView: View {
                                         .preference(key: ViewOffsetKey.self, value: proxy.frame(in: .named("signalScroll")).minY)
                                 }
                             )
-                        // Header
-                        HStack(alignment: .top, spacing: 12) {
-                            Image(systemName: iconName)
-                                .foregroundColor(accentColor)
-                                .font(.system(size: 24, weight: .semibold))
-                            .frame(width: 44, height: 44)
-                            .background(accentColor.opacity(0.15))
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-
+                        // Header: icon + title on one line; subtitle below
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(title)
-                                .font(.title2.bold())
-                                .foregroundStyle(.primary)
+                            HStack(alignment: .center, spacing: 12) {
+                                Image(systemName: iconName)
+                                    .font(.system(size: 24, weight: .semibold))
+                                    .foregroundStyle(colorForScheme)
+                                Text(title)
+                                    .font(.title2.bold())
+                                    .foregroundStyle(.primary)
+                            }
                             Text(subtitle)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
-                    }
-
+                    
                     // Sections
                     VStack(spacing: 14) {
                         ForEach(sections) { section in
@@ -139,27 +136,36 @@ private struct TopShade: View {
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        let top = accentColor.opacity(0.95)
-        let mid = accentColor.opacity(scheme == .dark ? 0.55 : 0.45)
-        let clear = Color.clear
-
-        LinearGradient(
-            colors: [top, mid, clear],
+        // Base accent gradient (Apple-style header shade)
+        // Bright at the very top, then gently desaturates and fades out
+        let base = LinearGradient(
+            gradient: Gradient(stops: [
+                .init(color: accentColor.opacity(0.95), location: 0.0),
+                .init(color: accentColor.opacity(scheme == .dark ? 0.78 : 0.72), location: 0.28),
+                .init(color: accentColor.opacity(scheme == .dark ? 0.52 : 0.45), location: 0.55),
+                .init(color: accentColor.opacity(0.0), location: 0.82)
+            ]),
             startPoint: .top,
             endPoint: .bottom
         )
-        .opacity(0.85 * Double(progress))
-        .overlay(
-            LinearGradient(
-                colors: [
-                    (scheme == .dark ? Color.black.opacity(0.25) : Color.black.opacity(0.06)),
-                    Color.black.opacity(0)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            ).opacity(Double(progress))
+
+        // A soft darkening ramp that creates the clean fade-into-background look
+        let darkRamp = LinearGradient(
+            gradient: Gradient(stops: [
+                .init(color: Color.black.opacity(scheme == .dark ? 0.10 : 0.04), location: 0.0),
+                .init(color: Color.black.opacity(scheme == .dark ? 0.20 : 0.08), location: 0.35),
+                .init(color: Color.black.opacity(scheme == .dark ? 0.55 : 0.16), location: 0.70),
+                .init(color: Color.black.opacity(0.0), location: 0.98)
+            ]),
+            startPoint: .top,
+            endPoint: .bottom
         )
-        .blur(radius: CGFloat(8 + (12 * progress)))
+
+        ZStack {
+            base
+            darkRamp
+        }
+        .opacity(0.95 * Double(progress))
         .frame(maxWidth: .infinity, maxHeight: 420)
         .transition(.opacity)
     }
@@ -178,6 +184,10 @@ private extension SignalDetailView {
         // scrollY is near 0 at rest; becomes negative when scrolled up
         let p = min(max(1.0 - (-scrollY / 240.0), 0.0), 1.0)
         return p
+    }
+
+    var colorForScheme: Color {
+        scheme == .dark ? .white : .black
     }
 }
 
