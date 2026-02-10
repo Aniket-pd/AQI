@@ -15,8 +15,8 @@ struct HeadacheHeavyHeadView: View {
                 ]),
                 .init(title: "When to get extra help", body: "If headaches are severe, sudden, or do not improve, seek medical advice.")
             ],
-            accentColor: Color(red: 0.58, green: 0.72, blue: 0.86),
-            iconName: "waveform.path.ecg",
+            accentColor: BodySignalKind.headacheHeavyHead.accentColor,
+            iconName: BodySignalKind.headacheHeavyHead.iconName,
             sources: [
                 "https://www.cdc.gov/wildfires/risk-factors/index.html",
                 "https://pmc.ncbi.nlm.nih.gov/articles/PMC9540829/"

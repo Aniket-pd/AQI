@@ -11,8 +11,8 @@ struct PoorSleepView: View {
                 .init(title: "What you can do right now?", body: "Use an air purifier in the bedroom if available, keep windows closed when AQI is high, avoid caffeine late in the day, and keep the room cool, dark, and quiet."),
                 .init(title: "When to get extra help", body: "If you experience breathing issues at night or ongoing insomnia despite cleaner air, consider medical advice.")
             ],
-            accentColor: Color(red: 0.56, green: 0.60, blue: 0.80),
-            iconName: "bed.double.fill"
+            accentColor: BodySignalKind.poorSleep.accentColor,
+            iconName: BodySignalKind.poorSleep.iconName
         )
     }
 }

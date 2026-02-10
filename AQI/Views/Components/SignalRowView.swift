@@ -14,7 +14,7 @@ struct SignalRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: item.iconName)
-                .symbolRenderingMode(.multicolor)
+                .symbolRenderingMode(.monochrome)
                 .foregroundStyle(item.tintColor)
                 .frame(width: 28, height: 28)
 

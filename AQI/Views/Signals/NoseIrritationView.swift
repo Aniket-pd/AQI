@@ -15,8 +15,8 @@ struct NoseIrritationView: View {
                 ]),
                 .init(title: "When to get extra help", body: "If symptoms are painful, severe, or long-lasting, seek medical advice.")
             ],
-            accentColor: Color(red: 0.72, green: 0.64, blue: 0.78),
-            iconName: "aqi.low",
+            accentColor: BodySignalKind.noseIrritation.accentColor,
+            iconName: BodySignalKind.noseIrritation.iconName,
             sources: [
                 "https://www.cdc.gov/air-quality/pollutants/index.html",
                 "https://www.cdc.gov/wildfires/risk-factors/index.html"

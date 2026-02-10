@@ -15,8 +15,8 @@ struct EyeThroatIrritationView: View {
                 ]),
                 .init(title: "When to get extra help", body: "If irritation is severe, painful, or does not improve after being in clean air, seek medical advice.")
             ],
-            accentColor: Color(red: 0.84, green: 0.66, blue: 0.34),
-            iconName: "eye.fill",
+            accentColor: BodySignalKind.eyeThroatIrritation.accentColor,
+            iconName: BodySignalKind.eyeThroatIrritation.iconName,
             sources: [
                 "https://www.cdc.gov/wildfires/risk-factors/index.html",
                 "https://cdn.who.int/media/docs/default-source/air-pollution-documents/household-air-pollution/health-risks.pdf"
