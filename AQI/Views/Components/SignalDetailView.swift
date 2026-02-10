@@ -15,6 +15,9 @@ struct SignalDetailView: View {
     let iconName: String
     let sources: [String]
 
+    // Track scroll to drive the header shade fade
+    @State private var scrollY: CGFloat = 0
+
     init(title: String,
          subtitle: String,
          sections: [SignalDetailSection],
@@ -30,14 +33,31 @@ struct SignalDetailView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Header
-                    HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: iconName)
-                            .foregroundColor(accentColor)
-                            .font(.system(size: 24, weight: .semibold))
+        ZStack(alignment: .top) {
+            // Base background stays grouped
+            Color(.systemGroupedBackground).ignoresSafeArea()
+
+            // Apple Health–style top gradient shade behind nav and header
+            TopShade(accentColor: accentColor, progress: shadeProgress)
+                .ignoresSafeArea(edges: .top)
+
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Invisible tracker for scroll offset
+                        Color.clear
+                            .frame(height: 0)
+                            .background(
+                                GeometryReader { proxy in
+                                    Color.clear
+                                        .preference(key: ViewOffsetKey.self, value: proxy.frame(in: .named("signalScroll")).minY)
+                                }
+                            )
+                        // Header
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: iconName)
+                                .foregroundColor(accentColor)
+                                .font(.system(size: 24, weight: .semibold))
                             .frame(width: 44, height: 44)
                             .background(accentColor.opacity(0.15))
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -98,11 +118,67 @@ struct SignalDetailView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 20)
+                }
+                .coordinateSpace(name: "signalScroll")
+                .onPreferenceChange(ViewOffsetKey.self) { y in
+                    scrollY = y
+                }
             }
         }
-        .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("Signal")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+    }
+}
+
+// MARK: - Top Shade
+private struct TopShade: View {
+    let accentColor: Color
+    // 0...1 where 1 is strong shade (top), 0 is faint
+    let progress: CGFloat
+
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        let top = accentColor.opacity(0.95)
+        let mid = accentColor.opacity(scheme == .dark ? 0.55 : 0.45)
+        let clear = Color.clear
+
+        LinearGradient(
+            colors: [top, mid, clear],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .opacity(0.85 * Double(progress))
+        .overlay(
+            LinearGradient(
+                colors: [
+                    (scheme == .dark ? Color.black.opacity(0.25) : Color.black.opacity(0.06)),
+                    Color.black.opacity(0)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            ).opacity(Double(progress))
+        )
+        .blur(radius: CGFloat(8 + (12 * progress)))
+        .frame(maxWidth: .infinity, maxHeight: 420)
+        .transition(.opacity)
+    }
+}
+
+// MARK: - Scroll offset key
+private struct ViewOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+private extension SignalDetailView {
+    var shadeProgress: CGFloat {
+        // scrollY is near 0 at rest; becomes negative when scrolled up
+        let p = min(max(1.0 - (-scrollY / 240.0), 0.0), 1.0)
+        return p
     }
 }
 
