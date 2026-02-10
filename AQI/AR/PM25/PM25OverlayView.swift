@@ -79,6 +79,12 @@ struct PM25OverlayView: View {
 
     private var controls: some View {
         VStack(spacing: 12) {
+            // Educational disclaimer (concise, always visible)
+            Text("This AR visualization is symbolic for learning. Particles are enlarged/simplified and not to scale or physically accurate.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 12) {
                 Image(systemName: "aqi.low")
                 Slider(value: $vm.pm25, in: 0...300, step: 1)
@@ -97,6 +103,16 @@ struct PM25OverlayView: View {
                 .font(.title2.bold())
             Text("You’re seeing a live particle field that represents PM2.5 (micrograms per cubic meter). More particles and faster motion means higher concentrations. Colors stay soft and neutral so it blends into your space.")
             Text("Interact by tapping to create a pulse or swiping to push particles aside.")
+            // Detailed educational clarification for WWDC SSC quality standards
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Educational Note")
+                    .font(.headline)
+                Text("This AR experience is designed purely for visual and educational purposes—to help you understand that PM2.5 particles exist in the air around us and to raise awareness about air pollution.")
+                Text("The visualization does not represent the actual size, density, or physical behavior of real PM2.5. In reality, PM2.5 are extremely small (2.5 micrometers or smaller) and cannot be seen with the naked eye. The particles shown here are enlarged and simplified to make the concept easier to understand.")
+                Text("Please consider this a symbolic visualization for awareness and learning—not a scientifically accurate physical representation.")
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
             HStack {
                 Spacer()
                 Button {
