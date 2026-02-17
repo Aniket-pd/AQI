@@ -16,11 +16,10 @@ struct AQIParticleMood {
     let spinRange: CGFloat
 
     static func mood(for range: AQIRange) -> AQIParticleMood {
-        // Map intensity based on title / aqiRange ordering used in ViewModel
         let baseColor = UIColor(range.accentColor)
 
-        switch range.title.lowercased() {
-        case "good":
+        switch range.category {
+        case .good_0_50:
             return AQIParticleMood(
                 color: baseColor.withAlphaComponent(0.9),
                 birthRate: 25,
@@ -34,7 +33,7 @@ struct AQIParticleMood {
                 xAcceleration: 2,
                 spinRange: 0.3
             )
-        case "moderate":
+        case .moderate_51_100:
             return AQIParticleMood(
                 color: baseColor.withAlphaComponent(0.95),
                 birthRate: 45,
@@ -48,7 +47,7 @@ struct AQIParticleMood {
                 xAcceleration: 4,
                 spinRange: 0.4
             )
-        case "usg":
+        case .usg_101_150:
             return AQIParticleMood(
                 color: baseColor,
                 birthRate: 75,
@@ -62,7 +61,7 @@ struct AQIParticleMood {
                 xAcceleration: 6,
                 spinRange: 0.5
             )
-        case "unhealthy":
+        case .unhealthy_151_200:
             return AQIParticleMood(
                 color: baseColor,
                 birthRate: 110,
@@ -76,7 +75,7 @@ struct AQIParticleMood {
                 xAcceleration: 8,
                 spinRange: 0.6
             )
-        case "very unhealthy":
+        case .veryUnhealthy_201_300:
             return AQIParticleMood(
                 color: baseColor,
                 birthRate: 140,
@@ -90,7 +89,7 @@ struct AQIParticleMood {
                 xAcceleration: 10,
                 spinRange: 0.7
             )
-        case "hazardous":
+        case .hazardous_300_plus:
             return AQIParticleMood(
                 color: baseColor,
                 birthRate: 180,
@@ -103,20 +102,6 @@ struct AQIParticleMood {
                 yAcceleration: -14,
                 xAcceleration: 12,
                 spinRange: 0.8
-            )
-        default:
-            return AQIParticleMood(
-                color: baseColor,
-                birthRate: 60,
-                lifetime: 1.3,
-                velocity: 28,
-                velocityRange: 20,
-                scale: 1.0,
-                scaleRange: 0.5,
-                alphaRange: 0.35,
-                yAcceleration: -6,
-                xAcceleration: 4,
-                spinRange: 0.4
             )
         }
     }
@@ -132,4 +117,3 @@ extension UIColor {
         }
     }
 }
-

@@ -125,6 +125,13 @@ final class InversionController: NSObject {
         setTimeOfDay(timeOfDay)
     }
 
+    func detach() {
+        failureTimer?.invalidate()
+        failureTimer = nil
+        root.removeFromParentNode()
+        view = nil
+    }
+
     private func setSunBaseDirectionFromCurrentCamera() {
         guard let t = view?.session.currentFrame?.camera.transform else { return }
         var fwd = SIMD3<Float>(-t.columns.2.x, -t.columns.2.y, -t.columns.2.z)

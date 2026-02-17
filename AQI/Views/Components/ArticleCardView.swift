@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ArticleCardView: View {
     let article: Article
@@ -14,11 +15,19 @@ struct ArticleCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Banner (image/illustration area)
             ZStack {
-                Image("Heat_inversion")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .clipped()
+                if let image = UIImage(named: article.heroImageName) ?? UIImage(named: "Heat_inversion") {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .clipped()
+                } else {
+                    LinearGradient(
+                        colors: article.heroGradient,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
 
                 // Optional symbol overlay (subtle, like an illustration accent)
                 Image(systemName: article.bannerSymbol)
@@ -111,7 +120,6 @@ struct ArticleCardView: View {
             description: "Learn about cardiovascular diseases, their causes, symptoms, and prevention strategies.",
             sectionCount: "6 sections",
             bannerSymbol: "heart.fill",
-            gradientColors: [Color.pink, Color.red, Color.orange],
             kind: .cardiovascular
         )
     )

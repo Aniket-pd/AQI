@@ -69,14 +69,13 @@ enum AQIGuideKind: Hashable {
     case hazardous
 
     static func from(range: AQIRange) -> AQIGuideKind {
-        switch range.aqiRange {
-        case "AQI 0–50": return .good
-        case "AQI 51–100": return .moderate
-        case "AQI 101–150": return .usg
-        case "AQI 151–200": return .unhealthy
-        case "AQI 201–300": return .veryUnhealthy
-        case "AQI 301+": return .hazardous
-        default: return .moderate
+        switch range.category {
+        case .good_0_50: return .good
+        case .moderate_51_100: return .moderate
+        case .usg_101_150: return .usg
+        case .unhealthy_151_200: return .unhealthy
+        case .veryUnhealthy_201_300: return .veryUnhealthy
+        case .hazardous_300_plus: return .hazardous
         }
     }
 }

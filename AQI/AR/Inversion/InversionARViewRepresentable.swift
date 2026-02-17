@@ -53,6 +53,13 @@ struct InversionARView: UIViewRepresentable {
                                               complexity: viewModel.targetComplexity)
     }
 
+    static func dismantleUIView(_ uiView: ARSCNView, coordinator: Coordinator) {
+        coordinator.controller.detach()
+        uiView.session.pause()
+        uiView.delegate = nil
+        uiView.session.delegate = nil
+    }
+
     final class Coordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate, InversionControllerDelegate {
         let parent: InversionARView
         let controller = InversionController()

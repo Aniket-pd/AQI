@@ -119,8 +119,8 @@ struct PrecautionCardView: View {
 #Preview {
     PrecautionCardView(
         range: AQIRange(
+            category: .moderate_51_100,
             title: "Moderate",
-            aqiRange: "AQI 51–100",
             summary: "Be Aware",
             detail: "Air quality is acceptable.",
             iconName: "aqi.medium",

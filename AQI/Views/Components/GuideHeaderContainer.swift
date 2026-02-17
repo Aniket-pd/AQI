@@ -213,8 +213,8 @@ private struct SolutionColumn: View {
     VStack(spacing: 16) {
         GuideHeaderContainer(
             range: AQIRange(
+                category: .moderate_51_100,
                 title: "Moderately Polluted",
-                aqiRange: "AQI 51–100",
                 summary: "",
                 detail: "",
                 iconName: "",

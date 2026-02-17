@@ -67,8 +67,8 @@ struct PrecautionAnimationBackground: View {
 
 #Preview {
     let range = AQIRange(
+        category: .unhealthy_151_200,
         title: "Unhealthy",
-        aqiRange: "AQI 151–200",
         summary: "",
         detail: "",
         iconName: "",

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ArticleDetailSheetView: View {
     let article: Article
@@ -16,11 +17,29 @@ struct ArticleDetailSheetView: View {
             ScrollView(showsIndicators: true) {
                 VStack(alignment: .leading, spacing: 0) {
                     // Hero image (edge-to-edge inside the sheet)
-                    Image("Heat_inversion")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity, minHeight: 220, maxHeight: 260)
-                        .clipped()
+                    ZStack {
+                        if let image = UIImage(named: article.heroImageName) ?? UIImage(named: "Heat_inversion") {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .clipped()
+                        } else {
+                            LinearGradient(
+                                colors: article.heroGradient,
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        }
+
+                        Image(systemName: article.bannerSymbol)
+                            .font(.system(size: 72, weight: .bold))
+                            .foregroundStyle(.white.opacity(0.2))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                            .padding(24)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 220, maxHeight: 260)
+                    .clipped()
 
                     // Headline and content
                     VStack(alignment: .leading, spacing: 16) {
@@ -137,7 +156,6 @@ struct ArticleARSection: View {
             description: "Cardio fitness, or cardiorespiratory fitness, is your body’s ability to take in, circulate and use oxygen.",
             sectionCount: "5",
             bannerSymbol: "heart.fill",
-            gradientColors: [.pink, .red],
             kind: .cardiovascular
         ),
         onClose: {}

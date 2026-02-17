@@ -41,6 +41,13 @@ struct PM25ARView: UIViewRepresentable {
         // Intentionally no heavy updates here; AR session delegate drives updates.
     }
 
+    static func dismantleUIView(_ uiView: ARSCNView, coordinator: Coordinator) {
+        coordinator.controller.detach()
+        uiView.session.pause()
+        uiView.delegate = nil
+        uiView.session.delegate = nil
+    }
+
     final class Coordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {
         let parent: PM25ARView
         let controller = PM25ParticleController()

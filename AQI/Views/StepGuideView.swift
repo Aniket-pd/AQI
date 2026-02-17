@@ -180,8 +180,8 @@ struct StepGuideView: View {
         switch category {
         case .good_0_50:
             return AQIRange(
+                category: .good_0_50,
                 title: "Good",
-                aqiRange: "AQI 0–50",
                 summary: "Enjoy Outside",
                 detail: "Air quality is satisfactory and air pollution poses little or no risk.",
                 iconName: "aqi.low",
@@ -190,8 +190,8 @@ struct StepGuideView: View {
             )
         case .moderate_51_100:
             return AQIRange(
+                category: .moderate_51_100,
                 title: "Moderate",
-                aqiRange: "AQI 51–100",
                 summary: "Be Aware",
                 detail: "Air quality is acceptable; some pollutants may be a concern for a very small number of people.",
                 iconName: "aqi.medium",
@@ -200,8 +200,8 @@ struct StepGuideView: View {
             )
         case .usg_101_150:
             return AQIRange(
+                category: .usg_101_150,
                 title: "Unhealthy for Sensitive Groups",
-                aqiRange: "AQI 101–150",
                 summary: "Caution",
                 detail: "Members of sensitive groups may experience health effects. The general public is less likely to be affected.",
                 iconName: "exclamationmark.triangle",
@@ -210,8 +210,8 @@ struct StepGuideView: View {
             )
         case .unhealthy_151_200:
             return AQIRange(
+                category: .unhealthy_151_200,
                 title: "Unhealthy",
-                aqiRange: "AQI 151–200",
                 summary: "Reduce Outdoor Activity",
                 detail: "Everyone may begin to experience adverse health effects; sensitive groups may experience more serious effects.",
                 iconName: "exclamationmark.octagon",
@@ -220,8 +220,8 @@ struct StepGuideView: View {
             )
         case .veryUnhealthy_201_300:
             return AQIRange(
+                category: .veryUnhealthy_201_300,
                 title: "Very Unhealthy",
-                aqiRange: "AQI 201–300",
                 summary: "Health Alert",
                 detail: "Health warnings of emergency conditions. The entire population is more likely to be affected.",
                 iconName: "xmark.octagon",
@@ -230,8 +230,8 @@ struct StepGuideView: View {
             )
         case .hazardous_300_plus:
             return AQIRange(
+                category: .hazardous_300_plus,
                 title: "Hazardous",
-                aqiRange: "AQI 300+",
                 summary: "Avoid Exposure",
                 detail: "Health alert: everyone may experience more serious health effects.",
                 iconName: "aqi.high",

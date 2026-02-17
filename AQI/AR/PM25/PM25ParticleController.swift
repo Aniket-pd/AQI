@@ -38,6 +38,10 @@ final class PM25ParticleController: NSObject {
     func detach() {
         clusterTimer?.invalidate()
         clusterTimer = nil
+        emitterNode.removeFromParentNode()
+        floorEmitterNode.removeFromParentNode()
+        turbulenceNode.removeFromParentNode()
+        sceneView = nil
     }
 
     // MARK: - Setup
