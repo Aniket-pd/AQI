@@ -99,7 +99,7 @@ struct ArticleDetailSheetView: View {
     private func headerTitle(for kind: ArticleKind) -> String {
         switch kind {
         case .cardiovascular: return "Cardio Fitness Article"
-        case .epilepsy: return "Neurology Article"
+        case .epilepsy: return "Temperature Inversions"
         case .aqiIndia: return "AQI Article"
         }
     }

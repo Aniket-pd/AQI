@@ -47,9 +47,9 @@ extension Article {
     var heroImageName: String {
         switch kind {
         case .cardiovascular:
-            return "Cardiovascular"
+            return "PM25"
         case .epilepsy:
-            return "Epilepsy"
+            return "Heat_inversion"
         case .aqiIndia:
             return "Heat_inversion"
         }

@@ -19,11 +19,11 @@ final class ArticlesViewModel: ObservableObject {
             kind: .cardiovascular
         ),
         Article(
-            title: "Epilepsy Insights",
-            subtitle: "Brain health & pollution",
-            description: "Explore epilepsy, its symptoms, causes, and how clean air supports recovery.",
-            sectionCount: "4 sections",
-            bannerSymbol: "brain.head.profile",
+            title: "When the Air Stops Moving",
+            subtitle: "Understanding Temperature Inversions",
+            description: "Learn how inversions form, why pollution gets trapped near the ground, and how to time outdoor activity more safely.",
+            sectionCount: "7 sections",
+            bannerSymbol: "wind",
             kind: .epilepsy
         ),
         Article(
