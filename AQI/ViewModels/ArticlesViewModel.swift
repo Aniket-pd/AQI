@@ -11,9 +11,9 @@ import Combine
 final class ArticlesViewModel: ObservableObject {
     let articles: [Article] = [
         Article(
-            title: "Understanding Cardiovascular Disease",
-            subtitle: "Heart health & air quality",
-            description: "Learn about cardiovascular diseases, their causes, symptoms, and prevention strategies.",
+            title: "Know Your Enemy: PM2.5",
+            subtitle: "PM2.5 basics & AR",
+            description: "Understand what PM2.5 is, why it matters, and how to visualize it with AR.",
             sectionCount: "6 sections",
             bannerSymbol: "heart.fill",
             kind: .cardiovascular

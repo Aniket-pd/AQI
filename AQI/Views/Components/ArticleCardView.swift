@@ -61,10 +61,12 @@ struct ArticleCardView: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.9)
 
-                Text(article.subtitle)
-                    .font(.system(size: 18, weight: .regular, design: .default))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(3)
+                if !article.subtitle.isEmpty {
+                    Text(article.subtitle)
+                        .font(.system(size: 18, weight: .regular, design: .default))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                }
 
                 HStack(alignment: .center, spacing: 10) {
                     Text(article.sectionCount)
