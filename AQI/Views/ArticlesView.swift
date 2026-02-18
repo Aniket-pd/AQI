@@ -31,14 +31,11 @@ struct ArticlesView: View {
             }
             .navigationTitle("Articles")
             .background(Color(.systemGroupedBackground))
-            .sheet(item: $selectedArticle) { article in
+            .fullScreenCover(item: $selectedArticle) { article in
                 ArticleDetailSheetView(article: article) {
                     selectedArticle = nil
                 }
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
                 .interactiveDismissDisabled(false)
-                .presentationCornerRadius(28)
             }
         }
     }
