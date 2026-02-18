@@ -11,6 +11,7 @@ import Combine
 struct PrecautionView: View {
     @StateObject private var viewModel = PrecautionViewModel()
     @State private var selectedGuide: AQIGuideNav?
+    @State private var showAboutSheet = false
 
     var body: some View {
         NavigationStack {
@@ -27,6 +28,17 @@ struct PrecautionView: View {
                 .padding(.vertical, 20)
             }
             .navigationTitle("Precaution")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAboutSheet = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .font(.title3)
+                    }
+                    .accessibilityLabel("About")
+                }
+            }
             .background(Color(.systemGroupedBackground))
             .navigationDestination(item: $selectedGuide) { nav in
                 switch nav.kind {
@@ -43,6 +55,9 @@ struct PrecautionView: View {
                 case .hazardous:
                     StepGuide_301_Plus_View(accentColor: nav.accentColor)
                 }
+            }
+            .sheet(isPresented: $showAboutSheet) {
+                PrecautionAboutSheetView()
             }
         }
     }
@@ -76,6 +91,66 @@ enum AQIGuideKind: Hashable {
         case .unhealthy_151_200: return .unhealthy
         case .veryUnhealthy_201_300: return .veryUnhealthy
         case .hazardous_300_plus: return .hazardous
+        }
+    }
+}
+
+private struct PrecautionAboutSheetView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    Text("About")
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(.primary)
+                        .accessibilityAddTraits(.isHeader)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Air pollution is often invisible, but fine particles like PM2.5 can still affect our health. The World Health Organization (WHO) recognizes air pollution as a major global health risk.")
+
+                        Text("This app helps you understand what air quality numbers mean in daily life. It translates AQI levels into clear precautions, highlights body signals you may notice on polluted days, and offers short educational articles to build awareness. Interactive AR features make invisible pollution patterns easier to visualize and understand.")
+
+                        Text("The goal is simple: turn air quality data into practical, intuitive guidance.")
+                    }
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .lineSpacing(3)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Data & Disclaimer")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.primary)
+
+                        Text("Health guidance in this app is informed by publicly available standards from WHO and CPCB (India).")
+
+                        Text("AR visualizations are designed for educational and awareness purposes and may not represent exact real-time environmental conditions.")
+
+                        Text("This app is for awareness and educational purposes only and does not replace professional medical advice.")
+                    }
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .lineSpacing(3)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 24)
+                .frame(maxWidth: 700, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .background(Color(.systemBackground))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .semibold))
+                    }
+                    .accessibilityLabel("Close")
+                }
+            }
         }
     }
 }
