@@ -142,9 +142,10 @@ struct ReferenceLink: Identifiable {
 
 struct ReferenceLinksSection: View {
     let title: String
+    let buttonTitle: String
     let references: [ReferenceLink]
 
-    @State private var activeReference: ReferenceLink?
+    @State private var isShowingSheet = false
 
     var body: some View {
         if !references.isEmpty {
@@ -153,54 +154,82 @@ struct ReferenceLinksSection: View {
                     .font(.title3.weight(.semibold))
                     .foregroundColor(.primary)
 
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(references) { reference in
-                        HStack(alignment: .firstTextBaseline, spacing: 12) {
-                            Text(reference.title)
-                                .font(.body)
-                                .foregroundColor(.primary)
-
-                            Spacer(minLength: 8)
-
-                            Button("Reference Link") {
-                                activeReference = reference
-                            }
-                            .buttonStyle(.bordered)
-                            .font(.footnote.weight(.semibold))
-                            .accessibilityLabel("Reference link for \(reference.title)")
-                        }
-                    }
+                Button(buttonTitle) {
+                    isShowingSheet = true
                 }
+                .buttonStyle(.bordered)
+                .font(.body.weight(.semibold))
+                .accessibilityLabel("\(buttonTitle)")
             }
-            .sheet(item: $activeReference) { reference in
-                ReferenceLinkSheet(reference: reference)
+            .sheet(isPresented: $isShowingSheet) {
+                ReferenceLinksSheet(title: title, references: references)
             }
         }
     }
 }
 
-struct ReferenceLinkSheet: View {
-    let reference: ReferenceLink
+struct ReferenceLinksSheet: View {
+    let title: String
+    let references: [ReferenceLink]
+
+    @State private var contentHeight: CGFloat = 0
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(reference.title)
-                .font(.title2.weight(.semibold))
-                .foregroundColor(.primary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(title)
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(.primary)
 
-            Text(reference.url.absoluteString)
-                .font(.footnote.monospaced())
-                .foregroundColor(.secondary)
-                .textSelection(.enabled)
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(references) { reference in
+                        Link(destination: reference.url) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(reference.title)
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundColor(.primary)
 
-            Link(destination: reference.url) {
-                Text("Open in Browser")
-                    .frame(maxWidth: .infinity)
+                                Text(reference.url.absoluteString)
+                                    .font(.caption.monospaced())
+                                    .foregroundColor(.secondary)
+                                    .textSelection(.enabled)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
+                    }
+                }
             }
-            .buttonStyle(.borderedProminent)
+            .padding(20)
+            .background(
+                GeometryReader { proxy in
+                    Color.clear
+                        .preference(key: ReferenceSheetHeightKey.self, value: proxy.size.height)
+                }
+            )
         }
-        .padding(20)
-        .presentationDetents([.medium])
+        .onPreferenceChange(ReferenceSheetHeightKey.self) { newHeight in
+            contentHeight = newHeight
+        }
+        .presentationDetents(sheetDetents)
+    }
+
+    private var sheetDetents: Set<PresentationDetent> {
+        guard contentHeight > 0 else { return [.medium, .large] }
+        let maxHeight = UIScreen.main.bounds.height * 0.9
+        if contentHeight < maxHeight {
+            return [.height(contentHeight)]
+        }
+        return [.large]
+    }
+}
+
+private struct ReferenceSheetHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 

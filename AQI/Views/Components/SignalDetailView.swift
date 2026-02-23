@@ -79,6 +79,7 @@ struct SignalDetailView: View {
                     if !sourceReferences.isEmpty {
                         ReferenceLinksSection(
                             title: "Sources",
+                            buttonTitle: "Reference Link",
                             references: sourceReferences
                         )
                         .padding(.top, 8)

@@ -46,6 +46,7 @@ struct EpilepsyArticleView: View {
 
             ReferenceLinksSection(
                 title: "References",
+                buttonTitle: "Reference Link",
                 references: [
                     ReferenceLink(
                         title: "World Health Organization (WHO) – Air Quality Guidelines",

@@ -41,6 +41,7 @@ struct CardiovascularArticleView: View {
 
             ReferenceLinksSection(
                 title: "References",
+                buttonTitle: "Reference Link",
                 references: [
                     ReferenceLink(
                         title: "United Nations Environment Programme – Air pollution: Know your enemy",
