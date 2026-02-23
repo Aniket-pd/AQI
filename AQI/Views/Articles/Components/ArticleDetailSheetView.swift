@@ -38,7 +38,8 @@ struct ArticleDetailSheetView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                             .padding(24)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 220, maxHeight: 260)
+                    .frame(maxWidth: .infinity)
+                    .aspectRatio(1.6, contentMode: .fill)
                     .clipped()
 
                     // Headline and content
