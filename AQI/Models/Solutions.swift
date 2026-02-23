@@ -43,6 +43,27 @@ enum SolutionType: String, CaseIterable, Identifiable {
     }
 }
 
+/// Visual severity level for color coding in UI.
+enum SolutionSeverity {
+    case safe
+    case optional
+    case recommended
+    case required
+
+    var color: Color {
+        switch self {
+        case .safe:
+            return .green
+        case .optional:
+            return .yellow
+        case .recommended:
+            return .orange
+        case .required:
+            return .red
+        }
+    }
+}
+
 /// Central place to map an AQI band to the status strings shown on each tile.
 enum SolutionsAdvisor {
     /// Returns a mapping for all three solutions for an AQI category.
@@ -50,46 +71,92 @@ enum SolutionsAdvisor {
         switch category {
         case .good_0_50:
             return [
-                .airPurifier: "Optional",
-                .n95Mask:     "Not Needed",
-                .stayIndoor:  "Enjoy Outside"
+                .airPurifier: "Not needed",
+                .n95Mask:     "Not needed",
+                .stayIndoor:  "Safe"
             ]
 
         case .moderate_51_100:
             return [
                 .airPurifier: "Optional",
                 .n95Mask:     "Optional",
-                .stayIndoor:  "Normal"
+                .stayIndoor:  "Optional"
             ]
 
         case .usg_101_150:
             return [
-                .airPurifier: "Turn On",
-                .n95Mask:     "Consider",
-                .stayIndoor:  "Reduce Outdoor"
+                .airPurifier: "Use purifier",
+                .n95Mask:     "Wear mask",
+                .stayIndoor:  "Recommended"
             ]
 
         case .unhealthy_151_200:
             return [
-                .airPurifier: "Turn On",
-                .n95Mask:     "Recommended",
+                .airPurifier: "Use purifier",
+                .n95Mask:     "Wear mask",
                 .stayIndoor:  "Recommended"
             ]
 
         case .veryUnhealthy_201_300:
             return [
-                .airPurifier: "Turn On",
-                .n95Mask:     "Recommended",
-                .stayIndoor:  "Limit Outdoor"
+                .airPurifier: "Keep on",
+                .n95Mask:     "Wear mask",
+                .stayIndoor:  "Required"
             ]
 
         case .hazardous_300_plus:
             return [
-                .airPurifier: "Turn On",
-                .n95Mask:     "Must",
-                .stayIndoor:  "Stay Indoor"
+                .airPurifier: "Keep on",
+                .n95Mask:     "Required",
+                .stayIndoor:  "Required"
+            ]
+        }
+    }
+
+    /// Returns severity level for each solution for color coding.
+    static func severities(for category: AQICategory) -> [SolutionType: SolutionSeverity] {
+        switch category {
+        case .good_0_50:
+            return [
+                .airPurifier: .safe,
+                .n95Mask: .safe,
+                .stayIndoor: .safe
+            ]
+
+        case .moderate_51_100:
+            return [
+                .airPurifier: .optional,
+                .n95Mask: .optional,
+                .stayIndoor: .safe
+            ]
+
+        case .usg_101_150:
+            return [
+                .airPurifier: .recommended,
+                .n95Mask: .recommended,
+                .stayIndoor: .optional
+            ]
+
+        case .unhealthy_151_200:
+            return [
+                .airPurifier: .recommended,
+                .n95Mask: .recommended,
+                .stayIndoor: .recommended
+            ]
+
+        case .veryUnhealthy_201_300:
+            return [
+                .airPurifier: .required,
+                .n95Mask: .required,
+                .stayIndoor: .recommended
+            ]
+
+        case .hazardous_300_plus:
+            return [
+                .airPurifier: .required,
+                .n95Mask: .required,
+                .stayIndoor: .required
             ]
         }
     }
 }
-
