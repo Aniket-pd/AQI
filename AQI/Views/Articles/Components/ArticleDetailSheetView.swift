@@ -124,6 +124,86 @@ struct ArticleSectionView: View {
     }
 }
 
+struct ReferenceLink: Identifiable {
+    let id = UUID()
+    let title: String
+    let url: URL
+
+    init(title: String, url: URL) {
+        self.title = title
+        self.url = url
+    }
+
+    init?(title: String, urlString: String) {
+        guard let url = URL(string: urlString) else { return nil }
+        self.init(title: title, url: url)
+    }
+}
+
+struct ReferenceLinksSection: View {
+    let title: String
+    let references: [ReferenceLink]
+
+    @State private var activeReference: ReferenceLink?
+
+    var body: some View {
+        if !references.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title)
+                    .font(.title3.weight(.semibold))
+                    .foregroundColor(.primary)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(references) { reference in
+                        HStack(alignment: .firstTextBaseline, spacing: 12) {
+                            Text(reference.title)
+                                .font(.body)
+                                .foregroundColor(.primary)
+
+                            Spacer(minLength: 8)
+
+                            Button("Reference Link") {
+                                activeReference = reference
+                            }
+                            .buttonStyle(.bordered)
+                            .font(.footnote.weight(.semibold))
+                            .accessibilityLabel("Reference link for \(reference.title)")
+                        }
+                    }
+                }
+            }
+            .sheet(item: $activeReference) { reference in
+                ReferenceLinkSheet(reference: reference)
+            }
+        }
+    }
+}
+
+struct ReferenceLinkSheet: View {
+    let reference: ReferenceLink
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(reference.title)
+                .font(.title2.weight(.semibold))
+                .foregroundColor(.primary)
+
+            Text(reference.url.absoluteString)
+                .font(.footnote.monospaced())
+                .foregroundColor(.secondary)
+                .textSelection(.enabled)
+
+            Link(destination: reference.url) {
+                Text("Open in Browser")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding(20)
+        .presentationDetents([.medium])
+    }
+}
+
 struct ArticleARSection: View {
     let title: String
     let bodyText: String

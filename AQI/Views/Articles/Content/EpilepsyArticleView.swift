@@ -44,9 +44,38 @@ struct EpilepsyArticleView: View {
                 bodyText: "Start by checking your local air quality.\n\nIf particle pollution (PM2.5) is high, early morning may be one of the worst times because the mixing layer is still shallow. Waiting until later in the day, when mixing improves, may reduce exposure.\n\nIf ozone is the main concern, afternoon may be worse than morning because ozone forms in sunlight.\n\nYou can reduce exposure by limiting time outdoors during poor air quality, lowering exercise intensity, avoiding heavy traffic areas, and improving indoor air filtration.\n\nUnderstanding the daily pattern helps you make better decisions."
             )
 
-            ArticleSectionView(
+            ReferenceLinksSection(
                 title: "References",
-                bodyText: "• World Health Organization (WHO) – Air Quality Guidelines\nhttps://www.who.int/news-room/feature-stories/detail/what-are-the-who-air-quality-guidelines\n\n• WHO – Ambient Air Pollution Fact Sheet\nhttps://www.who.int/news-room/fact-sheets/detail/ambient-(outdoor)-air-quality-and-health\n\n• United States Environmental Protection Agency (EPA) – PM Health Effects\nhttps://www.epa.gov/pm-pollution/health-and-environmental-effects-particulate-matter-pm\n\n• EPA – Ground-Level Ozone Basics\nhttps://www.epa.gov/ground-level-ozone-pollution/ground-level-ozone-basics\n\n• AirNow – AQI Technical Assistance Document\nhttps://www.airnow.gov/sites/default/files/2020-05/aqi-technical-assistance-document-sept2018.pdf\n\n• National Weather Service – Inversion Overview\nhttps://www.weather.gov/media/lzk/inversion101.pdf\n\n• NOAA – Temperature Inversion Glossary\nhttps://www.noaa.gov/jetstream/appendix/weather-glossary-i"
+                references: [
+                    ReferenceLink(
+                        title: "World Health Organization (WHO) – Air Quality Guidelines",
+                        url: URL(string: "https://www.who.int/news-room/feature-stories/detail/what-are-the-who-air-quality-guidelines")!
+                    ),
+                    ReferenceLink(
+                        title: "WHO – Ambient Air Pollution Fact Sheet",
+                        url: URL(string: "https://www.who.int/news-room/fact-sheets/detail/ambient-(outdoor)-air-quality-and-health")!
+                    ),
+                    ReferenceLink(
+                        title: "United States Environmental Protection Agency (EPA) – PM Health Effects",
+                        url: URL(string: "https://www.epa.gov/pm-pollution/health-and-environmental-effects-particulate-matter-pm")!
+                    ),
+                    ReferenceLink(
+                        title: "EPA – Ground-Level Ozone Basics",
+                        url: URL(string: "https://www.epa.gov/ground-level-ozone-pollution/ground-level-ozone-basics")!
+                    ),
+                    ReferenceLink(
+                        title: "AirNow – AQI Technical Assistance Document",
+                        url: URL(string: "https://www.airnow.gov/sites/default/files/2020-05/aqi-technical-assistance-document-sept2018.pdf")!
+                    ),
+                    ReferenceLink(
+                        title: "National Weather Service – Inversion Overview",
+                        url: URL(string: "https://www.weather.gov/media/lzk/inversion101.pdf")!
+                    ),
+                    ReferenceLink(
+                        title: "NOAA – Temperature Inversion Glossary",
+                        url: URL(string: "https://www.noaa.gov/jetstream/appendix/weather-glossary-i")!
+                    )
+                ]
             )
         }
         .fullScreenCover(isPresented: $showAR) {

@@ -39,9 +39,22 @@ struct CardiovascularArticleView: View {
                 showAR = true
             }
 
-            ArticleSectionView(
+            ReferenceLinksSection(
                 title: "References",
-                bodyText: "• United Nations Environment Programme – Air pollution: Know your enemy\nhttps://www.unep.org/news-and-stories/story/air-pollution-know-your-enemy\n\n• World Health Organization – Air Pollution Overview\nhttps://www.who.int/health-topics/air-pollution\n\n• United States Environmental Protection Agency – Particulate Matter (PM) Basics\nhttps://www.epa.gov/pm-pollution"
+                references: [
+                    ReferenceLink(
+                        title: "United Nations Environment Programme – Air pollution: Know your enemy",
+                        url: URL(string: "https://www.unep.org/news-and-stories/story/air-pollution-know-your-enemy")!
+                    ),
+                    ReferenceLink(
+                        title: "World Health Organization – Air Pollution Overview",
+                        url: URL(string: "https://www.who.int/health-topics/air-pollution")!
+                    ),
+                    ReferenceLink(
+                        title: "United States Environmental Protection Agency – Particulate Matter (PM) Basics",
+                        url: URL(string: "https://www.epa.gov/pm-pollution")!
+                    )
+                ]
             )
         }
         .fullScreenCover(isPresented: $showAR) {

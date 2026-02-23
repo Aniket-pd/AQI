@@ -76,41 +76,12 @@ struct SignalDetailView: View {
                         }
                     }
 
-                    if !sources.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Sources")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                                .padding(.top, 8)
-                            VStack(alignment: .leading, spacing: 6) {
-                                ForEach(sources, id: \.self) { s in
-                                    if let url = URL(string: s) {
-                                        Link(destination: url) {
-                                            HStack(spacing: 8) {
-                                                Image(systemName: "link")
-                                                    .font(.footnote)
-                                                    .foregroundStyle(.secondary)
-                                                Text(s)
-                                                    .font(.footnote)
-                                                    .foregroundStyle(.secondary)
-                                                    .textSelection(.enabled)
-                                            }
-                                        }
-                                    } else {
-                                        HStack(spacing: 8) {
-                                            Image(systemName: "link")
-                                                .font(.footnote)
-                                                .foregroundStyle(.secondary)
-                                            Text(s)
-                                                .font(.footnote)
-                                                .foregroundStyle(.secondary)
-                                                .textSelection(.enabled)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if !sourceReferences.isEmpty {
+                        ReferenceLinksSection(
+                            title: "Sources",
+                            references: sourceReferences
+                        )
+                        .padding(.top, 8)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -188,6 +159,15 @@ private extension SignalDetailView {
 
     var colorForScheme: Color {
         scheme == .dark ? .white : .black
+    }
+
+    var sourceReferences: [ReferenceLink] {
+        sources.compactMap { source in
+            guard let url = URL(string: source) else { return nil }
+            let host = url.host?.replacingOccurrences(of: "www.", with: "")
+            let title = host?.isEmpty == false ? host! : source
+            return ReferenceLink(title: title, url: url)
+        }
     }
 }
 
