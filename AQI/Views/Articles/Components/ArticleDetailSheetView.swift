@@ -115,7 +115,7 @@ struct ArticleSectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.title3.weight(.semibold))
+                .font(.title2.weight(.semibold))
                 .foregroundColor(.primary)
             Text(bodyText)
                 .font(.body)
