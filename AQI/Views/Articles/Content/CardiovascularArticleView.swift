@@ -13,7 +13,7 @@ struct CardiovascularArticleView: View {
         VStack(alignment: .leading, spacing: 24) {
             ArticleSectionView(
                 title: "What Exactly Is PM2.5?",
-                bodyText: "Every time you take a breath, you inhale a mixture of gases and tiny particles suspended in the air. Among them is PM2.5 — particulate matter that measures 2.5 micrometers or smaller in diameter.\n\nTo understand how small that is, consider this: a human hair is about 70 micrometers wide. PM2.5 is nearly thirty times smaller. These particles are invisible under normal conditions, yet they are present in the air around us — especially in urban environments.\n\nBecause of their size, PM2.5 particles behave differently from larger dust. They remain suspended in the air for longer periods and travel greater distances."
+                bodyText: "Every time you take a breath, you inhale a mixture of gases and tiny particles suspended in the air. Among them is PM2.5 particulate matter that measures 2.5 micrometers or smaller in diameter.\n\nTo understand how small that is, consider this: a human hair is about 70 micrometers wide. PM2.5 is nearly thirty times smaller. These particles are invisible under normal conditions, yet they are present in the air around us especially in urban environments.\n\nBecause of their size, PM2.5 particles behave differently from larger dust. They remain suspended in the air for longer periods and travel greater distances."
             )
 
             ArticleSectionView(
@@ -23,7 +23,7 @@ struct CardiovascularArticleView: View {
 
             ArticleSectionView(
                 title: "Where Does PM2.5 Come From?",
-                bodyText: "PM2.5 is produced by both human activity and natural processes.\n\nIn cities, common sources include vehicle exhaust, power plants, industrial emissions, construction activity, and burning of fuels. Natural sources such as wildfires and dust storms can also increase particle levels.\n\nBecause these particles are extremely small, they can travel across cities and even between countries. This makes air pollution a regional and global issue — not just a local one.\n\nThe United Nations Environment Programme emphasizes that understanding air pollution is the first step toward reducing its impact."
+                bodyText: "PM2.5 is produced by both human activity and natural processes.\n\nIn cities, common sources include vehicle exhaust, power plants, industrial emissions, construction activity, and burning of fuels. Natural sources such as wildfires and dust storms can also increase particle levels.\n\nBecause these particles are extremely small, they can travel across cities and even between countries. This makes air pollution a regional and global issue not just a local one.\n\nThe United Nations Environment Programme emphasizes that understanding air pollution is the first step toward reducing its impact."
             )
 
             ArticleSectionView(

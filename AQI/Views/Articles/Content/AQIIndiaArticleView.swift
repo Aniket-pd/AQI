@@ -12,7 +12,7 @@ struct AQIIndiaArticleView: View {
         VStack(alignment: .leading, spacing: 24) {
             ArticleSectionView(
                 title: "What is AQI?",
-                bodyText: "The Air Quality Index (AQI) is a standardized scale that translates complex air pollutant concentrations into an easy-to-understand score from 0 to 500. Lower is better. Scores are grouped into ranges with color codes that indicate potential health impacts for the general public and for sensitive groups."
+                bodyText: "The Air Quality Index (AQI) is a standardized scale that translates complex air pollutant concentrations into an easy to understand score from 0 to 500. Lower is better. Scores are grouped into ranges with color codes that indicate potential health impacts for the general public and for sensitive groups."
             )
 
             ArticleSectionView(
@@ -32,7 +32,7 @@ struct AQIIndiaArticleView: View {
 
             ArticleSectionView(
                 title: "Reduce exposure",
-                bodyText: "- Monitor AQI in your area and plan outdoor activities when levels are lower.\n- Use well-fitted masks on high AQI days.\n- Close windows and use air purifiers indoors.\n- Prefer public transport or active travel when air is cleaner."
+                bodyText: "Monitor AQI in your area and plan outdoor activities when levels are lower.\n- Use well-fitted masks on high AQI days.\n- Close windows and use air purifiers indoors.\n- Prefer public transport or active travel when air is cleaner."
             )
         }
     }

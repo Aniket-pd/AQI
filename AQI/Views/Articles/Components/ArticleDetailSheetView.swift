@@ -117,9 +117,7 @@ struct ArticleSectionView: View {
             Text(title)
                 .font(.title2.weight(.semibold))
                 .foregroundColor(.primary)
-            Text(bodyText)
-                .font(.body)
-                .foregroundColor(.primary)
+            ArticleBodyText(bodyText: bodyText)
         }
     }
 }
@@ -245,9 +243,7 @@ struct ArticleARSection: View {
                 .font(.title3.weight(.semibold))
                 .foregroundColor(.primary)
 
-            Text(bodyText)
-                .font(.body)
-                .foregroundColor(.primary)
+            ArticleBodyText(bodyText: bodyText)
 
             Button(buttonTitle, action: action)
                 .buttonStyle(.borderedProminent)
@@ -255,6 +251,28 @@ struct ArticleARSection: View {
                 .font(.body.weight(.semibold))
                 .accessibilityHint("Opens an AR experience")
         }
+    }
+}
+
+private struct ArticleBodyText: View {
+    let bodyText: String
+    let paragraphSpacing: CGFloat = 8
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: paragraphSpacing) {
+            ForEach(paragraphs.indices, id: \.self) { index in
+                Text(paragraphs[index])
+                    .font(.body)
+                    .foregroundColor(.primary)
+            }
+        }
+    }
+
+    private var paragraphs: [String] {
+        bodyText
+            .components(separatedBy: "\n\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
     }
 }
 

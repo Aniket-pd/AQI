@@ -23,12 +23,12 @@ struct EpilepsyArticleView: View {
 
             ArticleSectionView(
                 title: "A Smaller Volume of Air",
-                bodyText: "In the daytime, the mixing layer may extend about one kilometer upward. At night, it can shrink to roughly one hundred meters.\n\nThe same emissions now enter a much smaller space.\n\nWhen the volume of air decreases, concentration increases. This is why smog often appears worse before sunrise, when the inversion is strongest and winds are calm.\n\nCooler nighttime air also increases humidity. Fine particles scatter light more effectively in humid conditions, which can make haze appear thicker.\n\nThese invisible layers shape the air we experience — even if we cannot see them directly."
+                bodyText: "In the daytime, the mixing layer may extend about one kilometer upward. At night, it can shrink to roughly one hundred meters.\n\nThe same emissions now enter a much smaller space.\n\nWhen the volume of air decreases, concentration increases. This is why smog often appears worse before sunrise, when the inversion is strongest and winds are calm.\n\nCooler nighttime air also increases humidity. Fine particles scatter light more effectively in humid conditions, which can make haze appear thicker.\n\nThese invisible layers shape the air we experience even if we cannot see them directly."
             )
 
             ArticleARSection(
                 title: "Seeing the Invisible (AR Experience)",
-                bodyText: "The AR experience in this app helps you visualize this daily change.\n\nAs you move the time slider, you will see how the “lid” forms at night and lifts during the day. You will see how the mixing layer shrinks and expands as surface heating changes.\n\nThis visualization is conceptual and educational. It is designed to build intuition about how temperature inversions trap pollution. It does not represent exact real-time pollution levels, forecasts, or measurements for your location.\n\nIt shows the pattern — not a prediction.",
+                bodyText: "The AR experience in this app helps you visualize this daily change.\n\nAs you move the time slider, you will see how the “lid” forms at night and lifts during the day. You will see how the mixing layer shrinks and expands as surface heating changes.\n\nThis visualization is conceptual and educational. It is designed to build intuition about how temperature inversions trap pollution. It does not represent exact real-time pollution levels, forecasts, or measurements for your location.\n\nIt shows the pattern not a prediction.",
                 buttonTitle: "Start Inversion AR"
             ) {
                 showAR = true
