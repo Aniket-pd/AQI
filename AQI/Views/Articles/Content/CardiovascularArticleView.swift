@@ -36,13 +36,6 @@ struct CardiovascularArticleView: View {
                 bodyText: "The danger of PM2.5 lies in its scale.\n\nLarger particles are usually trapped by the nose or throat. PM2.5 bypasses these defenses. It travels deep into the lungs and may enter the bloodstream. Over time, repeated exposure can increase the risk of respiratory illness, cardiovascular disease, and stroke.\n\nThe World Health Organization reports that air pollution contributes to millions of premature deaths each year, and fine particulate matter is one of the primary causes.\n\nThe effects are not immediate. They accumulate gradually through long-term exposure."
             )
 
-            // ILLUSTRATION INSERT POINT — Lung Penetration Visualization
-            // Add LungPenetrationAnimationView() here.
-            // Purpose: After explaining that PM2.5 travels deep into the lungs and bloodstream,
-            // animate airflow entering the lungs where larger particles stop early and PM2.5 penetrates deeper.
-            // This helps users understand the biological danger visually.
-            LungPenetrationAnimationView()
-
             ArticleSectionView(
                 title: "Where Does PM2.5 Come From?",
                 bodyText: "PM2.5 is produced by both human activity and natural processes.\n\nIn cities, common sources include vehicle exhaust, power plants, industrial emissions, construction activity, and burning of fuels. Natural sources such as wildfires and dust storms can also increase particle levels.\n\nBecause these particles are extremely small, they can travel across cities and even between countries. This makes air pollution a regional and global issue not just a local one.\n\nThe United Nations Environment Programme emphasizes that understanding air pollution is the first step toward reducing its impact."
@@ -77,6 +70,8 @@ struct CardiovascularArticleView: View {
             ) {
                 showAR = true
             }
+
+            ARSectionIllustrationView()
 
             ReferenceLinksSection(
                 title: "References",
@@ -642,110 +637,25 @@ private struct ParticleSuspensionSimulation {
     }
 }
 
-private struct LungPenetrationAnimationView: View {
-    @State private var flow = false
-
-    private let pmPathPoints: [CGPoint] = [
-        CGPoint(x: 0.50, y: 0.12),
-        CGPoint(x: 0.50, y: 0.26),
-        CGPoint(x: 0.54, y: 0.38),
-        CGPoint(x: 0.60, y: 0.52),
-        CGPoint(x: 0.66, y: 0.66)
-    ]
+private struct StandaloneIllustrationImageView: View {
+    let imageName: String
+    let accessibilityLabel: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Lung Penetration Visualization")
-                .font(.headline)
+        Image(imageName)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .frame(maxWidth: .infinity, alignment: .center)
+            .accessibilityLabel(accessibilityLabel)
+    }
+}
 
-            Text("Larger particles tend to stop earlier, while PM2.5 can travel deeper into the lungs.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            GeometryReader { geo in
-                let w = geo.size.width
-                let h = geo.size.height
-
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.blue.opacity(0.06))
-
-                    Path { path in
-                        path.move(to: CGPoint(x: w * 0.5, y: h * 0.08))
-                        path.addLine(to: CGPoint(x: w * 0.5, y: h * 0.28))
-                        path.addLine(to: CGPoint(x: w * 0.38, y: h * 0.45))
-                        path.move(to: CGPoint(x: w * 0.5, y: h * 0.28))
-                        path.addLine(to: CGPoint(x: w * 0.62, y: h * 0.45))
-                    }
-                    .stroke(Color.blue.opacity(0.5), style: StrokeStyle(lineWidth: 10, lineCap: .round, lineJoin: .round))
-
-                    Ellipse()
-                        .fill(Color.pink.opacity(0.18))
-                        .frame(width: w * 0.28, height: h * 0.46)
-                        .position(x: w * 0.38, y: h * 0.6)
-                    Ellipse()
-                        .fill(Color.pink.opacity(0.18))
-                        .frame(width: w * 0.28, height: h * 0.46)
-                        .position(x: w * 0.62, y: h * 0.6)
-
-                    Circle()
-                        .fill(Color.brown)
-                        .frame(width: 14, height: 14)
-                        .position(
-                            x: w * (flow ? 0.42 : 0.50),
-                            y: h * (flow ? 0.36 : 0.18)
-                        )
-                        .overlay(
-                            Text("X")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundStyle(.white)
-                        )
-
-                    ForEach(Array(pmPathPoints.enumerated()), id: \.offset) { index, point in
-                        Circle()
-                            .fill(Color.orange.opacity(0.8))
-                            .frame(width: 7, height: 7)
-                            .position(
-                                x: w * ((flow ? point.x : 0.5) + (flow ? 0 : 0)),
-                                y: h * (flow ? point.y : 0.12)
-                            )
-                            .opacity(flow ? 1 : (index == 0 ? 1 : 0))
-                            .animation(
-                                .easeInOut(duration: 1.8)
-                                .repeatForever(autoreverses: true)
-                                .delay(Double(index) * 0.12),
-                                value: flow
-                            )
-                    }
-
-                    VStack {
-                        Spacer()
-                        HStack {
-                            Text("Large particle: stops early")
-                                .font(.caption2)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.ultraThinMaterial, in: Capsule())
-                            Spacer()
-                            Text("PM2.5: penetrates deeper")
-                                .font(.caption2)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.ultraThinMaterial, in: Capsule())
-                        }
-                        .padding(10)
-                    }
-                }
-            }
-            .frame(height: 210)
-            .onAppear {
-                flow = true
-            }
-        }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color(.secondarySystemBackground))
+private struct ARSectionIllustrationView: View {
+    var body: some View {
+        StandaloneIllustrationImageView(
+            imageName: "ARpm2.5",
+            accessibilityLabel: "Illustration preview for the PM2.5 augmented reality visualization"
         )
     }
 }
@@ -760,153 +670,20 @@ private struct PM25SourceIllustrationView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            GeometryReader { geo in
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white)
-
-                    // Force a white canvas so transparent pixels in the source image never inherit parent backgrounds.
-                    Color.white
-
-                    Image("pm2.5source")
-                        .resizable()
-                        .interpolation(.high)
-                        .scaledToFit()
-                        .padding(10)
-                }
-                .frame(width: geo.size.width, height: geo.size.height)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-            }
-            .frame(height: 200)
+            StandaloneIllustrationImageView(
+                imageName: "pm2.5source",
+                accessibilityLabel: "Illustration showing PM2.5 sources including traffic, industry, and construction"
+            )
         }
         .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color(.secondarySystemBackground))
-        )
     }
 }
 
 private struct AQIRevealInteractionView: View {
-    @State private var showParticles = false
-    @State private var pulse = false
-
-    private let hiddenParticlePoints: [CGPoint] = [
-        CGPoint(x: 0.12, y: 0.28),
-        CGPoint(x: 0.20, y: 0.43),
-        CGPoint(x: 0.29, y: 0.62),
-        CGPoint(x: 0.36, y: 0.35),
-        CGPoint(x: 0.47, y: 0.52),
-        CGPoint(x: 0.55, y: 0.30),
-        CGPoint(x: 0.64, y: 0.44),
-        CGPoint(x: 0.72, y: 0.57),
-        CGPoint(x: 0.82, y: 0.37),
-        CGPoint(x: 0.88, y: 0.50)
-    ]
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Invisible Pollution Reveal")
-                .font(.headline)
-
-            Text("A clear-looking scene can still contain harmful PM2.5.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            GeometryReader { geo in
-                let w = geo.size.width
-                let h = geo.size.height
-
-                ZStack(alignment: .topTrailing) {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.blue.opacity(0.14), Color.white],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-
-                    Circle()
-                        .fill(Color.yellow.opacity(0.5))
-                        .frame(width: 42, height: 42)
-                        .blur(radius: 1)
-                        .offset(x: -14, y: 14)
-
-                    Rectangle()
-                        .fill(Color.green.opacity(0.2))
-                        .frame(height: h * 0.2)
-                        .frame(maxWidth: .infinity, alignment: .bottom)
-                        .offset(y: h * 0.4)
-
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.65))
-                        .frame(width: w * 0.14, height: h * 0.26)
-                        .offset(x: -w * 0.28, y: h * 0.1)
-
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.55))
-                        .frame(width: w * 0.1, height: h * 0.2)
-                        .offset(x: -w * 0.16, y: h * 0.16)
-
-                    ForEach(Array(hiddenParticlePoints.enumerated()), id: \.offset) { index, point in
-                        Circle()
-                            .fill(Color.orange.opacity(showParticles ? 0.65 : 0))
-                            .frame(width: 5, height: 5)
-                            .position(
-                                x: point.x * w + (pulse && showParticles ? CGFloat((index % 3) - 1) * 2 : 0),
-                                y: point.y * h + (pulse && showParticles ? CGFloat((index % 2 == 0) ? -2 : 2) : 0)
-                            )
-                            .animation(
-                                .easeInOut(duration: 1.1)
-                                .repeatForever(autoreverses: true)
-                                .delay(Double(index) * 0.05),
-                                value: showParticles
-                            )
-                    }
-
-                    if showParticles {
-                        VStack(alignment: .trailing, spacing: 6) {
-                            Text("AQI 136")
-                                .font(.caption.weight(.bold))
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(Color.orange.opacity(0.9), in: Capsule())
-                                .foregroundStyle(.white)
-
-                            Text("Unhealthy for Sensitive Groups")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.ultraThinMaterial, in: Capsule())
-                        }
-                        .padding(10)
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
-                }
-            }
-            .frame(height: 180)
-
-            Button(showParticles ? "Hide Particles" : "Reveal Particles") {
-                withAnimation(.easeInOut(duration: 0.35)) {
-                    showParticles.toggle()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(showParticles ? .gray : .blue)
-
-            Text(showParticles ? "Even when the sky looks clear, AQI monitoring may detect dangerous fine particles." : "Tap to reveal hidden particles and an AQI category.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color(.secondarySystemBackground))
+        StandaloneIllustrationImageView(
+            imageName: "Particle_reveal",
+            accessibilityLabel: "Illustration showing invisible pollution in a clear-looking scene"
         )
-        .onAppear {
-            pulse = true
-        }
     }
 }
