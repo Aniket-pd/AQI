@@ -331,7 +331,11 @@ private struct ParticleSuspensionLaneView: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.62))
+                .fill(Color.white.opacity(0.96))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.black.opacity(0.06), lineWidth: 0.8)
+                )
 
             GeometryReader { geo in
                 let laneHeight = geo.size.height
@@ -448,6 +452,20 @@ private struct ParticleSuspensionLaneSimulation {
     mutating func triggerAirPulse() {
         // Build airflow over repeated taps so fine particles rise progressively instead of spiking to the top.
         airPulseStrength = min(1.0, airPulseStrength + 0.50)
+
+        // Give grounded particles a gentle initial lift so a single pulse is visible without a jerky jump.
+        let launchBase = max(0.02, (physics.airPulseAcceleration - physics.gravity) * 0.025)
+        for index in particles.indices where particles[index].position.y <= 0.02 {
+            let lift = min(
+                physics.maxVerticalSpeed * 0.18,
+                launchBase * particles[index].pulseResponse
+            )
+            particles[index].velocity.dy = max(particles[index].velocity.dy, lift)
+            particles[index].position.y = min(
+                physics.maxHeight,
+                max(particles[index].position.y, 0.004 + (lift * 0.04))
+            )
+        }
     }
 
     mutating func step(deltaTime dt: CGFloat, elapsedTime: CGFloat) {

@@ -67,7 +67,7 @@ struct EpilepsyArticleView: View {
                 title: "Seeing the Invisible (AR Experience)",
                 bodyText: "The AR experience in this app helps you visualize this daily change.\n\nAs you move the time slider, you will see how the “lid” forms at night and lifts during the day. You will see how the mixing layer shrinks and expands as surface heating changes.\n\nThis visualization is conceptual and educational. It is designed to build intuition about how temperature inversions trap pollution. It does not represent exact real-time pollution levels, forecasts, or measurements for your location.\n\nIt shows the pattern not a prediction.",
                 imageName: "InversionAR",
-                quoteText: "See invisible Pollution through you camera",
+                quoteText: "Visualize how invisible air layers shape the air around you.",
                 buttonTitle: "Open AR"
             ) {
                 showAR = true
