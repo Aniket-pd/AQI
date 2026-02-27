@@ -14,7 +14,12 @@ struct CardiovascularArticleView: View {
         VStack(alignment: .leading, spacing: 24) {
             ArticleSectionView(
                 title: "What Exactly Is PM2.5?",
-                bodyText: "Every time you take a breath, you inhale a mixture of gases and tiny particles suspended in the air. Among them is PM2.5 particulate matter that measures 2.5 micrometers or smaller in diameter.\n\nTo understand how small that is, consider this: a human hair is about 70 micrometers wide. PM2.5 is nearly thirty times smaller. These particles are invisible under normal conditions, yet they are present in the air around us especially in urban environments.\n\nBecause of their size, PM2.5 particles behave differently from larger dust. They remain suspended in the air for longer periods and travel greater distances."
+                bodyText: "Every time you take a breath, you inhale a mixture of gases and tiny particles suspended in the air. Among them is PM2.5 particulate matter that measures 2.5 micrometers or smaller in diameter.\n\nTo understand how small that is, consider this: a human hair is about 70 micrometers wide. PM2.5 is nearly thirty times smaller. These particles are invisible under normal conditions, yet they are present in the air around us especially in urban environments."
+            )
+
+            ArticleSectionView(
+                title: "",
+                bodyText: "But how small is that difference really?\nInstead of imagining it, let’s zoom in and compare it visually."
             )
 
             // INTERACTION INSERT POINT — Scale Explorer
@@ -24,12 +29,22 @@ struct CardiovascularArticleView: View {
             // This builds intuitive understanding of microscopic scale and size comparison.
             ScaleExplorerView()
 
+            ArticleSectionView(
+                title: "",
+                bodyText: "Now that you’ve seen the size difference, let’s explore how that size changes the way particles move in air."
+            )
+
             // ILLUSTRATION INSERT POINT — Particle Suspension Animation
             // Add ParticleSuspensionAnimationView() here.
             // Purpose: After explaining that PM2.5 remains suspended longer, show an animated comparison where
             // a large dust particle falls quickly and a PM2.5 particle floats slowly and drifts.
             // This reinforces behavioral differences visually.
             ParticleSuspensionAnimationView()
+
+            ArticleSectionView(
+                title: "",
+                bodyText: "The smaller the particle, the longer it can remain suspended in the air and travel greater distances."
+            )
 
             ArticleSectionView(
                 title: "Why Size Makes It Dangerous",
@@ -241,7 +256,7 @@ private struct ParticleSuspensionAnimationView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Particle Suspension Comparison")
+            Text("How Size Changes Movement")
                 .font(.headline)
 
             Text("Larger dust settles quickly, while PM2.5 drifts and remains suspended.")

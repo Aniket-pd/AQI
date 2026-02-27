@@ -13,7 +13,7 @@ struct EpilepsyArticleView: View {
         VStack(alignment: .leading, spacing: 24) {
             ArticleSectionView(
                 title: "The Air Is Meant to Move",
-                bodyText: "During the day, sunlight warms the ground. The ground warms the air above it. That warm air rises and mixes with the atmosphere. This mixing spreads pollution upward and helps prevent it from staying concentrated near the surface.\n\nThis daily stirring acts like natural ventilation for cities."
+                bodyText: "During the day, sunlight warms the ground. The ground warms the air above it. That warm air rises and mixes with the atmosphere. This mixing spreads pollution upward and helps prevent it from staying concentrated near the surface.This daily stirring acts like natural ventilation for cities.\nIn normal conditions, warm air near the ground rises and mixes with cooler air above.\nDuring a temperature inversion, a layer of warm air sits above cooler air near the surface, preventing that upward movement.\nLook at the diagrams below and notice how the direction of air movement changes."
             )
             // MARK: - INSERT ILLUSTRATION 1 (Daytime Mixing Visual)
             DaytimeMixingIllustrationView()
@@ -66,7 +66,7 @@ struct EpilepsyArticleView: View {
             InversionARSectionView(
                 title: "Seeing the Invisible (AR Experience)",
                 bodyText: "The AR experience in this app helps you visualize this daily change.\n\nAs you move the time slider, you will see how the “lid” forms at night and lifts during the day. You will see how the mixing layer shrinks and expands as surface heating changes.\n\nThis visualization is conceptual and educational. It is designed to build intuition about how temperature inversions trap pollution. It does not represent exact real-time pollution levels, forecasts, or measurements for your location.\n\nIt shows the pattern not a prediction.",
-                imageName: "Heat_inversion",
+                imageName: "InversionAR",
                 quoteText: "See invisible Pollution through you camera",
                 buttonTitle: "Open AR"
             ) {
