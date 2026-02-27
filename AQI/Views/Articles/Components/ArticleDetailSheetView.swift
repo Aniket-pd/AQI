@@ -242,13 +242,15 @@ struct ArticleARSection: View {
 
             HStack {
                 Spacer()
-                Button(buttonTitle, action: action)
-                    .buttonStyle(.borderedProminent)
-                    .tint(.accentColor)
-                    .font(.body.weight(.semibold))
-                    .controlSize(.large)
-                    .frame(minWidth: 160)
-                    .accessibilityHint("Opens an AR experience")
+                Button(action: action) {
+                    Label(buttonTitle, systemImage: "arkit")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.accentColor)
+                .font(.body.weight(.semibold))
+                .controlSize(.large)
+                .frame(minWidth: 160)
+                .accessibilityHint("Opens an AR experience")
                 Spacer()
             }
             .padding(.top, 4)

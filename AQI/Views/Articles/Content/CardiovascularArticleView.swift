@@ -752,13 +752,15 @@ private struct CardiovascularARSection: View {
 
             HStack {
                 Spacer()
-                Button(buttonTitle, action: action)
-                    .buttonStyle(.borderedProminent)
-                    .tint(.accentColor)
-                    .font(.title3.weight(.semibold))
-                    .controlSize(.large)
-                    .frame(minWidth: 180)
-                    .accessibilityHint("Opens an AR experience")
+                Button(action: action) {
+                    Label(buttonTitle, systemImage: "arkit")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.accentColor)
+                .font(.title3.weight(.semibold))
+                .controlSize(.large)
+                .frame(minWidth: 180)
+                .accessibilityHint("Opens an AR experience")
                 Spacer()
             }
             .padding(.top, 2)
