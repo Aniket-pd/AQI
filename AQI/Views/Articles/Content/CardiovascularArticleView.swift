@@ -128,124 +128,121 @@ private struct ScaleExplorerView: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Scale Explorer")
-                .font(.headline)
+        ArticleIllustrationContainer {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Scale Explorer")
+                    .font(.headline)
 
-            Text("Drag to zoom from a human hair to PM2.5-sized particles.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                Text("Drag to zoom from a human hair to PM2.5-sized particles.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
 
-            GeometryReader { geo in
-                let width = geo.size.width
-                let height = geo.size.height
-                let reveal = zoomLevel
-                let baseHairWidth = width * 0.22
-                let baseHairHeight: CGFloat = 8
-                let minHairScale: CGFloat = 0.65
-                let desiredMaxScale: CGFloat = 3.2
-                let maxScaleByWidth = (width * 0.86) / baseHairWidth
-                let maxScaleByHeight = (height * 0.42) / baseHairHeight
-                let maxHairScale = max(minHairScale, min(desiredMaxScale, maxScaleByWidth, maxScaleByHeight))
-                let hairScale = minHairScale + (maxHairScale - minHairScale) * CGFloat(zoomLevel)
-                let renderedHairWidth = baseHairWidth * hairScale
-                // Preserve the educational 30:1 visual comparison during zoom (hair : PM2.5).
-                let particleDiameter = renderedHairWidth / 30
-                let particleRevealScale = reveal > 0.45 ? (0.6 + (reveal - 0.45) * 0.8) : 0.2
-
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.blue.opacity(0.08), Color.cyan.opacity(0.12)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-
-                    ForEach(Array(particleOffsets.enumerated()), id: \.offset) { _, point in
-                        Circle()
-                            .fill(Color.orange.opacity(0.8))
-                            .frame(width: particleDiameter, height: particleDiameter)
-                            .position(x: point.x * width, y: point.y * geo.size.height)
-                            .opacity(reveal > 0.45 ? min(1, (reveal - 0.45) * 2) : 0)
-                            .scaleEffect(particleRevealScale)
-                            .animation(.easeInOut(duration: 0.2), value: particleDiameter)
-                    }
+                GeometryReader { geo in
+                    let width = geo.size.width
+                    let height = geo.size.height
+                    let reveal = zoomLevel
+                    let baseHairWidth = width * 0.22
+                    let baseHairHeight: CGFloat = 8
+                    let minHairScale: CGFloat = 0.65
+                    let desiredMaxScale: CGFloat = 3.2
+                    let maxScaleByWidth = (width * 0.86) / baseHairWidth
+                    let maxScaleByHeight = (height * 0.42) / baseHairHeight
+                    let maxHairScale = max(minHairScale, min(desiredMaxScale, maxScaleByWidth, maxScaleByHeight))
+                    let hairScale = minHairScale + (maxHairScale - minHairScale) * CGFloat(zoomLevel)
+                    let renderedHairWidth = baseHairWidth * hairScale
+                    // Preserve the educational 30:1 visual comparison during zoom (hair : PM2.5).
+                    let particleDiameter = renderedHairWidth / 30
+                    let particleRevealScale = reveal > 0.45 ? (0.6 + (reveal - 0.45) * 0.8) : 0.2
 
                     ZStack {
-                        Capsule()
+                        RoundedRectangle(cornerRadius: 16)
                             .fill(
                                 LinearGradient(
-                                    colors: [Color.brown.opacity(0.4), Color.brown.opacity(0.8)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
+                                    colors: [Color.blue.opacity(0.08), Color.cyan.opacity(0.12)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
                                 )
                             )
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.white.opacity(0.25), lineWidth: 0.8)
-                            )
 
-                        Capsule()
-                            .fill(Color.white.opacity(0.12))
-                            .frame(width: baseHairWidth * 0.78, height: baseHairHeight * 0.22)
-                            .offset(y: -baseHairHeight * 0.12)
+                        ForEach(Array(particleOffsets.enumerated()), id: \.offset) { _, point in
+                            Circle()
+                                .fill(Color.orange.opacity(0.8))
+                                .frame(width: particleDiameter, height: particleDiameter)
+                                .position(x: point.x * width, y: point.y * geo.size.height)
+                                .opacity(reveal > 0.45 ? min(1, (reveal - 0.45) * 2) : 0)
+                                .scaleEffect(particleRevealScale)
+                                .animation(.easeInOut(duration: 0.2), value: particleDiameter)
+                        }
 
-                        Capsule()
-                            .fill(Color.black.opacity(0.08))
-                            .frame(width: baseHairWidth * 0.9, height: baseHairHeight * 0.18)
-                            .offset(y: baseHairHeight * 0.16)
-                    }
-                    .frame(width: baseHairWidth, height: baseHairHeight)
-                    .scaleEffect(hairScale, anchor: .center)
-                    .animation(.easeInOut(duration: 0.2), value: hairScale)
+                        ZStack {
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.brown.opacity(0.4), Color.brown.opacity(0.8)],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.white.opacity(0.25), lineWidth: 0.8)
+                                )
 
-                    VStack {
-                        Spacer()
-                        HStack {
-                            Text("Human hair")
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(.ultraThinMaterial, in: Capsule())
+                            Capsule()
+                                .fill(Color.white.opacity(0.12))
+                                .frame(width: baseHairWidth * 0.78, height: baseHairHeight * 0.22)
+                                .offset(y: -baseHairHeight * 0.12)
+
+                            Capsule()
+                                .fill(Color.black.opacity(0.08))
+                                .frame(width: baseHairWidth * 0.9, height: baseHairHeight * 0.18)
+                                .offset(y: baseHairHeight * 0.16)
+                        }
+                        .frame(width: baseHairWidth, height: baseHairHeight)
+                        .scaleEffect(hairScale, anchor: .center)
+                        .animation(.easeInOut(duration: 0.2), value: hairScale)
+
+                        VStack {
                             Spacer()
-                            if reveal > 0.45 {
-                                Text("PM2.5 appears")
+                            HStack {
+                                Text("Human hair")
                                     .font(.caption)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
                                     .background(.ultraThinMaterial, in: Capsule())
-                                    .transition(.opacity)
+                                Spacer()
+                                if reveal > 0.45 {
+                                    Text("PM2.5 appears")
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(.ultraThinMaterial, in: Capsule())
+                                        .transition(.opacity)
+                                }
                             }
+                            .padding(10)
                         }
-                        .padding(10)
                     }
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-            }
-            .frame(height: 170)
+                .frame(height: 170)
 
-            HStack {
-                Text("Zoom")
+                HStack {
+                    Text("Zoom")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Slider(value: $zoomLevel, in: 0...1)
+                    Text("\(Int(zoomLevel * 100))%")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .frame(width: 42, alignment: .trailing)
+                }
+
+                Text(zoomLevel < 0.45 ? "At this scale, the hair dominates the frame." : "As you zoom further, PM2.5 particles become visible relative to the hair.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Slider(value: $zoomLevel, in: 0...1)
-                Text("\(Int(zoomLevel * 100))%")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                    .frame(width: 42, alignment: .trailing)
             }
-
-            Text(zoomLevel < 0.45 ? "At this scale, the hair dominates the frame." : "As you zoom further, PM2.5 particles become visible relative to the hair.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color(.secondarySystemBackground))
-        )
     }
 }
 
@@ -255,65 +252,62 @@ private struct ParticleSuspensionAnimationView: View {
     private let simulationTimer = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("How Size Changes Movement")
-                .font(.headline)
+        ArticleIllustrationContainer {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("How Size Changes Movement")
+                    .font(.headline)
 
-            Text("Larger dust settles quickly, while PM2.5 drifts and remains suspended.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            GeometryReader { geo in
-                let width = geo.size.width
-                let laneWidth = (width - 24) / 2
-
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.gray.opacity(0.08))
-
-                    HStack(spacing: 12) {
-                        ParticleSuspensionLaneView(
-                            title: "Large Dust",
-                            subtitle: "Falls quickly",
-                            accentColor: .brown,
-                            laneStyle: .heavy,
-                            particles: simulation.heavyLane.particles,
-                            airPulseStrength: simulation.heavyLane.airPulseStrength,
-                            laneWidth: laneWidth
-                        )
-
-                        ParticleSuspensionLaneView(
-                            title: "PM2.5",
-                            subtitle: "Stays suspended longer",
-                            accentColor: .orange,
-                            laneStyle: .fine,
-                            particles: simulation.fineLane.particles,
-                            airPulseStrength: simulation.fineLane.airPulseStrength,
-                            laneWidth: laneWidth
-                        )
-                    }
-                    .padding(6)
-                }
-            }
-            .frame(height: 240)
-
-            HStack(spacing: 10) {
-                Button("Air Pulse") {
-                    simulation.triggerAirPulse()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.blue)
-
-                Text("Heavy particles lift slightly and settle fast; PM2.5 rises and drifts longer.")
-                    .font(.caption)
+                Text("Larger dust settles quickly, while PM2.5 drifts and remains suspended.")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
+
+                GeometryReader { geo in
+                    let width = geo.size.width
+                    let laneWidth = (width - 24) / 2
+
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.gray.opacity(0.08))
+
+                        HStack(spacing: 12) {
+                            ParticleSuspensionLaneView(
+                                title: "Large Dust",
+                                subtitle: "Falls quickly",
+                                accentColor: .brown,
+                                laneStyle: .heavy,
+                                particles: simulation.heavyLane.particles,
+                                airPulseStrength: simulation.heavyLane.airPulseStrength,
+                                laneWidth: laneWidth
+                            )
+
+                            ParticleSuspensionLaneView(
+                                title: "PM2.5",
+                                subtitle: "Stays suspended longer",
+                                accentColor: .orange,
+                                laneStyle: .fine,
+                                particles: simulation.fineLane.particles,
+                                airPulseStrength: simulation.fineLane.airPulseStrength,
+                                laneWidth: laneWidth
+                            )
+                        }
+                        .padding(6)
+                    }
+                }
+                .frame(height: 240)
+
+                HStack(spacing: 10) {
+                    Button("Air Pulse") {
+                        simulation.triggerAirPulse()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+
+                    Text("Heavy particles lift slightly and settle fast; PM2.5 rises and drifts longer.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color(.secondarySystemBackground))
-        )
         .onReceive(simulationTimer) { now in
             let delta = min(max(now.timeIntervalSince(lastTickDate ?? now), 0), 1.0 / 20.0)
             lastTickDate = now
@@ -652,17 +646,44 @@ private struct ParticleSuspensionSimulation {
     }
 }
 
+private struct ArticleIllustrationContainer<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        content
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(.ultraThinMaterial)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.45), Color.primary.opacity(0.08)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 6)
+    }
+}
+
 private struct StandaloneIllustrationImageView: View {
     let imageName: String
     let accessibilityLabel: String
 
     var body: some View {
-        Image(imageName)
-            .resizable()
-            .interpolation(.high)
-            .scaledToFit()
-            .frame(maxWidth: .infinity, alignment: .center)
-            .accessibilityLabel(accessibilityLabel)
+        ArticleIllustrationContainer {
+            Image(imageName)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(maxWidth: .infinity, alignment: .center)
+                .accessibilityLabel(accessibilityLabel)
+        }
     }
 }
 
@@ -725,20 +746,23 @@ private struct CardiovascularARSection: View {
 
 private struct PM25SourceIllustrationView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("PM2.5 Source Illustration")
-                .font(.headline)
+        ArticleIllustrationContainer {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("PM2.5 Source Illustration")
+                    .font(.headline)
 
-            Text("Common urban sources include traffic, industry, and construction activity.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                Text("Common urban sources include traffic, industry, and construction activity.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
 
-            StandaloneIllustrationImageView(
-                imageName: "pm2.5source",
-                accessibilityLabel: "Illustration showing PM2.5 sources including traffic, industry, and construction"
-            )
+                Image("pm2.5source")
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .accessibilityLabel("Illustration showing PM2.5 sources including traffic, industry, and construction")
+            }
         }
-        .padding(14)
     }
 }
 
