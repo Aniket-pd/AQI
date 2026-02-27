@@ -12,6 +12,14 @@ struct ArticleDetailSheetView: View {
     let article: Article
     var onClose: (() -> Void)? = nil
 
+    private var sheetBackgroundColor: Color {
+        Color(UIColor { trait in
+            trait.userInterfaceStyle == .dark
+                ? UIColor.secondarySystemBackground
+                : UIColor.systemBackground
+        })
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: true) {
@@ -79,16 +87,9 @@ struct ArticleDetailSheetView: View {
                 }
             }
             .toolbarBackground(.hidden, for: .navigationBar)
-            .background(Color(.systemBackground))
+            .background(sheetBackgroundColor)
         }
-        .background(Color(.systemBackground))
-        .background(
-            Color(UIColor { trait in
-                trait.userInterfaceStyle == .dark
-                ? UIColor(red: 28/255, green: 28/255, blue: 30/255, alpha: 1)
-                : .white
-            })
-        )
+        .background(sheetBackgroundColor)
     }
 
     private func headerTitle(for kind: ArticleKind) -> String {
