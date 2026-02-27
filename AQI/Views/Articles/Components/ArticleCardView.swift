@@ -29,13 +29,6 @@ struct ArticleCardView: View {
                     )
                 }
 
-                // Optional symbol overlay (subtle, like an illustration accent)
-                Image(systemName: article.bannerSymbol)
-                    .font(.system(size: 52, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.18))
-                    .padding(24)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-
                 // Subtle dark fade at the bottom edge so the transition to the text area feels natural
                 LinearGradient(
                     colors: [Color.black.opacity(0.0), Color.black.opacity(0.35)],

@@ -31,12 +31,6 @@ struct ArticleDetailSheetView: View {
                                 endPoint: .bottomTrailing
                             )
                         }
-
-                        Image(systemName: article.bannerSymbol)
-                            .font(.system(size: 72, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.2))
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                            .padding(24)
                     }
                     .frame(maxWidth: .infinity)
                     .aspectRatio(1.6, contentMode: .fill)
