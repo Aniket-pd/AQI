@@ -21,8 +21,24 @@ struct InversionOverlayView: View {
                 captionView
             }
             .padding()
+
+            if showInfo {
+                Color.black.opacity(0.001)
+                    .ignoresSafeArea()
+                    .onTapGesture { withAnimation(.easeInOut) { showInfo = false } }
+
+                infoCard
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Material.ultraThin)
+                    )
+                    .padding()
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
-        .sheet(isPresented: $showInfo) { infoSheet }
+        .animation(.easeInOut, value: showInfo)
         .onChange(of: vm.timeOfDay) { _, _ in
             updateCaption(for: vm.derivedStability)
         }
@@ -95,22 +111,32 @@ struct InversionOverlayView: View {
     private var header: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Time of Day")
+                Text("Time of day")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                HStack(spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(vm.stabilityLabel)
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .font(.system(size: 28, weight: .semibold, design: .rounded))
                 }
                 Text("Sunlight weakens inversion and clears the air")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button { dismiss() } label: { Image(systemName: "xmark").font(.title3) }
-                .buttonStyle(.plain)
-            Button { showInfo = true } label: { Image(systemName: "info.circle").font(.title3) }
-                .buttonStyle(.plain)
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.title3)
+            }
+            .buttonStyle(.plain)
+            Button {
+                showInfo = true
+            } label: {
+                Image(systemName: "info.circle")
+                    .font(.title3)
+            }
+            .buttonStyle(.plain)
         }
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -127,7 +153,7 @@ struct InversionOverlayView: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private var infoSheet: some View {
+    private var infoCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             Capsule().frame(width: 40, height: 5).foregroundStyle(.secondary).opacity(0.3)
                 .frame(maxWidth: .infinity)
@@ -135,10 +161,19 @@ struct InversionOverlayView: View {
                 .font(.title2.bold())
             Text("Pollution isn’t higher because more is produced; it’s higher because stable, warmer air aloft prevents vertical escape. Particles slow at an invisible boundary, spread sideways, and accumulate in street canyons.")
             Text("Slide the ‘Time of Day’ control from early morning to afternoon to watch the sun rise along an arc. As sunlight increases, the inversion weakens: fog lifts, air mixes, and pollution disperses.")
-            Spacer()
+            HStack {
+                Spacer()
+                Button {
+                    withAnimation(.easeInOut) { showInfo = false }
+                } label: {
+                    Text("Close")
+                        .font(.callout.weight(.semibold))
+                }
+                .buttonStyle(.bordered)
+            }
+            Spacer(minLength: 0)
         }
-        .padding()
-        .presentationDetents([.fraction(0.35), .medium])
+        .padding(12)
     }
 
     
