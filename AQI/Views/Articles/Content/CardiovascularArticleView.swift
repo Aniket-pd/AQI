@@ -306,6 +306,10 @@ private struct ParticleSuspensionAnimationView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+
+                Text("Tip: Tap Air Pulse multiple times to compare how each particle responds.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .onReceive(simulationTimer) { now in
