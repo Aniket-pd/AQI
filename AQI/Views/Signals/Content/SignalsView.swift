@@ -10,6 +10,7 @@ import Combine
 
 struct SignalsView: View {
     @StateObject private var viewModel = SignalsViewModel()
+    @State private var showInfoSheet = false
 
     var body: some View {
         NavigationStack {
@@ -32,6 +33,39 @@ struct SignalsView: View {
             .headerProminence(.increased)
             .navigationTitle("Signals")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showInfoSheet = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showInfoSheet) {
+                NavigationStack {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("What is Signal?")
+                            .font(.title2)
+                            .bold()
+
+                        Text("In this app, Signals are early physical or mental signs your body may show when air quality affects you. They help you recognize how pollution might be impacting your breathing, focus, energy, sleep, or overall well-being.")
+
+                        Spacer()
+                    }
+                    .padding()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                showInfoSheet = false
+                            } label: {
+                                Image(systemName: "xmark")
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
