@@ -63,10 +63,12 @@ struct EpilepsyArticleView: View {
              This is a conceptual educational simulation, not real data.
             */
 
-            ArticleARSection(
+            InversionARSectionView(
                 title: "Seeing the Invisible (AR Experience)",
                 bodyText: "The AR experience in this app helps you visualize this daily change.\n\nAs you move the time slider, you will see how the “lid” forms at night and lifts during the day. You will see how the mixing layer shrinks and expands as surface heating changes.\n\nThis visualization is conceptual and educational. It is designed to build intuition about how temperature inversions trap pollution. It does not represent exact real-time pollution levels, forecasts, or measurements for your location.\n\nIt shows the pattern not a prediction.",
-                buttonTitle: "Start Inversion AR"
+                imageName: "Heat_inversion",
+                quoteText: "See invisible Pollution through you camera",
+                buttonTitle: "Open AR"
             ) {
                 showAR = true
             }
@@ -165,6 +167,64 @@ private struct InversionToggleIllustrationView: View {
                 .resizable()
                 .scaledToFit()
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+    }
+}
+
+private struct InversionARSectionView: View {
+    let title: String
+    let bodyText: String
+    let imageName: String
+    let quoteText: String
+    let buttonTitle: String
+    var action: () -> Void
+
+    private var paragraphs: [String] {
+        bodyText
+            .components(separatedBy: "\n\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.title3.weight(.semibold))
+                .foregroundColor(.primary)
+
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(paragraphs.indices, id: \.self) { index in
+                    Text(paragraphs[index])
+                        .font(.body)
+                        .foregroundColor(.primary)
+                }
+            }
+
+            Image(imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, alignment: .center)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+            Text(quoteText)
+                .font(.title3.weight(.medium))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 4)
+
+            HStack {
+                Spacer()
+                Button(buttonTitle, action: action)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.accentColor)
+                    .font(.title3.weight(.semibold))
+                    .controlSize(.large)
+                    .frame(minWidth: 180)
+                    .accessibilityHint("Opens an AR experience")
+                Spacer()
+            }
+            .padding(.top, 2)
         }
     }
 }

@@ -245,11 +245,18 @@ struct ArticleARSection: View {
 
             ArticleBodyText(bodyText: bodyText)
 
-            Button(buttonTitle, action: action)
-                .buttonStyle(.borderedProminent)
-                .tint(.accentColor)
-                .font(.body.weight(.semibold))
-                .accessibilityHint("Opens an AR experience")
+            HStack {
+                Spacer()
+                Button(buttonTitle, action: action)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.accentColor)
+                    .font(.body.weight(.semibold))
+                    .controlSize(.large)
+                    .frame(minWidth: 160)
+                    .accessibilityHint("Opens an AR experience")
+                Spacer()
+            }
+            .padding(.top, 4)
         }
     }
 }

@@ -63,15 +63,15 @@ struct CardiovascularArticleView: View {
             // The AR experience below serves as the final immersive learning step.
             // No additional components needed here, but maintain this as the climax of the learning flow.
 
-            ArticleARSection(
+            CardiovascularARSection(
                 title: "Seeing the Invisible: AR Visualization",
                 bodyText: "Understanding microscopic particles through text alone can be abstract. To make this concept easier to grasp, this app includes an augmented reality (AR) visualization.\n\nWhen you tap Open AR, a visual model of floating particles will appear in your physical space. This experience is designed to support learning by helping you visualize how fine particulate matter may exist around you.\n\nThe AR particles are educational representations. They are not to scale and do not reflect the real-time concentration of PM2.5 in your surroundings. For accurate air quality information, always consult official AQI sources such as the United States Environmental Protection Agency or other government monitoring agencies.\n\nThe purpose of this feature is simple: to transform an invisible scientific concept into something understandable.",
+                imageName: "ARpm2.5",
+                quoteText: "See invisible Pollution through you camera.",
                 buttonTitle: "Open AR"
             ) {
                 showAR = true
             }
-
-            ARSectionIllustrationView()
 
             ReferenceLinksSection(
                 title: "References",
@@ -651,12 +651,60 @@ private struct StandaloneIllustrationImageView: View {
     }
 }
 
-private struct ARSectionIllustrationView: View {
+private struct CardiovascularARSection: View {
+    let title: String
+    let bodyText: String
+    let imageName: String
+    let quoteText: String
+    let buttonTitle: String
+    var action: () -> Void
+
+    private var paragraphs: [String] {
+        bodyText
+            .components(separatedBy: "\n\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
     var body: some View {
-        StandaloneIllustrationImageView(
-            imageName: "ARpm2.5",
-            accessibilityLabel: "Illustration preview for the PM2.5 augmented reality visualization"
-        )
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.title3.weight(.semibold))
+                .foregroundColor(.primary)
+
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(paragraphs.indices, id: \.self) { index in
+                    Text(paragraphs[index])
+                        .font(.body)
+                        .foregroundColor(.primary)
+                }
+            }
+
+            StandaloneIllustrationImageView(
+                imageName: imageName,
+                accessibilityLabel: "Illustration preview for the PM2.5 augmented reality visualization"
+            )
+
+            Text(quoteText)
+                .font(.title3.weight(.medium))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 4)
+
+            HStack {
+                Spacer()
+                Button(buttonTitle, action: action)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.accentColor)
+                    .font(.title3.weight(.semibold))
+                    .controlSize(.large)
+                    .frame(minWidth: 180)
+                    .accessibilityHint("Opens an AR experience")
+                Spacer()
+            }
+            .padding(.top, 2)
+        }
     }
 }
 
