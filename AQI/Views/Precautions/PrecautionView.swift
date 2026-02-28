@@ -132,6 +132,17 @@ private struct PrecautionAboutSheetView: View {
                     .font(.body)
                     .foregroundStyle(.primary)
                     .lineSpacing(3)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("3D Model Credit")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.primary)
+
+                        Text("“Tiny City” (https://skfb.ly/6xOOr) by Matheus Dalla is licensed under Creative Commons Attribution 4.0 (http://creativecommons.org/licenses/by/4.0/).")
+                    }
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .lineSpacing(3)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 24)

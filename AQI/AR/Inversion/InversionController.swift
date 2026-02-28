@@ -505,6 +505,8 @@ final class InversionController: NSObject {
         delegate?.inversionControllerDidStartLoadingModel(self)
 
         // Try to synchronously load a USDZ; if unavailable, we are ready (procedural fallback).
+        // "Tiny City" (https://skfb.ly/6xOOr) by Matheus Dalla is licensed under
+        // Creative Commons Attribution 4.0 (http://creativecommons.org/licenses/by/4.0/).
         let modelName = "Tiny_City (1)"
         var modelURL: URL?
         if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz", subdirectory: "AR/Assets") {
@@ -711,6 +713,8 @@ final class InversionController: NSObject {
 
         // Try to load a real USDZ city model from the app bundle.
         // Looks under "AR/Assets" first, then at bundle root.
+        // "Tiny City" (https://skfb.ly/6xOOr) by Matheus Dalla is licensed under
+        // Creative Commons Attribution 4.0 (http://creativecommons.org/licenses/by/4.0/).
         let modelName = "Tiny_City (1)"
         var modelURL: URL?
         if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz", subdirectory: "AR/Assets") {
