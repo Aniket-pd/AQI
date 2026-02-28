@@ -503,40 +503,11 @@ final class InversionController: NSObject {
         guard !modelPreloadAttempted else { return }
         modelPreloadAttempted = true
         delegate?.inversionControllerDidStartLoadingModel(self)
-
-        // Try to synchronously load a USDZ; if unavailable, we are ready (procedural fallback).
-        // "Tiny City" (https://skfb.ly/6xOOr) by Matheus Dalla is licensed under
-        // Creative Commons Attribution 4.0 (http://creativecommons.org/licenses/by/4.0/).
-        let modelName = "Tiny_City (1)"
-        var modelURL: URL?
-        if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz", subdirectory: "AR/Assets") {
-            modelURL = url
-        } else if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz") {
-            modelURL = url
+        ARAssetWarmup.shared.fetchPreparedCityContainer { [weak self] container in
+            guard let self else { return }
+            self.preparedCityContainer = container
+            self.delegate?.inversionControllerIsReadyToPlace(self)
         }
-        if let url = modelURL, let scene = try? SCNScene(url: url, options: nil) {
-            let container = SCNNode()
-            container.name = "cityModel"
-            for child in scene.rootNode.childNodes { container.addChildNode(child) }
-
-            var minVec = SCNVector3Zero
-            var maxVec = SCNVector3Zero
-            if container.__getBoundingBoxMin(&minVec, max: &maxVec) {
-                let sizeX = CGFloat(maxVec.x - minVec.x)
-                let sizeZ = CGFloat(maxVec.z - minVec.z)
-                let maxSpan = max(sizeX, sizeZ)
-                let targetSpan: CGFloat = 0.34
-                if maxSpan > 0.0001 { let s = Float(targetSpan / maxSpan); container.scale = SCNVector3(s, s, s) }
-                let centerX = (minVec.x + maxVec.x) * 0.5
-                let centerZ = (minVec.z + maxVec.z) * 0.5
-                let scaledMinY = Float(minVec.y) * container.scale.y
-                container.position = SCNVector3(-centerX * container.scale.x,
-                                                -scaledMinY + 0.006,
-                                                -centerZ * container.scale.z)
-            }
-            preparedCityContainer = container
-        }
-        delegate?.inversionControllerIsReadyToPlace(self)
     }
 
     private func buildCityUsingPreparedIfAvailable() {
@@ -710,65 +681,6 @@ final class InversionController: NSObject {
     private func buildCity() {
         cityNode.childNodes.forEach { $0.removeFromParentNode() }
         root.addChildNode(cityNode)
-
-        // Try to load a real USDZ city model from the app bundle.
-        // Looks under "AR/Assets" first, then at bundle root.
-        // "Tiny City" (https://skfb.ly/6xOOr) by Matheus Dalla is licensed under
-        // Creative Commons Attribution 4.0 (http://creativecommons.org/licenses/by/4.0/).
-        let modelName = "Tiny_City (1)"
-        var modelURL: URL?
-        if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz", subdirectory: "AR/Assets") {
-            modelURL = url
-        } else if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz") {
-            modelURL = url
-        }
-
-        if let url = modelURL, let scene = try? SCNScene(url: url, options: nil) {
-            // Wrap model under a container so we can scale and center it.
-            let container = SCNNode()
-            container.name = "cityModel"
-            for child in scene.rootNode.childNodes {
-                container.addChildNode(child)
-            }
-
-            // Compute bounds and normalize: sit on ground (y=0) and fit within ~34 cm square.
-            var minVec = SCNVector3Zero
-            var maxVec = SCNVector3Zero
-            if container.__getBoundingBoxMin(&minVec, max: &maxVec) {
-                let sizeX = CGFloat(maxVec.x - minVec.x)
-                let sizeZ = CGFloat(maxVec.z - minVec.z)
-                let maxSpan = max(sizeX, sizeZ)
-                let targetSpan: CGFloat = 0.34 // match original base size
-                if maxSpan > 0.0001 {
-                    let s = Float(targetSpan / maxSpan)
-                    container.scale = SCNVector3(s, s, s)
-                }
-                // After scaling, compute center and min to align: center at origin, base on ground
-                let centerX = (minVec.x + maxVec.x) * 0.5
-                let centerZ = (minVec.z + maxVec.z) * 0.5
-                let scaledMinY = Float(minVec.y) * container.scale.y
-                container.position = SCNVector3(-centerX * container.scale.x,
-                                                -scaledMinY + 0.006,
-                                                -centerZ * container.scale.z)
-            }
-
-            // Add a base plate under the model to preserve tinting behavior and visual reference
-            let baseSize: CGFloat = 0.34
-            let base = SCNBox(width: baseSize, height: 0.01, length: baseSize, chamferRadius: 0.004)
-            let baseNode = SCNNode(geometry: base)
-            base.firstMaterial = SCNMaterial()
-            base.firstMaterial?.diffuse.contents = UIColor(white: 0.15, alpha: 1)
-            base.firstMaterial?.lightingModel = .lambert
-            baseNode.name = "basePlate"
-            baseNode.position = SCNVector3(0, 0, 0)
-            cityNode.addChildNode(baseNode)
-
-            cityNode.addChildNode(container)
-
-            // Build pollution sources relative to the model footprint
-            buildSources()
-            return
-        }
 
         // Fallback: build the original procedural city if USDZ missing
         let baseSize: CGFloat = 0.34 // 34 cm square platform

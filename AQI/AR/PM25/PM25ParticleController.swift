@@ -30,6 +30,7 @@ final class PM25ParticleController: NSObject {
 
     func attach(to view: ARSCNView) {
         self.sceneView = view
+        ARAssetWarmup.shared.prepareIfNeeded()
         configureScene(view: view)
         buildEmitters(in: view)
         scheduleClusters()
@@ -113,7 +114,7 @@ final class PM25ParticleController: NSObject {
         p.particleColorVariation = SCNVector4(0.02, 0.02, 0.02, 0.1)
         p.dampingFactor = 0.02
         p.isBlackPassEnabled = false
-        p.particleImage = UIImage(systemName: "circle.fill")?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        p.particleImage = ARAssetWarmup.pm25ParticleImage
         p.isAffectedByPhysicsFields = true
         return p
     }
