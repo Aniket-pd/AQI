@@ -10,31 +10,26 @@ import SwiftUI
 struct AQIIndiaArticleView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
+
             ArticleSectionView(
-                title: "What is AQI?",
-                bodyText: "The Air Quality Index (AQI) is a standardized scale that translates complex air pollutant concentrations into an easy to understand score from 0 to 500. Lower is better. Scores are grouped into ranges with color codes that indicate potential health impacts for the general public and for sensitive groups."
+                title: "When Pollution Becomes “Normal”",
+                bodyText: "In places like Delhi, smoke, haze, and dust can become part of the background. When something is always around, the brain labels it as “normal life,” even if it’s harming us.\n\nThe scary part is that polluted air is a major health risk globally, not a rare event."
             )
 
             ArticleSectionView(
-                title: "What is PM2.5?",
-                bodyText: "PM2.5 are fine particulate matter with a diameter of 2.5 micrometers or less—small enough to penetrate deep into the lungs and even enter the bloodstream. Long-term exposure is associated with heart and lung diseases."
+                title: "How Our Brain Learns to Ignore It",
+                bodyText: "Our brains are built to react fast to sudden danger (like fire or loud sounds). Air pollution is different: it often harms quietly. If you don’t feel sharp pain today, the brain decides it’s not urgent.\n\nBut inside the body, breathing polluted air can still trigger harmful stress responses without you “feeling” them in a clear way."
             )
 
             ArticleSectionView(
-                title: "How is AQI calculated?",
-                bodyText: "Regulatory agencies compute a sub-index for each pollutant (PM2.5, PM10, O3, NO2, SO2, CO). The overall AQI is the maximum of these sub-indices for the monitoring period. The color category is determined by thresholds defined by national standards."
+                title: "The Illusion That Nothing Is Wrong",
+                bodyText: "A common thought is: “If it was truly dangerous, I would feel it instantly.”\n\nThat’s not always true.\n\nMuch of the harm comes from long exposure to fine particles that can affect the lungs and cardiovascular system.\n\nSo “I feel okay today” doesn’t always mean “the air is harmless.”"
             )
 
             ArticleSectionView(
-                title: "Health impacts",
-                bodyText: "As AQI increases, so does the likelihood of respiratory and cardiovascular symptoms. Sensitive groups (children, older adults, pregnant people, and those with chronic conditions) may experience effects at lower AQI levels."
-            )
-
-            ArticleSectionView(
-                title: "Reduce exposure",
-                bodyText: "Monitor AQI in your area and plan outdoor activities when levels are lower.\n- Use well-fitted masks on high AQI days.\n- Close windows and use air purifiers indoors.\n- Prefer public transport or active travel when air is cleaner."
+                title: "Breaking the Habit of Ignoring",
+                bodyText: "You don’t need to become obsessed. You just need a small awareness loop:\n\n• Check air quality the same way you check the weather.\n• Notice patterns : headache days, cough days, breathless days.\n• On bad air days, reduce exposure by limiting time outdoors and heavy exercise.\n\nAwareness turns the invisible into something noticeable.\n\nAnd once something is noticeable, behavior changes become easier."
             )
         }
     }
 }
-

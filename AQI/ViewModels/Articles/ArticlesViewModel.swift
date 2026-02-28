@@ -27,9 +27,9 @@ final class ArticlesViewModel: ObservableObject {
             kind: .epilepsy
         ),
         Article(
-            title: "Why AQI Matters in India",
-            subtitle: "Daily exposure explained",
-            description: "Understand how AQI is measured and when to reduce outdoor activity.",
+            title: "Living in a Cloud",
+            subtitle: "Why We Ignore Air Pollution",
+            description: "Living in a Cloud: Why We Ignore Air Pollution",
             sectionCount: "5 sections",
             bannerSymbol: "sun.haze.fill",
             kind: .aqiIndia
