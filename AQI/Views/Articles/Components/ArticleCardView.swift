@@ -99,6 +99,7 @@ struct ArticleCardView: View {
         }
         .background(Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)

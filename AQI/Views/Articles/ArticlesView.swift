@@ -21,6 +21,7 @@ struct ArticlesView: View {
                             selectedArticle = article
                         } label: {
                             ArticleCardView(article: article)
+                                .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(Text("Open article: \(article.title)"))
