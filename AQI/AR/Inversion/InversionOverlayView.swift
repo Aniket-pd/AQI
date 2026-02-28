@@ -15,10 +15,10 @@ struct InversionOverlayView: View {
 
             VStack(spacing: 12) {
                 header
+                captionView
                 Spacer()
                 placementHint
                 timeOfDayControl
-                captionView
             }
             .padding()
 
@@ -70,10 +70,13 @@ struct InversionOverlayView: View {
 
     private var captionView: some View {
         Text(caption)
-            .font(.footnote)
-            .foregroundStyle(.secondary)
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(.primary)
             .frame(maxWidth: .infinity)
-            .multilineTextAlignment(.center)
+            .multilineTextAlignment(.leading)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .opacity(captionOpacity)
             .animation(.easeInOut(duration: 0.5), value: captionOpacity)
     }
