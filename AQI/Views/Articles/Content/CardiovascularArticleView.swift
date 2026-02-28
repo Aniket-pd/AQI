@@ -23,11 +23,6 @@ struct CardiovascularArticleView: View {
                 bodyText: "But how small is that difference really?\nInstead of imagining it, let’s zoom in and compare it visually."
             )
 
-            // INTERACTION INSERT POINT — Scale Explorer
-            // Add ScaleExplorerView() here.
-            // Purpose: After explaining "PM2.5 is nearly thirty times smaller", this interaction should allow the user
-            // to zoom into a human hair and gradually reveal floating PM2.5 particles.
-            // This builds intuitive understanding of microscopic scale and size comparison.
             ScaleExplorerView()
 
             ArticleSectionView(
@@ -35,11 +30,6 @@ struct CardiovascularArticleView: View {
                 bodyText: "Now that you’ve seen the size difference, let’s explore how that size changes the way particles move in air."
             )
 
-            // ILLUSTRATION INSERT POINT — Particle Suspension Animation
-            // Add ParticleSuspensionAnimationView() here.
-            // Purpose: After explaining that PM2.5 remains suspended longer, show an animated comparison where
-            // a large dust particle falls quickly and a PM2.5 particle floats slowly and drifts.
-            // This reinforces behavioral differences visually.
             ParticleSuspensionAnimationView()
 
             ArticleSectionView(
@@ -57,10 +47,6 @@ struct CardiovascularArticleView: View {
                 bodyText: "PM2.5 is produced by both human activity and natural processes.\n\nIn cities, common sources include vehicle exhaust, power plants, industrial emissions, construction activity, and burning of fuels. Natural sources such as wildfires and dust storms can also increase particle levels.\n\nBecause these particles are extremely small, they can travel across cities and even between countries. This makes air pollution a regional and global issue not just a local one.\n\nThe United Nations Environment Programme emphasizes that understanding air pollution is the first step toward reducing its impact."
             )
 
-            // ILLUSTRATION INSERT POINT — Pollution Source Visualization
-            // Add PM25SourceIllustrationView() here.
-            // Purpose: Show a simple animated city scene with cars, factories, and construction emitting particles.
-            // This connects real-world pollution sources to PM2.5 visually.
             PM25SourceIllustrationView()
 
             ArticleSectionView(
@@ -68,22 +54,13 @@ struct CardiovascularArticleView: View {
                 bodyText: "One of the most challenging aspects of PM2.5 is that it is often invisible.\n\nWhile heavy pollution can appear as smog, harmful levels may still exist even when the sky looks clear. Human perception is not a reliable tool for detecting fine particles.\n\nThis is why monitoring systems measure air quality scientifically. The Air Quality Index (AQI) translates these measurements into understandable categories, helping individuals make informed decisions.\n\nRelying on AQI data is far more accurate than judging air quality visually."
             )
 
-            // INTERACTION INSERT POINT — Invisible Pollution Reveal
-            // Add AQIRevealInteractionView() here.
-            // Purpose: Show a clean scene initially, then allow the user to tap "Reveal Particles"
-            // to visualize hidden PM2.5 and display an AQI label.
-            // This teaches that harmful pollution can exist even when air appears clean.
             AQIRevealInteractionView()
-
-            // CAPSTONE INTERACTION — AR Visualization
-            // The AR experience below serves as the final immersive learning step.
-            // No additional components needed here, but maintain this as the climax of the learning flow.
 
             CardiovascularARSection(
                 title: "Seeing the Invisible: AR Visualization",
                 bodyText: "Understanding microscopic particles through text alone can be abstract. To make this concept easier to grasp, this app includes an augmented reality (AR) visualization.\n\nWhen you tap Open AR, a visual model of floating particles will appear in your physical space. This experience is designed to support learning by helping you visualize how fine particulate matter may exist around you.\n\nThe AR particles are educational representations. They are not to scale and do not reflect the real-time concentration of PM2.5 in your surroundings. For accurate air quality information, always consult official AQI sources such as the United States Environmental Protection Agency or other government monitoring agencies.\n\nThe purpose of this feature is simple: to transform an invisible scientific concept into something understandable.",
                 imageName: "ARpm2.5",
-                quoteText: "See invisible Pollution through you camera.",
+                quoteText: "See invisible pollution through your camera.",
                 buttonTitle: "Open AR"
             ) {
                 showAR = true

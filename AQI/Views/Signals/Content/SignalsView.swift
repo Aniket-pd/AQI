@@ -52,7 +52,7 @@ struct SignalsView: View {
             .sheet(isPresented: $showInfoSheet) {
                 NavigationStack {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("What is Signal?")
+                        Text("What are Signals?")
                             .font(.title2)
                             .bold()
 
