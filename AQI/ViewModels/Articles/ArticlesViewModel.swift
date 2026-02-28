@@ -19,8 +19,8 @@ final class ArticlesViewModel: ObservableObject {
             kind: .cardiovascular
         ),
         Article(
-            title: "When the Air Stops Moving",
-            subtitle: "Understanding Temperature Inversions",
+            title: "Why It Doesn’t Rise",
+            subtitle: "The Science of Trapped Pollution",
             description: "Learn how inversions form, why pollution gets trapped near the ground, and how to time outdoor activity more safely.",
             sectionCount: "7 sections",
             bannerSymbol: "wind",

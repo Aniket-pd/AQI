@@ -111,6 +111,8 @@ final class ARAssetWarmup {
     }
 
     private static func cityModelURL() -> URL? {
+        // "Tiny City" (https://skfb.ly/6xOOr) by Matheus Dalla is licensed under
+        // Creative Commons Attribution 4.0 (http://creativecommons.org/licenses/by/4.0/).
         let modelName = "Tiny_City (1)"
         if let url = Bundle.main.url(forResource: modelName, withExtension: "usdz", subdirectory: "AR/Assets") {
             return url
