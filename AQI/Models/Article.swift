@@ -51,7 +51,7 @@ extension Article {
         case .epilepsy:
             return "Heat_inversion"
         case .aqiIndia:
-            return "Heat_inversion"
+            return "Cloud"
         }
     }
 }
