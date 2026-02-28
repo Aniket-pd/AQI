@@ -13,7 +13,12 @@ struct PM25ARView: UIViewRepresentable {
         view.session.delegate = context.coordinator
         view.automaticallyUpdatesLighting = true
         view.preferredFramesPerSecond = 60
-        view.contentScaleFactor = UIScreen.main.scale
+        // Prefer trait-based scale; fall back to windowScene screen if available
+        if let displayScale = view.traitCollection.displayScale as CGFloat? {
+            view.contentScaleFactor = displayScale
+        } else if let scale = view.window?.windowScene?.screen.scale {
+            view.contentScaleFactor = scale
+        }
         view.isUserInteractionEnabled = true
 
         let config = ARWorldTrackingConfiguration()

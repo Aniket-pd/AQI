@@ -211,7 +211,12 @@ struct ReferenceLinksSheet: View {
 
     private var sheetDetents: Set<PresentationDetent> {
         guard contentHeight > 0 else { return [.medium, .large] }
-        let maxHeight = UIScreen.main.bounds.height * 0.9
+        let sceneHeight: CGFloat = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first(where: { $0.isKeyWindow })
+            .map { $0.screen.bounds.height } ?? 800
+        let maxHeight = sceneHeight * 0.9
         if contentHeight < maxHeight {
             return [.height(contentHeight)]
         }

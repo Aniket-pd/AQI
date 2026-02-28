@@ -23,9 +23,8 @@ struct ArticleCardARBadge: View {
     }
 }
 
-#Preview {
+#Preview(traits: .sizeThatFitsLayout) {
     ArticleCardARBadge()
         .padding()
         .background(Color(.secondarySystemBackground))
-        .previewLayout(.sizeThatFits)
 }

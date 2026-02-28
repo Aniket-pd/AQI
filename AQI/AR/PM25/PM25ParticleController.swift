@@ -233,10 +233,12 @@ final class PM25ParticleController: NSObject {
     }
 
     private func worldPosition(from point: CGPoint, in view: ARSCNView) -> SCNVector3 {
-        // Try hit-test against feature points
-        if let result = view.hitTest(point, types: [.featurePoint, .estimatedHorizontalPlane]).first {
-            let pos = result.worldTransform.columns.3
-            return SCNVector3(pos.x, pos.y, pos.z)
+        // Try raycast against feature points and estimated planes (modern API)
+        if let query = view.raycastQuery(from: point, allowing: .estimatedPlane, alignment: .any) {
+            if let result = view.session.raycast(query).first {
+                let pos = result.worldTransform.columns.3
+                return SCNVector3(pos.x, pos.y, pos.z)
+            }
         }
         // Fallback: 0.5m in front of camera
         return view.cameraPosition + view.cameraForward * 0.5
@@ -262,7 +264,7 @@ final class PM25ParticleController: NSObject {
         s.particleLifeSpan = 3.5
         s.particleVelocity = 0.05
         s.particleSize = 0.004
-        s.particleColor = (particleSystem.particleColor ?? UIColor.white).withAlphaComponent(0.5)
+        s.particleColor = particleSystem.particleColor.withAlphaComponent(0.5)
         s.spreadingAngle = 12
         s.particleImage = UIImage(systemName: "circle.fill")
         s.isAffectedByPhysicsFields = true
@@ -330,3 +332,4 @@ extension SCNVector3 {
     var length: Float { sqrtf(x*x + y*y + z*z) }
     var normalized: SCNVector3 { let len = max(length, 0.0001); return SCNVector3(x/len, y/len, z/len) }
 }
+

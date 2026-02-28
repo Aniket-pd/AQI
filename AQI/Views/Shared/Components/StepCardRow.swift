@@ -137,10 +137,15 @@ struct StepCardRow: View {
 }
 
 #Preview {
-    @State var expanded = true
-    let step = GuideStep(title: "Call Emergency Services", content: "Dial 112/911 immediately and provide location.")
-    return StepCardRow(index: 0, step: step, accentColor: .green, isExpanded: $expanded, onTap: {})
-        .preferredColorScheme(.dark)
-        .padding()
-        .background(Color(.systemGroupedBackground))
+    struct StepCardRow_PreviewContainer: View {
+        @State private var expanded = true
+        var body: some View {
+            let step = GuideStep(title: "Call Emergency Services", content: "Dial 112/911 immediately and provide location.")
+            StepCardRow(index: 0, step: step, accentColor: .green, isExpanded: $expanded, onTap: {})
+                .preferredColorScheme(.dark)
+                .padding()
+                .background(Color(.systemGroupedBackground))
+        }
+    }
+    return StepCardRow_PreviewContainer()
 }

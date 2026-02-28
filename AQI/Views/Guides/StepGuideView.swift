@@ -238,6 +238,16 @@ struct StepGuideView: View {
                 accentColor: accentColor,
                 buttonTitle: "Guide"
             )
+        @unknown default:
+            return AQIRange(
+                category: category,
+                title: "Unknown",
+                summary: "",
+                detail: "",
+                iconName: "questionmark.circle",
+                accentColor: accentColor,
+                buttonTitle: "Guide"
+            )
         }
     }
 
@@ -275,6 +285,14 @@ struct StepGuideView: View {
         case .medium:
             hapticMedium.impactOccurred()
             hapticMedium.prepare()
+        case .soft:
+            // Treat soft like light for now
+            hapticLight.impactOccurred()
+            hapticLight.prepare()
+        case .rigid:
+            // Treat rigid like medium for now
+            hapticMedium.impactOccurred()
+            hapticMedium.prepare()
         case .heavy:
             // Create on demand if heavy is ever requested; keep behavior safe
             let heavy = UIImpactFeedbackGenerator(style: .heavy)
@@ -290,7 +308,8 @@ struct StepGuideView: View {
 // MARK: - Safe area helper
 private var topSafeArea: CGFloat {
     (UIApplication.shared.connectedScenes.first as? UIWindowScene)?
-        .keyWindow?.safeAreaInsets.top ?? 0
+        .windows.first(where: { $0.isKeyWindow })?
+        .safeAreaInsets.top ?? 0
 }
 
 private extension UIWindowScene {
@@ -313,3 +332,4 @@ private extension UIWindowScene {
     }
     .preferredColorScheme(.dark)
 }
+

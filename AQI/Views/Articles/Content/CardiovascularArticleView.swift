@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import UIKit
 
 struct CardiovascularArticleView: View {
     @State private var showAR = false
@@ -249,6 +250,7 @@ private struct ScaleExplorerView: View {
 private struct ParticleSuspensionAnimationView: View {
     @State private var simulation = ParticleSuspensionSimulation.makeDefault()
     @State private var lastTickDate: Date?
+    @State private var airPulseHaptic = UIImpactFeedbackGenerator(style: .soft)
     private let simulationTimer = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -297,6 +299,8 @@ private struct ParticleSuspensionAnimationView: View {
 
                 HStack(spacing: 10) {
                     Button("Air Pulse") {
+                        airPulseHaptic.impactOccurred(intensity: 0.8)
+                        airPulseHaptic.prepare()
                         simulation.triggerAirPulse()
                     }
                     .buttonStyle(.borderedProminent)
@@ -319,6 +323,7 @@ private struct ParticleSuspensionAnimationView: View {
         }
         .onAppear {
             lastTickDate = Date()
+            airPulseHaptic.prepare()
         }
     }
 }
@@ -404,9 +409,10 @@ private struct ParticleSuspensionLaneView: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.black)
                 Text(subtitle)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.black.opacity(0.68))
             }
             .padding(.horizontal, 9)
             .padding(.vertical, 7)

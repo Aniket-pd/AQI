@@ -84,7 +84,7 @@ struct SwiftUIParticleField: View {
                 Color.white.opacity(pulseOpacity)
                     .animation(.easeInOut(duration: 0.6), value: pulseOpacity)
             }
-            .onChange(of: trigger) { _ in
+            .onChange(of: trigger) { _, _ in
                 if reduceMotion {
                     // Brief luminance pulse
                     particles.removeAll()

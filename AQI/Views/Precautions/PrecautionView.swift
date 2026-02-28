@@ -123,7 +123,7 @@ private struct PrecautionAboutSheetView: View {
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(.primary)
 
-                        Text("Health guidance in this app is informed by publicly available standards from WHO and CPCB (India).")
+                        Text("Health guidance in this app is informed by publicly available standards from WHO")
 
                         Text("AR visualizations are designed for educational and awareness purposes and may not represent exact real-time environmental conditions.")
 
