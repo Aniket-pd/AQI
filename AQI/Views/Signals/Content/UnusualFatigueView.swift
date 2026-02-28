@@ -16,11 +16,7 @@ struct UnusualFatigueView: View {
                 .init(title: "When to get extra help", body: "If extreme tiredness does not improve with rest or feels overwhelming, seek medical advice.")
             ],
             accentColor: BodySignalKind.unusualFatigue.accentColor,
-            iconName: BodySignalKind.unusualFatigue.iconName,
-            sources: [
-                "https://newsinhealth.nih.gov/2011/07/bad-air-day",
-                "https://www.cdc.gov/wildfires/risk-factors/index.html"
-            ]
+            iconName: BodySignalKind.unusualFatigue.iconName
         )
     }
 }

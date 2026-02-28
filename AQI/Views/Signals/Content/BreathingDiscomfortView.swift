@@ -16,11 +16,7 @@ struct BreathingDiscomfortView: View {
                 .init(title: "When to get extra help", body: "If breathing feels unusually difficult or does not improve after resting in cleaner air, consider seeking medical advice.")
             ],
             accentColor: BodySignalKind.breathingDiscomfort.accentColor,
-            iconName: BodySignalKind.breathingDiscomfort.iconName,
-            sources: [
-                "https://www.airnow.gov/air-quality-and-health/your-health/",
-                "https://www.cdc.gov/air-quality/pollutants/index.html"
-            ]
+            iconName: BodySignalKind.breathingDiscomfort.iconName
         )
     }
 }

@@ -16,11 +16,7 @@ struct LowEnergyView: View {
                 .init(title: "When to get extra help", body: "If low energy is severe or does not improve, seek medical advice.")
             ],
             accentColor: BodySignalKind.lowEnergy.accentColor,
-            iconName: BodySignalKind.lowEnergy.iconName,
-            sources: [
-                "https://www.who.int/teams/environment-climate-change-and-health/air-quality-and-health/health-impacts/types-of-pollutants",
-                "https://www.cdc.gov/wildfires/risk-factors/index.html"
-            ]
+            iconName: BodySignalKind.lowEnergy.iconName
         )
     }
 }

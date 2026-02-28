@@ -16,11 +16,7 @@ struct PoorFocusBrainFogView: View {
                 .init(title: "When to get extra help", body: "If confusion is strong, sudden, or does not improve, seek medical advice.")
             ],
             accentColor: BodySignalKind.poorFocusBrainFog.accentColor,
-            iconName: BodySignalKind.poorFocusBrainFog.iconName,
-            sources: [
-                "https://pmc.ncbi.nlm.nih.gov/articles/PMC6792460/",
-                "https://pmc.ncbi.nlm.nih.gov/articles/PMC8622756/"
-            ]
+            iconName: BodySignalKind.poorFocusBrainFog.iconName
         )
     }
 }

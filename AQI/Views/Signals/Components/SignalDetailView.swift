@@ -13,7 +13,6 @@ struct SignalDetailView: View {
     let sections: [SignalDetailSection]
     let accentColor: Color
     let iconName: String
-    let sources: [String]
 
     // Track scroll to drive the header shade fade
     @State private var scrollY: CGFloat = 0
@@ -23,14 +22,12 @@ struct SignalDetailView: View {
          subtitle: String,
          sections: [SignalDetailSection],
          accentColor: Color,
-         iconName: String,
-         sources: [String] = []) {
+         iconName: String) {
         self.title = title
         self.subtitle = subtitle
         self.sections = sections
         self.accentColor = accentColor
         self.iconName = iconName
-        self.sources = sources
     }
 
     var body: some View {
@@ -74,15 +71,6 @@ struct SignalDetailView: View {
                         ForEach(sections) { section in
                             SignalSectionRow(accentColor: accentColor, section: section)
                         }
-                    }
-
-                    if !sourceReferences.isEmpty {
-                        ReferenceLinksSection(
-                            title: "Sources",
-                            buttonTitle: "Reference Link",
-                            references: sourceReferences
-                        )
-                        .padding(.top, 8)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -161,15 +149,6 @@ private extension SignalDetailView {
     var colorForScheme: Color {
         scheme == .dark ? .white : .black
     }
-
-    var sourceReferences: [ReferenceLink] {
-        sources.compactMap { source in
-            guard let url = URL(string: source) else { return nil }
-            let host = url.host?.replacingOccurrences(of: "www.", with: "")
-            let title = host?.isEmpty == false ? host! : source
-            return ReferenceLink(title: title, url: url)
-        }
-    }
 }
 
 #Preview {
@@ -188,11 +167,7 @@ private extension SignalDetailView {
                 .init(title: "When to get extra help", body: "If breathing feels very hard, painful, or remains uncomfortable even after resting in clean air, seek medical advice.")
             ],
             accentColor: .red,
-            iconName: "lungs.fill",
-            sources: [
-                "https://www.airnow.gov/air-quality-and-health/your-health/",
-                "https://www.cdc.gov/air-quality/pollutants/index.html"
-            ]
+            iconName: "lungs.fill"
         )
     }
     .preferredColorScheme(.dark)

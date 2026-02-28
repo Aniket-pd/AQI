@@ -28,6 +28,13 @@ struct SignalsView: View {
                             .textCase(nil)
                     }
                 }
+
+                Section {
+                    EmptyView()
+                } footer: {
+                    Text("This information is for general awareness only and should not be considered medical advice. If symptoms are severe, persistent, or concerning, seek professional medical guidance.")
+                        .textCase(nil)
+                }
             }
             .listStyle(.insetGrouped)
             .headerProminence(.increased)
